@@ -39,7 +39,10 @@ public partial class User
 
     public int? DonationCount { get; set; }
 
+    public int DonationAvailabilityId { get; set; }
+
     public bool IsActive { get; set; }
+
     public bool IsDeleted { get; set; }
 
     public DateTime? CreatedAt { get; set; }
@@ -53,6 +56,8 @@ public partial class User
     public virtual ICollection<BloodRequest> BloodRequests { get; set; } = new List<BloodRequest>();
 
     public virtual BloodType? BloodType { get; set; }
+
+    public virtual DonationAvailability DonationAvailability { get; set; } = null!;
 
     public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
 
