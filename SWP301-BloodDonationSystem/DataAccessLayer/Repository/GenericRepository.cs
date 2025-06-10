@@ -33,12 +33,12 @@ namespace DataAccessLayer.Repository
 
         public Task<IEnumerable<T>> GetAllAsync<T>() where T : class
         {
-                     return Task.FromResult(_context.Set<T>().AsEnumerable());
+            return Task.FromResult(_context.Set<T>().AsEnumerable());
         }
 
         public Task<T> GetByIdAsync<T>(int id) where T : class
         {
-         
+
             var entity = _context.Set<T>().Find(id);
             if (entity == null)
             {
@@ -49,7 +49,7 @@ namespace DataAccessLayer.Repository
 
         public Task<bool> SaveChangesAsync()
         {
-         
+
             try
             {
                 return Task.FromResult(_context.SaveChanges() > 0);

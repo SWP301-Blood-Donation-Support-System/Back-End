@@ -7,11 +7,7 @@ public partial class DonationRecord
 {
     public int DonationRecordId { get; set; }
 
-    public int AppointmentId { get; set; }
-
-    public int DonorId { get; set; }
-
-    public int? ProcessingStaffId { get; set; }
+    public int RegistrationId { get; set; }
 
     public DateTime DonationDateTime { get; set; }
 
@@ -20,8 +16,6 @@ public partial class DonationRecord
     public decimal? BloodTemperature { get; set; }
 
     public string? BloodPressure { get; set; }
-
-    public int? DonationTypeId { get; set; }
 
     public decimal? VolumeExtracted { get; set; }
 
@@ -33,21 +27,17 @@ public partial class DonationRecord
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
-    public int? UpdatedBy { get; set; }
+    public string? UpdatedBy { get; set; }
 
     public bool? IsDeleted { get; set; }
-
-    public virtual DonationAppointment Appointment { get; set; } = null!;
 
     public virtual BloodTestResult? BloodTestResultNavigation { get; set; }
 
     public virtual ICollection<BloodUnit> BloodUnits { get; set; } = new List<BloodUnit>();
 
-    public virtual DonationType? DonationType { get; set; }
+    public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
 
-    public virtual User Donor { get; set; } = null!;
-
-    public virtual User? ProcessingStaff { get; set; }
+    public virtual Registration Registration { get; set; } = null!;
 }

@@ -11,25 +11,27 @@ public partial class Article
 
     public int ArticleCategoryId { get; set; }
 
+    public int ArticleStatusId { get; set; }
+
     public string Title { get; set; } = null!;
 
     public string? Content { get; set; }
 
     public string? Picture { get; set; }
 
-    public int? ArticleStatus { get; set; }
-
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? UpdatedBy { get; set; }
+    public string? CreatedBy { get; set; }
+
+    public string? UpdatedBy { get; set; }
 
     public bool? IsDeleted { get; set; }
 
     public virtual ArticleCategory ArticleCategory { get; set; } = null!;
 
-    public virtual ArticleStatus? ArticleStatusNavigation { get; set; }
+    public virtual ArticleStatus ArticleStatus { get; set; } = null!;
 
     public virtual User AuthorUser { get; set; } = null!;
 }

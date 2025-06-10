@@ -3,21 +3,21 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Entity;
 
-public partial class TimeSlot
+public partial class DonationSchedule
 {
-    public int SlotId { get; set; }
+    public int ScheduleId { get; set; }
 
-    public string? SlotName { get; set; }
+    public DateTime? ScheduleDate { get; set; }
 
-    public TimeOnly StartTime { get; set; }
+    public int? TotalSlots { get; set; }
 
-    public TimeOnly EndTime { get; set; }
+    public int RegisteredSlots { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
-
     public string? CreatedBy { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
 
     public string? UpdatedBy { get; set; }
 

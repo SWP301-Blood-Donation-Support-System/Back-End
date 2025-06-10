@@ -25,9 +25,9 @@ public partial class BloodUnit
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
-    public int? UpdatedBy { get; set; }
+    public string? UpdatedBy { get; set; }
 
     public bool? IsDeleted { get; set; }
 

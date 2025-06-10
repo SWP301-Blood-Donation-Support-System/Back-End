@@ -15,8 +15,6 @@ public partial class BloodDonationDbContext : DbContext
     {
     }
 
-    public virtual DbSet<AppointmentStatus> AppointmentStatuses { get; set; }
-
     public virtual DbSet<Article> Articles { get; set; }
 
     public virtual DbSet<ArticleCategory> ArticleCategories { get; set; }
@@ -37,13 +35,13 @@ public partial class BloodDonationDbContext : DbContext
 
     public virtual DbSet<BloodUnitStatus> BloodUnitStatuses { get; set; }
 
-    public virtual DbSet<DonationAppointment> DonationAppointments { get; set; }
-
-    public virtual DbSet<DonationAvailability> DonationAvailabilities { get; set; }
-
     public virtual DbSet<DonationRecord> DonationRecords { get; set; }
 
+    public virtual DbSet<DonationSchedule> DonationSchedules { get; set; }
+
     public virtual DbSet<DonationType> DonationTypes { get; set; }
+
+    public virtual DbSet<DonationValidation> DonationValidations { get; set; }
 
     public virtual DbSet<Gender> Genders { get; set; }
 
@@ -52,6 +50,10 @@ public partial class BloodDonationDbContext : DbContext
     public virtual DbSet<NotificationType> NotificationTypes { get; set; }
 
     public virtual DbSet<Occupation> Occupations { get; set; }
+
+    public virtual DbSet<Registration> Registrations { get; set; }
+
+    public virtual DbSet<RegistrationStatus> RegistrationStatuses { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -63,434 +65,511 @@ public partial class BloodDonationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=(local);user=sa;password=12345;Database=BloodDonationDB;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=database.purintech.id.vn;user=sa;password=<Hu@nH0aH0n9>;Database=BloodDonationDB;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AppointmentStatus>(entity =>
-        {
-            entity.HasKey(e => e.AppointmentStatusId).HasName("PK__Appointm__A619B640D69034FF");
-
-            entity.ToTable("AppointmentStatus");
-
-            entity.Property(e => e.AppointmentStatusId).HasColumnName("AppointmentStatusID");
-            entity.Property(e => e.AppointmentStatusName).HasMaxLength(50);
-            entity.Property(e => e.Description).HasMaxLength(255);
-        });
-
         modelBuilder.Entity<Article>(entity =>
         {
-            entity.HasKey(e => e.ArticleId).HasName("PK__Article__9C6270C80D28A1AF");
+            entity.HasKey(e => e.ArticleId).HasName("PK__Article__9C6270C82C5335E2");
 
             entity.ToTable("Article");
 
-            entity.HasIndex(e => e.AuthorUserId, "IX_Article_AuthorUserID");
-
-            entity.HasIndex(e => e.ArticleCategoryId, "IX_Article_CategoryID");
-
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.ArticleCategoryId).HasColumnName("ArticleCategoryID");
+            entity.Property(e => e.ArticleStatusId).HasColumnName("ArticleStatusID");
             entity.Property(e => e.AuthorUserId).HasColumnName("AuthorUserID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.Picture).HasMaxLength(255);
             entity.Property(e => e.Title).HasMaxLength(200);
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
 
             entity.HasOne(d => d.ArticleCategory).WithMany(p => p.Articles)
                 .HasForeignKey(d => d.ArticleCategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Article__Article__55209ACA");
+                .HasConstraintName("FK_Article_Category");
 
-            entity.HasOne(d => d.ArticleStatusNavigation).WithMany(p => p.Articles)
-                .HasForeignKey(d => d.ArticleStatus)
-                .HasConstraintName("FK_Article_ArticleStatus");
+            entity.HasOne(d => d.ArticleStatus).WithMany(p => p.Articles)
+                .HasForeignKey(d => d.ArticleStatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Article_Status");
 
             entity.HasOne(d => d.AuthorUser).WithMany(p => p.Articles)
                 .HasForeignKey(d => d.AuthorUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Article__AuthorU__542C7691");
+                .HasConstraintName("FK_Article_Author");
         });
 
         modelBuilder.Entity<ArticleCategory>(entity =>
         {
-            entity.HasKey(e => e.ArticleCategoryId).HasName("PK__ArticleC__E0B60963730E1355");
+            entity.HasKey(e => e.ArticleCategoryId).HasName("PK__ArticleC__E0B6096368D1EBFD");
 
             entity.ToTable("ArticleCategory");
 
+            entity.HasIndex(e => e.CategoryName, "UQ_ArticleCategory_Name").IsUnique();
+
             entity.Property(e => e.ArticleCategoryId).HasColumnName("ArticleCategoryID");
             entity.Property(e => e.CategoryName).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<ArticleStatus>(entity =>
         {
-            entity.HasKey(e => e.ArticleStatusId).HasName("PK__ArticleS__3F0E2D6B98B2CF53");
+            entity.HasKey(e => e.ArticleStatusId).HasName("PK__ArticleS__3F0E2D6B4AD51E54");
 
             entity.ToTable("ArticleStatus");
 
+            entity.HasIndex(e => e.StatusName, "UQ_ArticleStatus_Name").IsUnique();
+
             entity.Property(e => e.ArticleStatusId).HasColumnName("ArticleStatusID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.StatusName).HasMaxLength(50);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<BloodComponent>(entity =>
         {
-            entity.HasKey(e => e.ComponentId).HasName("PK__BloodCom__D79CF02E43A9345D");
+            entity.HasKey(e => e.ComponentId).HasName("PK__BloodCom__D79CF02E98E3E0E4");
 
             entity.ToTable("BloodComponent");
 
+            entity.HasIndex(e => e.ComponentName, "UQ_BloodComponent_Name").IsUnique();
+
             entity.Property(e => e.ComponentId).HasColumnName("ComponentID");
             entity.Property(e => e.ComponentName).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<BloodRequest>(entity =>
         {
-            entity.HasKey(e => e.RequestId).HasName("PK__BloodReq__33A8519A6A24BEB8");
+            entity.HasKey(e => e.RequestId).HasName("PK__BloodReq__33A8519AF741A01B");
 
             entity.ToTable("BloodRequest");
-
-            entity.HasIndex(e => e.BloodTypeId, "IX_BloodRequest_BloodTypeID");
-
-            entity.HasIndex(e => e.RequestingStaffId, "IX_BloodRequest_RequestingStaffID");
 
             entity.Property(e => e.RequestId).HasColumnName("RequestID");
             entity.Property(e => e.BloodComponentId).HasColumnName("BloodComponentID");
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.Quantity).HasColumnType("decimal(6, 2)");
-            entity.Property(e => e.RequestDateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.RequestStatusId).HasColumnName("RequestStatusID");
             entity.Property(e => e.RequestingStaffId).HasColumnName("RequestingStaffID");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.UrgencyId).HasColumnName("UrgencyID");
 
             entity.HasOne(d => d.BloodComponent).WithMany(p => p.BloodRequests)
                 .HasForeignKey(d => d.BloodComponentId)
-                .HasConstraintName("FK__BloodRequ__Blood__7C4F7684");
+                .HasConstraintName("FK_BloodRequest_Component");
 
             entity.HasOne(d => d.BloodType).WithMany(p => p.BloodRequests)
                 .HasForeignKey(d => d.BloodTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__BloodRequ__Blood__7B5B524B");
+                .HasConstraintName("FK_BloodRequest_BloodType");
 
             entity.HasOne(d => d.RequestStatus).WithMany(p => p.BloodRequests)
                 .HasForeignKey(d => d.RequestStatusId)
-                .HasConstraintName("FK__BloodRequ__Reque__7E37BEF6");
+                .HasConstraintName("FK_BloodRequest_Status");
 
             entity.HasOne(d => d.RequestingStaff).WithMany(p => p.BloodRequests)
                 .HasForeignKey(d => d.RequestingStaffId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__BloodRequ__Reque__7D439ABD");
+                .HasConstraintName("FK_BloodRequest_Staff");
 
             entity.HasOne(d => d.Urgency).WithMany(p => p.BloodRequests)
                 .HasForeignKey(d => d.UrgencyId)
-                .HasConstraintName("FK__BloodRequ__Urgen__7F2BE32F");
+                .HasConstraintName("FK_BloodRequest_Urgency");
         });
 
         modelBuilder.Entity<BloodRequestStatus>(entity =>
         {
-            entity.HasKey(e => e.BloodRequestStatusId).HasName("PK__BloodReq__F73749E58BC0AFD2");
+            entity.HasKey(e => e.BloodRequestStatusId).HasName("PK__BloodReq__F73749E55A4F09E9");
 
             entity.ToTable("BloodRequestStatus");
 
+            entity.HasIndex(e => e.StatusName, "UQ_BloodRequestStatus_Name").IsUnique();
+
             entity.Property(e => e.BloodRequestStatusId).HasColumnName("BloodRequestStatusID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.StatusName).HasMaxLength(50);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<BloodTestResult>(entity =>
         {
-            entity.HasKey(e => e.ResultId).HasName("PK__BloodTes__97690228A38BACDD");
+            entity.HasKey(e => e.ResultId).HasName("PK__BloodTes__9769022886069207");
 
             entity.ToTable("BloodTestResult");
 
             entity.Property(e => e.ResultId).HasColumnName("ResultID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.ResultName).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<BloodType>(entity =>
         {
-            entity.HasKey(e => e.BloodTypeId).HasName("PK__BloodTyp__B489BA4399B13F4C");
+            entity.HasKey(e => e.BloodTypeId).HasName("PK__BloodTyp__B489BA43DAB88E27");
 
             entity.ToTable("BloodType");
 
-            entity.HasIndex(e => e.BloodTypeName, "UQ__BloodTyp__3323606BE136806A").IsUnique();
+            entity.HasIndex(e => e.BloodTypeName, "UQ_BloodType_Name").IsUnique();
 
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.BloodTypeName).HasMaxLength(10);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<BloodUnit>(entity =>
         {
-            entity.HasKey(e => e.BloodUnitId).HasName("PK__BloodUni__AC1C2FABB7747114");
+            entity.HasKey(e => e.BloodUnitId).HasName("PK__BloodUni__AC1C2FAB78796DDE");
 
             entity.ToTable("BloodUnit");
-
-            entity.HasIndex(e => e.BloodTypeId, "IX_BloodUnit_BloodTypeID");
-
-            entity.HasIndex(e => e.DonationRecordId, "IX_BloodUnit_DonationRecordID");
-
-            entity.HasIndex(e => e.ExpiryDateTime, "IX_BloodUnit_ExpiryDateTime");
 
             entity.Property(e => e.BloodUnitId).HasColumnName("BloodUnitID");
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.BloodUnitStatusId).HasColumnName("BloodUnitStatusID");
             entity.Property(e => e.ComponentId).HasColumnName("ComponentID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.DonationRecordId).HasColumnName("DonationRecordID");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.Volume).HasColumnType("decimal(6, 2)");
 
             entity.HasOne(d => d.BloodType).WithMany(p => p.BloodUnits)
                 .HasForeignKey(d => d.BloodTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__BloodUnit__Blood__00200768");
+                .HasConstraintName("FK_BloodUnit_BloodType");
 
             entity.HasOne(d => d.BloodUnitStatus).WithMany(p => p.BloodUnits)
                 .HasForeignKey(d => d.BloodUnitStatusId)
-                .HasConstraintName("FK__BloodUnit__Blood__01142BA1");
+                .HasConstraintName("FK_BloodUnit_Status");
 
             entity.HasOne(d => d.Component).WithMany(p => p.BloodUnits)
                 .HasForeignKey(d => d.ComponentId)
-                .HasConstraintName("FK__BloodUnit__Compo__02084FDA");
+                .HasConstraintName("FK_BloodUnit_Component");
 
             entity.HasOne(d => d.DonationRecord).WithMany(p => p.BloodUnits)
                 .HasForeignKey(d => d.DonationRecordId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__BloodUnit__Donat__01F34141");
+                .HasConstraintName("FK_BloodUnit_DonationRecord");
         });
 
         modelBuilder.Entity<BloodUnitStatus>(entity =>
         {
-            entity.HasKey(e => e.BloodUnitStatusId).HasName("PK__BloodUni__D4B59B31F628ED40");
+            entity.HasKey(e => e.BloodUnitStatusId).HasName("PK__BloodUni__D4B59B31D5A18342");
 
             entity.ToTable("BloodUnitStatus");
 
+            entity.HasIndex(e => e.StatusName, "UQ_BloodUnitStatus_Name").IsUnique();
+
             entity.Property(e => e.BloodUnitStatusId).HasColumnName("BloodUnitStatusID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.StatusName).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<DonationAppointment>(entity =>
-        {
-            entity.HasKey(e => e.AppointmentId).HasName("PK__Donation__8ECDFCA20869DFC6");
-
-            entity.ToTable("DonationAppointment");
-
-            entity.HasIndex(e => e.DonorId, "IX_DonationAppointment_DonorID");
-
-            entity.HasIndex(e => e.ScheduledDateTime, "IX_DonationAppointment_ScheduledDateTime");
-
-            entity.Property(e => e.AppointmentId).HasColumnName("AppointmentID");
-            entity.Property(e => e.AppointmentStatusId).HasColumnName("AppointmentStatusID");
-            entity.Property(e => e.BookingCode).HasMaxLength(50);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.DonationTypeId).HasColumnName("DonationTypeID");
-            entity.Property(e => e.DonorId).HasColumnName("DonorID");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-            entity.Property(e => e.Qrcode)
-                .HasMaxLength(255)
-                .HasColumnName("QRCode");
-            entity.Property(e => e.TimeSlotId).HasColumnName("TimeSlotID");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
-
-            entity.HasOne(d => d.AppointmentStatus).WithMany(p => p.DonationAppointments)
-                .HasForeignKey(d => d.AppointmentStatusId)
-                .HasConstraintName("FK__DonationA__Appoi__03F0984C");
-
-            entity.HasOne(d => d.DonationType).WithMany(p => p.DonationAppointments)
-                .HasForeignKey(d => d.DonationTypeId)
-                .HasConstraintName("FK__DonationA__Donat__04E4BC85");
-
-            entity.HasOne(d => d.Donor).WithMany(p => p.DonationAppointments)
-                .HasForeignKey(d => d.DonorId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DonationA__Donor__05D8E0BE");
-
-            entity.HasOne(d => d.TimeSlot).WithMany(p => p.DonationAppointments)
-                .HasForeignKey(d => d.TimeSlotId)
-                .HasConstraintName("FK__DonationA__TimeS__06CD04F7");
-        });
-
-        modelBuilder.Entity<DonationAvailability>(entity =>
-        {
-            entity.HasKey(e => e.AvailabilityId).HasName("PK__Donation__DA397991713DA4BA");
-
-            entity.ToTable("DonationAvailability");
-
-            entity.Property(e => e.AvailabilityId).HasColumnName("AvailabilityID");
-            entity.Property(e => e.AvailabilityName).HasMaxLength(50);
-            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<DonationRecord>(entity =>
         {
-            entity.HasKey(e => e.DonationRecordId).HasName("PK__Donation__26D61356D0EE92FB");
+            entity.HasKey(e => e.DonationRecordId).HasName("PK__Donation__26D61356095E0A97");
 
             entity.ToTable("DonationRecord");
 
-            entity.HasIndex(e => e.AppointmentId, "IX_DonationRecord_AppointmentID");
-
-            entity.HasIndex(e => e.DonorId, "IX_DonationRecord_DonorID");
+            entity.HasIndex(e => e.RegistrationId, "UQ_DonationRecord_RegistrationID").IsUnique();
 
             entity.Property(e => e.DonationRecordId).HasColumnName("DonationRecordID");
-            entity.Property(e => e.AppointmentId).HasColumnName("AppointmentID");
             entity.Property(e => e.BloodPressure).HasMaxLength(20);
             entity.Property(e => e.BloodTemperature).HasColumnType("decimal(4, 2)");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.DonationTypeId).HasColumnName("DonationTypeID");
-            entity.Property(e => e.DonorId).HasColumnName("DonorID");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.DonorWeight).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-            entity.Property(e => e.ProcessingStaffId).HasColumnName("ProcessingStaffID");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.RegistrationId).HasColumnName("RegistrationID");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.VolumeExtracted).HasColumnType("decimal(6, 2)");
-
-            entity.HasOne(d => d.Appointment).WithMany(p => p.DonationRecords)
-                .HasForeignKey(d => d.AppointmentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DonationR__Appoi__673F4B05");
 
             entity.HasOne(d => d.BloodTestResultNavigation).WithMany(p => p.DonationRecords)
                 .HasForeignKey(d => d.BloodTestResult)
                 .HasConstraintName("FK_DonationRecord_BloodTestResult");
 
-            entity.HasOne(d => d.DonationType).WithMany(p => p.DonationRecords)
-                .HasForeignKey(d => d.DonationTypeId)
-                .HasConstraintName("FK__DonationR__Donat__6A1BB7B0");
-
-            entity.HasOne(d => d.Donor).WithMany(p => p.DonationRecordDonors)
-                .HasForeignKey(d => d.DonorId)
+            entity.HasOne(d => d.Registration).WithOne(p => p.DonationRecord)
+                .HasForeignKey<DonationRecord>(d => d.RegistrationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DonationR__Donor__68336F3E");
+                .HasConstraintName("FK_DonationRecord_Registration");
+        });
 
-            entity.HasOne(d => d.ProcessingStaff).WithMany(p => p.DonationRecordProcessingStaffs)
-                .HasForeignKey(d => d.ProcessingStaffId)
-                .HasConstraintName("FK__DonationR__Proce__69279377");
+        modelBuilder.Entity<DonationSchedule>(entity =>
+        {
+            entity.HasKey(e => e.ScheduleId).HasName("PK__Donation__9C8A5B696F6CEA62");
+
+            entity.ToTable("DonationSchedule");
+
+            entity.Property(e => e.ScheduleId).HasColumnName("ScheduleID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<DonationType>(entity =>
         {
-            entity.HasKey(e => e.DonationTypeId).HasName("PK__Donation__39DA5ED4397B58B6");
+            entity.HasKey(e => e.DonationTypeId).HasName("PK__Donation__39DA5ED4C0982E80");
 
             entity.ToTable("DonationType");
 
+            entity.HasIndex(e => e.TypeName, "UQ_DonationType_Name").IsUnique();
+
             entity.Property(e => e.DonationTypeId).HasColumnName("DonationTypeID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.TypeName).HasMaxLength(50);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<DonationValidation>(entity =>
+        {
+            entity.HasKey(e => e.ValidationId).HasName("PK__Donation__FA0B50E52DF9A920");
+
+            entity.ToTable("DonationValidation");
+
+            entity.HasIndex(e => new { e.UserId, e.DonationRecordId }, "UQ_Validation_User_Record").IsUnique();
+
+            entity.Property(e => e.ValidationId).HasColumnName("ValidationID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.DonationRecordId).HasColumnName("DonationRecordID");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.DonationRecord).WithMany(p => p.DonationValidations)
+                .HasForeignKey(d => d.DonationRecordId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DonationValidation_DonationRecord");
+
+            entity.HasOne(d => d.User).WithMany(p => p.DonationValidations)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DonationValidation_User");
         });
 
         modelBuilder.Entity<Gender>(entity =>
         {
-            entity.HasKey(e => e.GenderId).HasName("PK__Gender__4E24E81742354AD1");
+            entity.HasKey(e => e.GenderId).HasName("PK__Gender__4E24E817279F58C3");
 
             entity.ToTable("Gender");
 
             entity.Property(e => e.GenderId).HasColumnName("GenderID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.GenderName).HasMaxLength(50);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__20CF2E321EDA3C5D");
+            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__20CF2E329B065A7B");
 
             entity.ToTable("Notification");
 
-            entity.HasIndex(e => e.IsRead, "IX_Notification_IsRead");
-
-            entity.HasIndex(e => e.RecipientId, "IX_Notification_RecipientID");
-
             entity.Property(e => e.NotificationId).HasColumnName("NotificationID");
-            entity.Property(e => e.IsRead).HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.NotificationTypeId).HasColumnName("NotificationTypeID");
             entity.Property(e => e.RecipientId).HasColumnName("RecipientID");
-            entity.Property(e => e.SentDateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Subject).HasMaxLength(200);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
 
             entity.HasOne(d => d.NotificationType).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.NotificationTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Notificat__Notif__0C85DE4D");
+                .HasConstraintName("FK_Notification_Type");
 
             entity.HasOne(d => d.Recipient).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.RecipientId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Notificat__Recip__0D7A0286");
+                .HasConstraintName("FK_Notification_Recipient");
         });
 
         modelBuilder.Entity<NotificationType>(entity =>
         {
-            entity.HasKey(e => e.NotificationTypeId).HasName("PK__Notifica__299002A131834735");
+            entity.HasKey(e => e.NotificationTypeId).HasName("PK__Notifica__299002A1B3FDAD5F");
 
             entity.ToTable("NotificationType");
 
+            entity.HasIndex(e => e.TypeName, "UQ_NotificationType_Name").IsUnique();
+
             entity.Property(e => e.NotificationTypeId).HasColumnName("NotificationTypeID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.TypeName).HasMaxLength(50);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Occupation>(entity =>
         {
-            entity.HasKey(e => e.OccupationId).HasName("PK__Occupati__8917118DD2D71214");
+            entity.HasKey(e => e.OccupationId).HasName("PK__Occupati__8917118D1F2D8BE8");
 
             entity.ToTable("Occupation");
 
             entity.Property(e => e.OccupationId).HasColumnName("OccupationID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.OccupationName).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<Registration>(entity =>
+        {
+            entity.HasKey(e => e.RegistrationId).HasName("PK__Registra__6EF588302CA4B1F8");
+
+            entity.ToTable("Registration");
+
+            entity.HasIndex(e => e.QrCodeUrl, "UQ_Registration_QrCodeUrl")
+                .IsUnique()
+                .HasFilter("([QrCodeUrl] IS NOT NULL)");
+
+            entity.HasIndex(e => new { e.ScheduleId, e.DonorId }, "UQ_Registration_Schedule_Donor").IsUnique();
+
+            entity.Property(e => e.RegistrationId).HasColumnName("RegistrationID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.DonationTypeId).HasColumnName("DonationTypeID");
+            entity.Property(e => e.DonorId).HasColumnName("DonorID");
+            entity.Property(e => e.QrCodeUrl).HasMaxLength(255);
+            entity.Property(e => e.RegistrationDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.RegistrationStatusId).HasColumnName("RegistrationStatusID");
+            entity.Property(e => e.ScheduleId).HasColumnName("ScheduleID");
+            entity.Property(e => e.TimeSlotId).HasColumnName("TimeSlotID");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+            entity.HasOne(d => d.DonationType).WithMany(p => p.Registrations)
+                .HasForeignKey(d => d.DonationTypeId)
+                .HasConstraintName("FK_Registration_DonationType");
+
+            entity.HasOne(d => d.Donor).WithMany(p => p.Registrations)
+                .HasForeignKey(d => d.DonorId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Registration_Donor");
+
+            entity.HasOne(d => d.RegistrationStatus).WithMany(p => p.Registrations)
+                .HasForeignKey(d => d.RegistrationStatusId)
+                .HasConstraintName("FK_Registration_RegistrationStatus");
+
+            entity.HasOne(d => d.Schedule).WithMany(p => p.Registrations)
+                .HasForeignKey(d => d.ScheduleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Registration_Schedule");
+
+            entity.HasOne(d => d.TimeSlot).WithMany(p => p.Registrations)
+                .HasForeignKey(d => d.TimeSlotId)
+                .HasConstraintName("FK_Registration_TimeSlot");
+        });
+
+        modelBuilder.Entity<RegistrationStatus>(entity =>
+        {
+            entity.HasKey(e => e.RegistrationStatusId).HasName("PK__Registra__17166B453EB9562D");
+
+            entity.ToTable("RegistrationStatus");
+
+            entity.HasIndex(e => e.RegistrationStatusName, "UQ_RegistrationStatus_Name").IsUnique();
+
+            entity.Property(e => e.RegistrationStatusId).HasColumnName("RegistrationStatusID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.RegistrationStatusName).HasMaxLength(50);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE3AECB2A30F");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE3A0BB32BBD");
 
             entity.ToTable("Role");
 
+            entity.HasIndex(e => e.RoleName, "UQ_Role_Name").IsUnique();
+
             entity.Property(e => e.RoleId).HasColumnName("RoleID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.RoleName).HasMaxLength(50);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<TimeSlot>(entity =>
         {
-            entity.HasKey(e => e.SlotId).HasName("PK__TimeSlot__0A124A4F6565C918");
+            entity.HasKey(e => e.SlotId).HasName("PK__TimeSlot__0A124A4FF5039A48");
 
             entity.ToTable("TimeSlot");
 
             entity.Property(e => e.SlotId).HasColumnName("SlotID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.SlotName).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Urgency>(entity =>
         {
-            entity.HasKey(e => e.UrgencyId).HasName("PK__Urgency__7A92287A0B219FF9");
+            entity.HasKey(e => e.UrgencyId).HasName("PK__Urgency__7A92287A1C6994FC");
 
             entity.ToTable("Urgency");
 
+            entity.HasIndex(e => e.UrgencyName, "UQ_Urgency_Name").IsUnique();
+
             entity.Property(e => e.UrgencyId).HasColumnName("UrgencyID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.UrgencyName).HasMaxLength(50);
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__1788CCACB5F023D3");
+            entity.HasKey(e => e.UserId).HasName("PK__User__1788CCAC19B7599C");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.BloodTypeId, "IX_User_BloodTypeID");
+            entity.HasIndex(e => e.Email, "UQ_User_Email")
+                .IsUnique()
+                .HasFilter("([Email] IS NOT NULL)");
 
-            entity.HasIndex(e => e.Email, "IX_User_Email");
+            entity.HasIndex(e => e.NationalId, "UQ_User_NationalID")
+                .IsUnique()
+                .HasFilter("([NationalID] IS NOT NULL)");
 
-            entity.HasIndex(e => e.RoleId, "IX_User_RoleID");
+            entity.HasIndex(e => e.PhoneNumber, "UQ_User_PhoneNumber")
+                .IsUnique()
+                .HasFilter("([PhoneNumber] IS NOT NULL)");
 
-            entity.HasIndex(e => e.Username, "IX_User_Username");
+            entity.HasIndex(e => e.StaffCode, "UQ_User_StaffCode")
+                .IsUnique()
+                .HasFilter("([StaffCode] IS NOT NULL)");
 
-            entity.HasIndex(e => e.Username, "UQ__User__536C85E4ABBB6924").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ_User_Username").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.Address).HasMaxLength(255);
@@ -506,31 +585,28 @@ public partial class BloodDonationDbContext : DbContext
                 .HasColumnName("NationalID");
             entity.Property(e => e.OccupationId).HasColumnName("OccupationID");
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(25);
             entity.Property(e => e.RoleId).HasColumnName("RoleID");
             entity.Property(e => e.StaffCode).HasMaxLength(50);
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.Username).HasMaxLength(50);
 
             entity.HasOne(d => d.BloodType).WithMany(p => p.Users)
                 .HasForeignKey(d => d.BloodTypeId)
-                .HasConstraintName("FK__User__BloodTypeI__0E6E26BF");
-
-            entity.HasOne(d => d.DonationAvailabilityNavigation).WithMany(p => p.Users)
-                .HasForeignKey(d => d.DonationAvailability)
-                .HasConstraintName("FK__User__DonationAv__0F624AF8");
+                .HasConstraintName("FK_User_BloodType");
 
             entity.HasOne(d => d.Gender).WithMany(p => p.Users)
                 .HasForeignKey(d => d.GenderId)
-                .HasConstraintName("FK__User__GenderID__10566F31");
+                .HasConstraintName("FK_User_Gender");
 
             entity.HasOne(d => d.Occupation).WithMany(p => p.Users)
                 .HasForeignKey(d => d.OccupationId)
-                .HasConstraintName("FK__User__Occupation__114A936A");
+                .HasConstraintName("FK_User_Occupation");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User__RoleID__123EB7A3");
+                .HasConstraintName("FK_User_Role");
         });
 
         OnModelCreatingPartial(modelBuilder);

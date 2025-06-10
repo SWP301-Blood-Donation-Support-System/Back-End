@@ -11,7 +11,15 @@ public partial class DonationType
 
     public string? Description { get; set; }
 
-    public virtual ICollection<DonationAppointment> DonationAppointments { get; set; } = new List<DonationAppointment>();
+    public DateTime CreatedAt { get; set; }
 
-    public virtual ICollection<DonationRecord> DonationRecords { get; set; } = new List<DonationRecord>();
+    public DateTime? UpdatedAt { get; set; }
+
+    public string? CreatedBy { get; set; }
+
+    public string? UpdatedBy { get; set; }
+
+    public bool IsDeleted { get; set; }
+
+    public virtual ICollection<Registration> Registrations { get; set; } = new List<Registration>();
 }
