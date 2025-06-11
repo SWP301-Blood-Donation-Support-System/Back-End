@@ -1,6 +1,9 @@
+using AutoMapper;
 using BusinessLayer.IService;
+using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
+using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,10 +13,11 @@ namespace BusinessLayer.Service
     public class UserServices : IUserServices
     {
         private readonly IUserRepository _userRepository;
-
-        public UserServices(IUserRepository userRepository)
+        private readonly IMapper _mapper;
+        public UserServices(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<User> GetUserByIdAsync(int userId)
@@ -23,12 +27,12 @@ namespace BusinessLayer.Service
                 throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
             }
 
-            return await _userRepository.GetByIdAsync<User>(userId);
+            return await _userRepository.GetByIdAsync(userId);
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await _userRepository.GetAllAsync<User>();
+            return await _userRepository.GetAllAsync();
         }
 
         public async Task<User> GetUserByEmailAsync(string email)
@@ -66,22 +70,19 @@ namespace BusinessLayer.Service
             return await _userRepository.GetEligibleDonorsAsync();
         }
 
-        public async Task<User> CreateUserAsync(User user)
+        public async Task AddUserAsync(UserDTO user)
         {
-            if (user == null)
+            try
             {
-                throw new ArgumentNullException(nameof(user), "User cannot be null");
+                User EntityUser = _mapper.Map<User>(user);
+                await _userRepository.AddAsync(EntityUser);
             }
-
-            // Set default values for new users
-            user.CreatedAt = DateTime.UtcNow;
-            user.UpdatedAt = DateTime.UtcNow;
-            user.IsActive = true;
-            user.IsDeleted = false;
-
-            await _userRepository.AddAsync(user);
-            await _userRepository.SaveChangesAsync();
-            return user;
+            catch (Exception ex)
+            {
+                // Log the exception (consider using a logging framework)
+                Console.WriteLine($"Error adding user: {ex.Message}");
+                throw; // Re-throw the exception to be handled by the caller
+            }
         }
 
         public async Task<User> UpdateUserAsync(User user)
@@ -107,7 +108,7 @@ namespace BusinessLayer.Service
             }
 
             // Soft delete - get the user first and set IsDeleted flag
-            var user = await _userRepository.GetByIdAsync<User>(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return false;

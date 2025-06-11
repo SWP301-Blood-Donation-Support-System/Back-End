@@ -12,7 +12,7 @@ namespace DataAccessLayer.Repository
     {
         private readonly BloodDonationDbContext _context;
 
-        public UserRepository(BloodDonationDbContext context) : base()
+        public UserRepository(BloodDonationDbContext context) : base(context)
         {
             _context = context;
         }
