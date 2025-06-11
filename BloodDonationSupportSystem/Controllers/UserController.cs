@@ -63,24 +63,30 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                var token = await _memberService.GenerateToken(login);
-                if (!String.IsNullOrEmpty(token))
+                if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
+                {
+                    return BadRequest(new { status = "failed", message = "Email and password are required" });
+                }
+
+                var token = await _userServices.GenerateToken(login);
+                if (!string.IsNullOrEmpty(token))
                 {
                     return new JsonResult(new
                     {
                         result = token
                     });
                 }
-                return NotFound();
+                return NotFound(new { status = "failed", message = "Invalid email or password" });
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Login error: {ex.Message}");
                 return new JsonResult(new
                 {
                     status = "failed",
+                    message = "An error occurred during login"
                 });
             }
-
         }
     }
 }
