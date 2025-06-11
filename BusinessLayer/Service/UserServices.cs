@@ -76,6 +76,7 @@ namespace BusinessLayer.Service
             {
                 User EntityUser = _mapper.Map<User>(user);
                 await _userRepository.AddAsync(EntityUser);
+                await _userRepository.SaveChangesAsync();
             }
             catch (Exception ex)
             {

@@ -34,7 +34,7 @@ namespace BloodDonationSupportSystem.Controllers
                 Console.WriteLine("UserDTO is null in Post method.");
             }
              await _userServices.AddUserAsync(userDTO);
-            return CreatedAtAction(nameof(GetAllUsers), new { id = userDTO.UserId }, userDTO);
+            return CreatedAtAction(nameof(GetAllUsers), new {}, userDTO);
         }
 
 
@@ -56,6 +56,31 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest("Invalid ID.");
             }
             return NoContent();
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO login)
+        {
+            try
+            {
+                var token = await _memberService.GenerateToken(login);
+                if (!String.IsNullOrEmpty(token))
+                {
+                    return new JsonResult(new
+                    {
+                        result = token
+                    });
+                }
+                return NotFound();
+            }
+            catch
+            {
+                return new JsonResult(new
+                {
+                    status = "failed",
+                });
+            }
+
         }
     }
 }
