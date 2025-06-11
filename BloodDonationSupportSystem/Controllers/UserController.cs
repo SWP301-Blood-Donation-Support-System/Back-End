@@ -34,7 +34,7 @@ namespace BloodDonationSupportSystem.Controllers
                 Console.WriteLine("UserDTO is null in Post method.");
             }
              await _userServices.AddUserAsync(userDTO);
-            return CreatedAtAction(nameof(GetAllUsers), new { id = userDTO.UserId }, userDTO);
+            return CreatedAtAction(nameof(GetAllUsers), new {}, userDTO);
         }
 
 
