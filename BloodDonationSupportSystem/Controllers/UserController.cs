@@ -57,5 +57,30 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return NoContent();
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO login)
+        {
+            try
+            {
+                var token = await _memberService.GenerateToken(login);
+                if (!String.IsNullOrEmpty(token))
+                {
+                    return new JsonResult(new
+                    {
+                        result = token
+                    });
+                }
+                return NotFound();
+            }
+            catch
+            {
+                return new JsonResult(new
+                {
+                    status = "failed",
+                });
+            }
+
+        }
     }
 }
