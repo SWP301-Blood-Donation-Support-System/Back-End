@@ -1,3 +1,4 @@
+using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace BusinessLayer.IService
         Task<IEnumerable<User>> GetUsersByRoleAsync(int roleId);
         Task<IEnumerable<User>> GetUsersByBloodTypeAsync(int bloodTypeId);
         Task<IEnumerable<User>> GetEligibleDonorsAsync();
-        Task<User> CreateUserAsync(User user);
+        Task AddUserAsync(UserDTO user);
         Task<User> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);

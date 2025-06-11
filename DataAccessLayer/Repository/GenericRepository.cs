@@ -11,16 +11,30 @@ namespace DataAccessLayer.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        public GenericRepository() { }
         private readonly BloodDonationDbContext _context;
-        public Task<T> AddAsync<T>(T entity) where T : class
-        {
-            _context.Set<T>().Add(entity);
-            return Task.FromResult(entity);
 
+        public GenericRepository(BloodDonationDbContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public Task<bool> DeleteAsync<T>(int id) where T : class
+        public Task<T> AddAsync(T entity)
+        {
+            try
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
+
+                _context.Set<T>().Add(entity);
+                return Task.FromResult(entity);
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return Task.FromResult<T>(null);
+        }
+
+        public Task<bool> DeleteAsync(int id)
         {
             var entity = _context.Set<T>().Find(id);
             if (entity == null)
@@ -31,14 +45,13 @@ namespace DataAccessLayer.Repository
             return Task.FromResult(true);
         }
 
-        public Task<IEnumerable<T>> GetAllAsync<T>() where T : class
+        public Task<IEnumerable<T>> GetAllAsync()
         {
             return Task.FromResult(_context.Set<T>().AsEnumerable());
         }
 
-        public Task<T> GetByIdAsync<T>(int id) where T : class
+        public Task<T> GetByIdAsync(int id)
         {
-
             var entity = _context.Set<T>().Find(id);
             if (entity == null)
             {
@@ -49,7 +62,6 @@ namespace DataAccessLayer.Repository
 
         public Task<bool> SaveChangesAsync()
         {
-
             try
             {
                 return Task.FromResult(_context.SaveChanges() > 0);
@@ -61,8 +73,11 @@ namespace DataAccessLayer.Repository
             }
         }
 
-        public Task<T> UpdateAsync<T>(T entity) where T : class
+        public Task<T> UpdateAsync(T entity)
         {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
             _context.Set<T>().Update(entity);
             return Task.FromResult(entity);
         }
