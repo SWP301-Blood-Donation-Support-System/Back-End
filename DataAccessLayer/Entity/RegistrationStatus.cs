@@ -21,5 +21,5 @@ public partial class RegistrationStatus
 
     public bool IsDeleted { get; set; }
 
-    public virtual ICollection<Registration> Registrations { get; set; } = new List<Registration>();
+    public virtual ICollection<DonationRegistration> DonationRegistrations { get; set; } = new List<DonationRegistration>();
 }
