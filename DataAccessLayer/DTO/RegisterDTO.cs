@@ -10,15 +10,19 @@ namespace DataAccessLayer.DTO
     public class RegisterDTO
     {
         [Required(ErrorMessage = "Username is required.")]
-        [StringLength(16, ErrorMessage = "Username cannot be longer than 50 characters.",MinimumLength = 4)]
+        [StringLength(16, ErrorMessage = "Username cannot be longer than 16 characters.",MinimumLength = 4)]
         public string Username { get; set; } = null!;
 
-
+        [Required(ErrorMessage = "Password is required.")]
         public string PasswordHash { get; set; } = null!;
-        public string PhoneNumber { get; set; } = null!;
+        [Required(ErrorMessage = "Phone Number is required.")]
+        public string? PhoneNumber { get; set; }
+        [Required(ErrorMessage = "Email is required.")]
         public string? Email { get; set; }
-        public string? NationalId { get; set; }
+        [Required(ErrorMessage = "Full Name is required.")]
         public string? FullName { get; set; }
+        [Required(ErrorMessage = "National Id is required.")]
+        public string? NationalId { get; set; }
+    }
 
-       }
 }

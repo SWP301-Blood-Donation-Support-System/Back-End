@@ -93,12 +93,7 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                var existingUser = await _userServices.GetAllUsersAsync();
-                if (existingUser.Any(m => m.Email == registerDTO.Email))
-                {
-                    return BadRequest("Email already exists.");
-                }
-                await _userServices.AddUserAsync(registerDTO);
+                await _userServices.RegisterDonorAsync(registerDTO);
             }
             catch (Exception ex)
             {
