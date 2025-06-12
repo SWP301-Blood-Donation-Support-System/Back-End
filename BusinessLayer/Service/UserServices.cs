@@ -87,9 +87,13 @@ namespace BusinessLayer.Service
         {
             try
             {
-
-                User EntityUser = _mapper.Map<User>(user);
-                EntityUser.PasswordHash = EncryptPassword(user.PasswordHash);
+                var existingUser = await _userRepository.GetByEmailAsync(donor.Email);
+                if (existingUser != null)
+                {
+                    throw new InvalidOperationException("Email already exists");
+                }
+                User EntityUser = _mapper.Map<User>(donor);
+                EntityUser.PasswordHash = EncryptPassword(donor.PasswordHash);
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 3;
                 await _userRepository.AddAsync(EntityUser);

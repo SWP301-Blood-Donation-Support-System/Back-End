@@ -19,14 +19,15 @@ builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = (errorContext) =>
     {
-        var errors = errorContext.ModelState.Values.SelectMany(e => e.Errors.Select(m => new
-        {
-            ErrorMessage = m.ErrorMessage
-        })).ToList();
+        var errorMessages = errorContext.ModelState.Values
+            .SelectMany(e => e.Errors
+            .Select(m => m.ErrorMessage))
+            .ToList();
+
         var result = new
         {
             status = "failed",
-            msg = errors.ToString()
+            msg = errorMessages  
         };
         return new BadRequestObjectResult(result);
     };

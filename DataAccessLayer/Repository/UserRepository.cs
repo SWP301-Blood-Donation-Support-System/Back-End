@@ -58,7 +58,6 @@ namespace DataAccessLayer.Repository
             }
 
             user.LastDonationDate = donationDate;
-            // Assuming 3 months waiting period between donations
             user.NextEligibleDonationDate = donationDate.AddMonths(3);
             user.DonationCount++;
             user.UpdatedAt = DateTime.UtcNow;
