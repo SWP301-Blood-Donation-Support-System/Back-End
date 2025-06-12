@@ -82,11 +82,12 @@ namespace BusinessLayer.Service
             return await _userRepository.GetEligibleDonorsAsync();
         }
 
-        public async Task AddUserAsync(UserDTO user)
+        public async Task AddUserAsync(RegisterDTO user)
         {
             try
             {
                 User EntityUser = _mapper.Map<User>(user);
+                EntityUser.IsActive = true;
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
             }

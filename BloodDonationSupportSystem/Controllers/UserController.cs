@@ -26,16 +26,16 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         // POST: api/user
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] UserDTO userDTO)
-        {
-            if(userDTO == null)
-            {
-                Console.WriteLine("UserDTO is null in Post method.");
-            }
-             await _userServices.AddUserAsync(userDTO);
-            return CreatedAtAction(nameof(GetAllUsers), new {}, userDTO);
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> Post([FromBody] UserDTO userDTO)
+        //{
+        //    if(userDTO == null)
+        //    {
+        //        Console.WriteLine("UserDTO is null in Post method.");
+        //    }
+        //     await _userServices.AddUserAsync(userDTO);
+        //    return CreatedAtAction(nameof(GetAllUsers), new {}, userDTO);
+        //}
 
 
         [HttpPut("{id}")]
@@ -87,6 +87,30 @@ namespace BloodDonationSupportSystem.Controllers
                     message = "An error occurred during login"
                 });
             }
+        }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
+        {
+            try
+            {
+                var existingUser = await _userServices.GetAllUsersAsync();
+                if (existingUser.Any(m => m.Email == registerDTO.Email))
+                {
+                    return BadRequest("Email already exists.");
+                }
+                await _userServices.AddUserAsync(registerDTO);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+
+            }
+            return Ok("User registered successfully.");
+
         }
     }
 }
