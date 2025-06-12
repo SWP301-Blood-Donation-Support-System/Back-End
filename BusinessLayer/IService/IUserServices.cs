@@ -14,7 +14,7 @@ namespace BusinessLayer.IService
         Task<IEnumerable<User>> GetUsersByRoleAsync(int roleId);
         Task<IEnumerable<User>> GetUsersByBloodTypeAsync(int bloodTypeId);
         Task<IEnumerable<User>> GetEligibleDonorsAsync();
-        Task AddUserAsync(RegisterDTO user);
+        Task RegisterDonorAsync(RegisterDTO donor);
         Task<User> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);

@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -82,12 +83,14 @@ namespace BusinessLayer.Service
             return await _userRepository.GetEligibleDonorsAsync();
         }
 
-        public async Task AddUserAsync(RegisterDTO user)
+        public async Task RegisterDonorAsync(RegisterDTO donor)
         {
             try
             {
-                User EntityUser = _mapper.Map<User>(user);
+                User EntityUser = _mapper.Map<User>(donor);
+                EntityUser.PasswordHash = EncryptPassword(donor.PasswordHash); // Encrypt the password
                 EntityUser.IsActive = true;
+                EntityUser.RoleId = 3;
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
             }
@@ -178,7 +181,7 @@ namespace BusinessLayer.Service
                 var user = await _userRepository.GetByEmailAsync(login.Email);
                 
                 // If no user found or password doesn't match
-                if (user == null || user.PasswordHash != login.Password)
+                if (user == null || user.PasswordHash != EncryptPassword(login.Password))
                 {
                     Console.WriteLine($"Login failed: User with email {login.Email} not found or password doesn't match");
                     return null;
@@ -232,6 +235,36 @@ namespace BusinessLayer.Service
                 Console.WriteLine($"Error generating token: {ex.Message}");
                 throw;
             }
+        }
+        public string EncryptPassword(string plainText)
+        {
+            var key = "b14ca5898a4e4133bbce2ea2315a1916";
+            byte[] iv = new byte[16];
+            byte[] array;
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(key);
+                aes.IV = iv;
+
+                ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter streamWriter = new StreamWriter((Stream)cryptoStream))
+                        {
+                            streamWriter.Write(plainText);
+                        }
+
+                        array = memoryStream.ToArray();
+                    }
+                }
+            }
+
+
+            return Convert.ToBase64String(array);
         }
     }
 }

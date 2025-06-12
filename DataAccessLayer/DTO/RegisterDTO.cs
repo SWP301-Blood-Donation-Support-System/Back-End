@@ -15,6 +15,6 @@ namespace DataAccessLayer.DTO
         public string? Email { get; set; }
         public string? NationalId { get; set; }
         public string? FullName { get; set; }
-        public int RoleId { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }
