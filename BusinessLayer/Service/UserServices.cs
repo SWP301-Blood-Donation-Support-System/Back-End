@@ -87,8 +87,9 @@ namespace BusinessLayer.Service
         {
             try
             {
-                User EntityUser = _mapper.Map<User>(donor);
-                EntityUser.PasswordHash = EncryptPassword(donor.PasswordHash); // Encrypt the password
+
+                User EntityUser = _mapper.Map<User>(user);
+                EntityUser.PasswordHash = EncryptPassword(user.PasswordHash);
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 3;
                 await _userRepository.AddAsync(EntityUser);
@@ -267,4 +268,5 @@ namespace BusinessLayer.Service
             return Convert.ToBase64String(array);
         }
     }
+
 }

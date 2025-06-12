@@ -5,6 +5,7 @@ using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
 using DataAccessLayer.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -14,6 +15,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.Configure<AppSetting>(builder.Configuration.GetSection("AppSetting"));
 builder.Services.AddControllers();
+builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = (errorContext) =>
+    {
+        var errors = errorContext.ModelState.Values.SelectMany(e => e.Errors.Select(m => new
+        {
+            ErrorMessage = m.ErrorMessage
+        })).ToList();
+        var result = new
+        {
+            status = "failed",
+            msg = errors.ToString()
+        };
+        return new BadRequestObjectResult(result);
+    };
+});
 string? secretKey = builder.Configuration["AppSetting:SecretKey"];
 if (string.IsNullOrEmpty(secretKey))
 {
