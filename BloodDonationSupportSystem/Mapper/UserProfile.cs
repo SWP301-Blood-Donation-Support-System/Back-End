@@ -9,6 +9,8 @@ namespace BloodDonationSupportSystem.Mapper
        public UserProfile()
         {
             CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<User, RegisterDTO>().ReverseMap();
+
         }
     }
 }
