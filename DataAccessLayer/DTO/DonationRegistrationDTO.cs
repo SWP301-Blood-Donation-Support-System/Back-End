@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.DTO
 {
-    internal class DonationRegistrationDTO
+    public class DonationRegistrationDTO
     {
+        public int DonorId { get; set; }
+        public int ScheduleId { get; set; }
+        public int TimeSlotId { get; set; }
+        public string QrCode { get; set; } = null!;
+        public int StatusId { get; set; }
     }
 }
