@@ -20,5 +20,6 @@ namespace BusinessLayer.IService
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);
         Task<bool> UpdateUserStatusAsync(int userId, bool isActive);
         Task<bool> SaveChangesAsync();
+        Task<string> GenerateToken(LoginDTO login);
     }
 }

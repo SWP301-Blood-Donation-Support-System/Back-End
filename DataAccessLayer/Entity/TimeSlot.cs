@@ -5,9 +5,9 @@ namespace DataAccessLayer.Entity;
 
 public partial class TimeSlot
 {
-    public int SlotId { get; set; }
+    public int TimeSlotId { get; set; }
 
-    public string? SlotName { get; set; }
+    public string? TimeSlotName { get; set; }
 
     public TimeOnly StartTime { get; set; }
 
@@ -23,5 +23,5 @@ public partial class TimeSlot
 
     public bool IsDeleted { get; set; }
 
-    public virtual ICollection<Registration> Registrations { get; set; } = new List<Registration>();
+    public virtual ICollection<DonationRegistration> DonationRegistrations { get; set; } = new List<DonationRegistration>();
 }

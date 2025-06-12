@@ -11,6 +11,8 @@ public partial class DonationType
 
     public string? Description { get; set; }
 
+    public int? MinWaitTime { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
@@ -21,5 +23,5 @@ public partial class DonationType
 
     public bool IsDeleted { get; set; }
 
-    public virtual ICollection<Registration> Registrations { get; set; } = new List<Registration>();
+    public virtual ICollection<DonationRecord> DonationRecords { get; set; } = new List<DonationRecord>();
 }

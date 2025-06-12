@@ -34,7 +34,7 @@ namespace BloodDonationSupportSystem.Controllers
                 Console.WriteLine("UserDTO is null in Post method.");
             }
              await _userServices.AddUserAsync(userDTO);
-            return CreatedAtAction(nameof(GetAllUsers), new { id = userDTO.UserId }, userDTO);
+            return CreatedAtAction(nameof(GetAllUsers), new {}, userDTO);
         }
 
 
@@ -56,6 +56,37 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest("Invalid ID.");
             }
             return NoContent();
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO login)
+        {
+            try
+            {
+                if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
+                {
+                    return BadRequest(new { status = "failed", message = "Email and password are required" });
+                }
+
+                var token = await _userServices.GenerateToken(login);
+                if (!string.IsNullOrEmpty(token))
+                {
+                    return new JsonResult(new
+                    {
+                        result = token
+                    });
+                }
+                return NotFound(new { status = "failed", message = "Invalid email or password" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Login error: {ex.Message}");
+                return new JsonResult(new
+                {
+                    status = "failed",
+                    message = "An error occurred during login"
+                });
+            }
         }
     }
 }

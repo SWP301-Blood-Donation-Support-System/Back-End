@@ -59,6 +59,8 @@ public partial class User
 
     public virtual DonationAvailability DonationAvailability { get; set; } = null!;
 
+    public virtual ICollection<DonationRegistration> DonationRegistrations { get; set; } = new List<DonationRegistration>();
+
     public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
 
     public virtual Gender? Gender { get; set; }
@@ -66,8 +68,6 @@ public partial class User
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual Occupation? Occupation { get; set; }
-
-    public virtual ICollection<Registration> Registrations { get; set; } = new List<Registration>();
 
     public virtual Role Role { get; set; } = null!;
 }

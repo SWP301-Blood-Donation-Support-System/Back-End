@@ -13,11 +13,13 @@ public partial class DonationRecord
 
     public decimal? DonorWeight { get; set; }
 
-    public decimal? BloodTemperature { get; set; }
+    public decimal? DonorTemperature { get; set; }
 
-    public string? BloodPressure { get; set; }
+    public string? DonorBloodPressure { get; set; }
 
-    public decimal? VolumeExtracted { get; set; }
+    public int? DonationTypeId { get; set; }
+
+    public decimal? VolumeDonated { get; set; }
 
     public string? Note { get; set; }
 
@@ -37,7 +39,9 @@ public partial class DonationRecord
 
     public virtual ICollection<BloodUnit> BloodUnits { get; set; } = new List<BloodUnit>();
 
+    public virtual DonationType? DonationType { get; set; }
+
     public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
 
-    public virtual Registration Registration { get; set; } = null!;
+    public virtual DonationRegistration Registration { get; set; } = null!;
 }
