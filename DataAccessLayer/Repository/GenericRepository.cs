@@ -68,8 +68,9 @@ namespace DataAccessLayer.Repository
             }
             catch (DbUpdateException ex)
             {
+                string errorMessage = ex.InnerException?.Message ?? ex.Message;
                 // Log the exception (not implemented here)
-                throw new Exception("An error occurred while saving changes to the database.", ex);
+                throw new Exception($"Database error: {errorMessage}", ex);
             }
         }
 

@@ -64,6 +64,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IUserRepository,UserRepository>();
+builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistrationRepository>();
+builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
+builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();  
+builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
 var app = builder.Build();
 
 

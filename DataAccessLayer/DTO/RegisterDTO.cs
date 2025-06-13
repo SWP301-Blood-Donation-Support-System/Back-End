@@ -23,6 +23,8 @@ namespace DataAccessLayer.DTO
         public string? FullName { get; set; }
         [Required(ErrorMessage = "National Id is required.")]
         public string? NationalId { get; set; }
+        [Required(ErrorMessage = "DateOfBirth is required.")]
+        public DateOnly? DateOfBirth { get; set; }
     }
 
 }

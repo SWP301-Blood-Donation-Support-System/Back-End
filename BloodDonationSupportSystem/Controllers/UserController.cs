@@ -88,7 +88,7 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
-        [HttpPost("register")]
+        [HttpPost("registerUser")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
         {
             try

@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using BusinessLayer.IService;
+using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
 using DataAccessLayer.Repository;
 
 namespace BusinessLayer.Service
 {
-    public class DonationRegistrationService : IDonationRegistrationService
+    public class DonationRegistrationService : IDonationRegistrationServices
     {
         private readonly IDonationRegistrationRepository _donationRegistrationRepository;
         private readonly IMapper _mapper;
@@ -67,9 +68,22 @@ namespace BusinessLayer.Service
             }
             return await _donationRegistrationRepository.GetRegistrationsByQrCodeAsync(qrCode);
         }
-        public Task<DonationRegistration> AddRegistrationAsync(DonationRegistration registration)
+        public async Task AddRegistrationAsync(DonationRegistrationDTO registration)
         {
-            throw new NotImplementedException();
+            try
+            {
+               var entity = _mapper.Map<DonationRegistration>(registration);
+                await _donationRegistrationRepository.AddAsync(entity);
+                await _donationRegistrationRepository.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (consider using a logging framework)
+                Console.WriteLine($"Error adding registration: {ex.Message}");
+                throw; // Re-throw the exception to be handled by the caller
+            }
+
+            
         }
 
         public Task<bool> DeleteRegistrationAsync(int registrationId)
@@ -94,9 +108,10 @@ namespace BusinessLayer.Service
         }
 
 
-        public Task<bool> SaveChangesAsync()
+        public async Task<bool> SaveChangesAsync()
         {
-            throw new NotImplementedException();
+            
+            return await _donationRegistrationRepository.SaveChangesAsync();
         }
 
         public Task<DonationRegistration> UpdateRegistrationAsync(DonationRegistration registration)
@@ -109,12 +124,12 @@ namespace BusinessLayer.Service
             throw new NotImplementedException();
         }
 
-        Task<IEnumerable<DonationRegistration>> IDonationRegistrationService.GetRegistrationsByDonorIdAsync(int donorId)
+        Task<IEnumerable<DonationRegistration>> IDonationRegistrationServices.GetRegistrationsByDonorIdAsync(int donorId)
         {
             throw new NotImplementedException();
         }
 
-        Task<IEnumerable<DonationRegistration>> IDonationRegistrationService.GetRegistrationByTimeSlotIdAsync(int timeSlotId)
+        Task<IEnumerable<DonationRegistration>> IDonationRegistrationServices.GetRegistrationByTimeSlotIdAsync(int timeSlotId)
         {
             throw new NotImplementedException();
         }
