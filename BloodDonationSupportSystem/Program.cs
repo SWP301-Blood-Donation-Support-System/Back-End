@@ -76,6 +76,13 @@ builder.Services.AddCors(options =>
                  .AllowAnyMethod()
                  .AllowAnyHeader();
        });
+       options.AddPolicy("AllowReact", policy =>
+       {
+           policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Common React dev servers
+                 .AllowAnyHeader()
+                 .AllowAnyMethod()
+                 .AllowCredentials(); // Allows cookies/credentials to be sent
+       });
    });
 var app = builder.Build();
 
@@ -88,7 +95,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAllOrigins");
 app.UseCors("AllowCors");
+app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
 
