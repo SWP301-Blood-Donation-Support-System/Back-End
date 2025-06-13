@@ -1,6 +1,9 @@
 ﻿using BusinessLayer.IService;
+using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Threading.Tasks;
@@ -63,7 +66,7 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
+                if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.PasswordHash))
                 {
                     return BadRequest(new { status = "failed", message = "Email and password are required" });
                 }
@@ -106,6 +109,21 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("User registered successfully.");
 
+        }
+
+        [HttpPost("google")]
+        public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
+        {
+            
+            var token = await _userServices.ValidateGoogleToken(request);
+            if (!string.IsNullOrEmpty(token))
+            {
+                return new JsonResult(new
+                {
+                    result = token
+                });
+            }
+            return NotFound(new { status = "failed", message = "Invalid" });
         }
     }
 }
