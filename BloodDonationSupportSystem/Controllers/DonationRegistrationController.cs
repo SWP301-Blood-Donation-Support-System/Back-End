@@ -1,7 +1,5 @@
 ﻿using BusinessLayer.IService;
-using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
-using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -11,20 +9,20 @@ namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class DonationRecord : ControllerBase
     {
-        private readonly IUserServices _userServices;
-        public UserController(IUserServices userServices)
+        private readonly IDonationRegistrationService _donationRegistrationService;
+        public DonationRecord(IDonationRegistrationService donationRegistrationService)
         {
-            _userServices = userServices;
+            _donationRegistrationService = donationRegistrationService;
         }
 
         // GET: api/user
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _userServices.GetAllUsersAsync();
-            return Ok(users);
+            var registration = await _donationRegistrationService.GetAllRegistrationsAsync();
+            return Ok(registration);
         }
 
         // POST: api/user
@@ -108,29 +106,6 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("User registered successfully.");
 
-        }
-        [HttpPost("google")]
-        public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
-        {
-            try
-            {
-                var payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, new GoogleJsonWebSignature.ValidationSettings
-                {
-                    Audience = new[] { "439095486459-gvdm000c5lstr8v0j1cl3ng9bg4gs4l2.apps.googleusercontent.com" } // Thay bằng client ID của bạn
-                });
-
-                return Ok(new
-                {
-                    payload.Email,
-                    payload.Name,
-                    payload.Picture,
-                    payload.Subject // ID người dùng Google
-                });
-            }
-            catch (InvalidJwtException)
-            {
-                return Unauthorized("Token không hợp lệ.");
-            }
         }
     }
 }

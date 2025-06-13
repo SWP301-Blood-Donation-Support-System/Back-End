@@ -7,7 +7,7 @@ using DataAccessLayer.Entity;
 
 namespace DataAccessLayer.IRepository
 {
-    public interface IDonationRegistrationRepository : IGenericRepository<DonationRegistration>
+    public interface IDonationRecordRepository : IGenericRepository<DonationRegistration>
     {
         Task<IEnumerable<DonationRegistration>> GetRegistrationsByDonorIdAsync(int donorId);
         Task<IEnumerable<DonationRegistration>> GetRegistrationsByScheduleIdAsync(int scheduleId);

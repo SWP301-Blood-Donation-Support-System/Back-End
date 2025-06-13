@@ -32,6 +32,14 @@ builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
         return new BadRequestObjectResult(result);
     };
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact",
+        builder => builder.WithOrigins("http://localhost:3000") // Adjust the origin as needed
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials());
+});
 string? secretKey = builder.Configuration["AppSetting:SecretKey"];
 if (string.IsNullOrEmpty(secretKey))
 {
@@ -75,6 +83,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowReact");
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -33,7 +33,7 @@ public partial class DonationRecord
 
     public string? UpdatedBy { get; set; }
 
-    public bool? IsDeleted { get; set; }
+    public bool IsDeleted { get; set; }
 
     public virtual BloodTestResult? BloodTestResultNavigation { get; set; }
 
