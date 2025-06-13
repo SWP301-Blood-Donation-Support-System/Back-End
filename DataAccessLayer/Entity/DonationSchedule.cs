@@ -9,8 +9,6 @@ public partial class DonationSchedule
 
     public DateTime? ScheduleDate { get; set; }
 
-    public int? TotalSlots { get; set; }
-
     public int RegisteredSlots { get; set; }
 
     public DateTime CreatedAt { get; set; }
