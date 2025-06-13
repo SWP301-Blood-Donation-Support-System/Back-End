@@ -23,20 +23,32 @@ namespace BusinessLayer.Service
             _donationRegistrationRepository = donationRegistrationRepository ?? throw new ArgumentNullException(nameof(donationRegistrationRepository));
         }
 
-        public async Task<DonationRegistration> GetRegistrationsByDonorIdAsync(int donorId)
+        public async Task<DonationRegistration> GetRegistrationByIdAsync(int registrationId)
+        {
+            if (registrationId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(registrationId), "Registration ID must be greater than zero");
+            }
+            
+            return await _donationRegistrationRepository.GetByIdAsync(registrationId);
+        }
+        
+        public async Task<IEnumerable<DonationRegistration>> GetRegistrationsByDonorIdAsync(int donorId)
         {
             if (donorId <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(donorId), "Donor ID must be greater than zero");
             }
 
-            return await _donationRegistrationRepository.GetByIdAsync(donorId);
+            return await _donationRegistrationRepository.GetRegistrationsByDonorIdAsync(donorId);
         }
+        
         public async Task<IEnumerable<DonationRegistration>> GetAllRegistrationsAsync()
         {
             return await _donationRegistrationRepository.GetAllAsync();
         }
-        public async Task<IEnumerable<DonationRegistration>> GetRegistrationByScheduleIdAsync(int scheduleId)
+        
+        public async Task<IEnumerable<DonationRegistration>> GetRegistrationsByScheduleIdAsync(int scheduleId)
         {
             if (scheduleId <= 0)
             {
@@ -44,14 +56,12 @@ namespace BusinessLayer.Service
             }
             return await _donationRegistrationRepository.GetRegistrationsByScheduleIdAsync(scheduleId);
         }
+        
         public async Task<IEnumerable<DonationRegistration>> GetRegistrationsByStatusIdAsync(int statusId)
         {
-            if (statusId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(statusId), "Status ID must be greater than zero");
-            }
             return await _donationRegistrationRepository.GetRegistrationsByStatusIdAsync(statusId);
         }
+        
         public async Task<IEnumerable<DonationRegistration>> GetRegistrationsByTimeSlotIdAsync(int timeSlotId)
         {
             if (timeSlotId <= 0)
@@ -60,6 +70,7 @@ namespace BusinessLayer.Service
             }
             return await _donationRegistrationRepository.GetRegistrationsByTimeSlotIdAsync(timeSlotId);
         }
+        
         public async Task<IEnumerable<DonationRegistration>> GetRegistrationsByQrCodeAsync(string qrCode)
         {
             if (string.IsNullOrEmpty(qrCode))
@@ -68,6 +79,7 @@ namespace BusinessLayer.Service
             }
             return await _donationRegistrationRepository.GetRegistrationsByQrCodeAsync(qrCode);
         }
+        
         public async Task AddRegistrationAsync(DonationRegistrationDTO registration)
         {
             try
@@ -82,56 +94,22 @@ namespace BusinessLayer.Service
                 Console.WriteLine($"Error adding registration: {ex.Message}");
                 throw; // Re-throw the exception to be handled by the caller
             }
-
-            
         }
+       
 
-        public Task<bool> DeleteRegistrationAsync(int registrationId)
+        public async Task<bool> UpdateRegistrationStatusAsync(int registrationId, int statusId)
         {
-            throw new NotImplementedException();
+            return await _donationRegistrationRepository.UpdateRegistrationStatusAsync(registrationId, statusId);
         }
-
-        public Task<DonationRegistration> GetRegistrationByIdAsync(int registrationId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<DonationRegistration> GetRegistrationByTimeSlotIdAsync(int timeSlotId)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public Task<IEnumerable<DonationRegistration>> GetRegistrationsByScheduleIdAsync(int scheduleId)
-        {
-            throw new NotImplementedException();
-        }
-
 
         public async Task<bool> SaveChangesAsync()
         {
-            
             return await _donationRegistrationRepository.SaveChangesAsync();
         }
 
-        public Task<DonationRegistration> UpdateRegistrationAsync(DonationRegistration registration)
+        public Task<bool> SoftDeleteRegistrationAsync(int registrationId)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateRegistrationStatusAsync(int registrationId, int statusId)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<IEnumerable<DonationRegistration>> IDonationRegistrationServices.GetRegistrationsByDonorIdAsync(int donorId)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<IEnumerable<DonationRegistration>> IDonationRegistrationServices.GetRegistrationByTimeSlotIdAsync(int timeSlotId)
-        {
-            throw new NotImplementedException();
+            return _donationRegistrationRepository.SoftDeleteRegistrationAsync(registrationId);
         }
     }
 }
