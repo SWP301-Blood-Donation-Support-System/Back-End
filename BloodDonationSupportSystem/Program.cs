@@ -32,16 +32,6 @@ builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
         return new BadRequestObjectResult(result);
     };
 });
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReact", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000") // React app URL
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
 string? secretKey = builder.Configuration["AppSetting:SecretKey"];
 if (string.IsNullOrEmpty(secretKey))
 {
@@ -78,6 +68,15 @@ builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistration
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
 builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();  
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
+builder.Services.AddCors(options =>
+   {
+       options.AddPolicy("AllowCors", policy =>
+       {
+           policy.AllowAnyOrigin()
+                 .AllowAnyMethod()
+                 .AllowAnyHeader();
+       });
+   });
 var app = builder.Build();
 
 
@@ -89,11 +88,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseCors("AllowAllOrigins"); // Ensure CORS is configured if needed
-app.UseCors("AllowReact");
-
-
+app.UseCors("AllowCors");
 app.UseAuthentication();
 app.UseAuthorization();
 
