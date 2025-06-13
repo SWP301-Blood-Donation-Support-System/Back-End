@@ -91,7 +91,7 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
-        [HttpPost("registerUser")]
+        [HttpPost("registerDonor")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
         {
             try
@@ -107,7 +107,7 @@ namespace BloodDonationSupportSystem.Controllers
                 });
 
             }
-            return Ok("User registered successfully.");
+            return Ok("Donor registered successfully.");
 
         }
 
