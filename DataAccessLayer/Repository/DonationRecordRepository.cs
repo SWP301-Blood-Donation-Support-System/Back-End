@@ -27,7 +27,7 @@ namespace DataAccessLayer.Repository
 
 
         // Fixed method name to match service expectations
-        public async Task<DonationRecord> GetByIdAsync(int recordId)
+        public new async Task<DonationRecord> GetByIdAsync(int recordId)
         {
             return await _context.DonationRecords
                 .FirstOrDefaultAsync(r => r.DonationRecordId == recordId && !r.IsDeleted);

@@ -10,7 +10,7 @@ namespace BloodDonationSupportSystem.Controllers
     [ApiController]
     public class DonationRecordController : ControllerBase
     {
-       private readonly IDonationRecordService _donationRecordService;
+        private readonly IDonationRecordService _donationRecordService;
         public DonationRecordController(IDonationRecordService donationRecordService)
         {
             _donationRecordService = donationRecordService ?? throw new ArgumentNullException(nameof(donationRecordService));
@@ -43,9 +43,22 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest("Donation record cannot be null.");
             }
-            
-            var addedRecord = await _donationRecordService.AddRecordsAsync(donationRecord);
-            return CreatedAtAction(nameof(GetRecordById), new { recordId = addedRecord.DonationRecordId }, addedRecord);
+            try
+            {
+                await _donationRecordService.AddRecordsAsync(donationRecord);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+
+
+            }
+            return Ok("Record added");
         }
     }
 }

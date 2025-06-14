@@ -86,6 +86,8 @@ builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>(
 builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
+builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddCors(options =>
    {
        options.AddPolicy("AllowCors", policy =>
