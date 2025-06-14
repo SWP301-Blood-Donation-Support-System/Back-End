@@ -42,7 +42,5 @@ namespace DataAccessLayer.DTO
         public int? DonationCount { get; set; }
 
         public int DonationAvailabilityId { get; set; }
-
-
     }
 }

@@ -15,8 +15,6 @@ public partial class DonationRegistration
 
     public int? RegistrationStatusId { get; set; }
 
-    public string? QrCodeUrl { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public string? CreatedBy { get; set; }

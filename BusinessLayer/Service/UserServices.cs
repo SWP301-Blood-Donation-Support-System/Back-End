@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure.Core;
 using BloodDonationSupportSystem.Utils;
+using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
 using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
@@ -27,13 +28,15 @@ namespace BusinessLayer.Service
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmailService _emailService;
 
-        public UserServices(IUserRepository userRepository, IMapper mapper, IOptionsMonitor<AppSetting> options, IHttpContextAccessor httpContextAccessor)
+        public UserServices(IUserRepository userRepository, IMapper mapper, IOptionsMonitor<AppSetting> options, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _appSetting = options.CurrentValue;
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _emailService = emailService;
         }
 
         public async Task<User> GetUserByIdAsync(int userId)
@@ -350,6 +353,17 @@ namespace BusinessLayer.Service
             }
             return null;
             
+        }
+        public void SendMail(string mailSubject, string mailBody, string receiver)
+        {
+            var message = new Message(
+                 to: new string[] {
+               receiver
+                 },
+                 subject: mailSubject,
+                 content: mailBody);
+
+            _emailService.SendEmail(message);
         }
     }
 
