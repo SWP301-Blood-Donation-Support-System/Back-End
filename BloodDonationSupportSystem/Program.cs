@@ -38,6 +38,14 @@ builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
         return new BadRequestObjectResult(result);
     };
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact",
+        builder => builder.WithOrigins("http://localhost:3000") // Adjust the origin as needed
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials());
+});
 string? secretKey = builder.Configuration["AppSetting:SecretKey"];
 if (string.IsNullOrEmpty(secretKey))
 {
@@ -74,6 +82,8 @@ builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistration
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
 builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();  
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
+builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>();
+builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddCors(options =>
