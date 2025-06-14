@@ -23,5 +23,6 @@ namespace BusinessLayer.IService
         Task<bool> SaveChangesAsync();
         Task<string> GenerateToken(LoginDTO login);
         Task<string> ValidateGoogleToken(TokenRequest token);
+        void SendMail(string mailSubject, string mailBody, string receiver);
     }
 }
