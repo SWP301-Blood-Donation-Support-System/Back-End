@@ -71,20 +71,12 @@ namespace BusinessLayer.Service
             return await _donationRegistrationRepository.GetRegistrationsByTimeSlotIdAsync(timeSlotId);
         }
         
-        public async Task<IEnumerable<DonationRegistration>> GetRegistrationsByQrCodeAsync(string qrCode)
-        {
-            if (string.IsNullOrEmpty(qrCode))
-            {
-                throw new ArgumentNullException(nameof(qrCode), "QR Code cannot be null or empty");
-            }
-            return await _donationRegistrationRepository.GetRegistrationsByQrCodeAsync(qrCode);
-        }
-        
         public async Task AddRegistrationAsync(DonationRegistrationDTO registration)
         {
             try
             {
                var entity = _mapper.Map<DonationRegistration>(registration);
+                entity.RegistrationStatusId = 1; // 1 is the default status for new registrations
                 await _donationRegistrationRepository.AddAsync(entity);
                 await _donationRegistrationRepository.SaveChangesAsync();
             }

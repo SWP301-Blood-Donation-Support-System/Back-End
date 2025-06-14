@@ -111,20 +111,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok(registrations);
         }
-        [HttpGet("getRegistrationsByQrCode/{qrCode}")]
-        public async Task<IActionResult> GetRegistrationsByQrCode(string qrCode)
-        {
-            if (string.IsNullOrEmpty(qrCode))
-            {
-                return BadRequest("QR Code cannot be null or empty.");
-            }
-            var registrations = await _donationRegistrationService.GetRegistrationsByQrCodeAsync(qrCode);
-            if (registrations == null || !registrations.Any())
-            {
-                return NotFound($"No registrations found for QR Code {qrCode}.");
-            }
-            return Ok(registrations);
-        }
+      
         [HttpPut("updateRegistrationStatus/{registrationId}/{statusId}")]
         public async Task<IActionResult> UpdateRegistrationStatus(int registrationId, int statusId)
         {

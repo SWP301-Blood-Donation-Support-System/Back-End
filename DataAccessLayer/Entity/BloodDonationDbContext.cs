@@ -349,9 +349,6 @@ public partial class BloodDonationDbContext : DbContext
 
             entity.ToTable("DonationRegistration");
 
-            entity.HasIndex(e => e.QrCodeUrl, "UQ_DonationRegistration_QrCodeUrl")
-                .IsUnique()
-                .HasFilter("([QrCodeUrl] IS NOT NULL)");
 
             entity.HasIndex(e => new { e.ScheduleId, e.DonorId }, "UQ_DonationRegistration_Schedule_Donor").IsUnique();
 
@@ -359,7 +356,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.DonorId).HasColumnName("DonorID");
-            entity.Property(e => e.QrCodeUrl).HasMaxLength(255);
             entity.Property(e => e.RegistrationStatusId).HasColumnName("RegistrationStatusID");
             entity.Property(e => e.ScheduleId).HasColumnName("ScheduleID");
             entity.Property(e => e.TimeSlotId).HasColumnName("TimeSlotID");
