@@ -88,6 +88,23 @@ builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleReposito
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
+builder.Services.AddScoped<ILookupService, LookupService>();
+builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();
+builder.Services.AddScoped<IGenericRepository<BloodType>, GenericRepository<BloodType>>();
+builder.Services.AddScoped<IGenericRepository<BloodComponent>, GenericRepository<BloodComponent>>();
+builder.Services.AddScoped<IGenericRepository<BloodUnitStatus>, GenericRepository<BloodUnitStatus>>();
+builder.Services.AddScoped<IGenericRepository<DonationAvailability>, GenericRepository<DonationAvailability>>();
+builder.Services.AddScoped<IGenericRepository<DonationType>, GenericRepository<DonationType>>();
+builder.Services.AddScoped<IGenericRepository<NotificationType>, GenericRepository<NotificationType>>();
+builder.Services.AddScoped<IGenericRepository<Occupation>, GenericRepository<Occupation>>();
+builder.Services.AddScoped<IGenericRepository<Role>, GenericRepository<Role>>();
+builder.Services.AddScoped<IGenericRepository<Urgency>, GenericRepository<Urgency>>();
+builder.Services.AddScoped<IGenericRepository<BloodRequestStatus>, GenericRepository<BloodRequestStatus>>();
+builder.Services.AddScoped<IGenericRepository<RegistrationStatus>, GenericRepository<RegistrationStatus>>();
+builder.Services.AddScoped<IGenericRepository<ArticleCategory>, GenericRepository<ArticleCategory>>();
+builder.Services.AddScoped<IGenericRepository<ArticleStatus>, GenericRepository<ArticleStatus>>();
+builder.Services.AddScoped<IGenericRepository<BloodTestResult>, GenericRepository<BloodTestResult>>();
+
 builder.Services.AddCors(options =>
    {
        options.AddPolicy("AllowCors", policy =>
