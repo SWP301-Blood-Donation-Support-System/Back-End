@@ -1,99 +1,33 @@
 ﻿using BusinessLayer.IService;
+using BusinessLayer.Service;
 using DataAccessLayer.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.Threading.Tasks;
 
 namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DonationRecord : ControllerBase
+    public class DonationRegistrationController : ControllerBase
     {
-        private readonly IDonationRegistrationService _donationRegistrationService;
-        public DonationRecord(IDonationRegistrationService donationRegistrationService)
+        private readonly IDonationRegistrationServices _donationRegistrationService;
+        public DonationRegistrationController(IDonationRegistrationServices donationRegistrationService)
         {
             _donationRegistrationService = donationRegistrationService;
         }
-
-        // GET: api/user
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllRegistrations()
         {
-            var registration = await _donationRegistrationService.GetAllRegistrationsAsync();
-            return Ok(registration);
+            var registrations = await _donationRegistrationService.GetAllRegistrationsAsync();
+            return Ok(registrations);
         }
-
-        // POST: api/user
-        //[HttpPost]
-        //public async Task<IActionResult> Post([FromBody] UserDTO userDTO)
-        //{
-        //    if(userDTO == null)
-        //    {
-        //        Console.WriteLine("UserDTO is null in Post method.");
-        //    }
-        //     await _userServices.AddUserAsync(userDTO);
-        //    return CreatedAtAction(nameof(GetAllUsers), new {}, userDTO);
-        //}
-
-
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] string value)
+        [HttpPost("registerDonation")]
+        public async Task<IActionResult> RegisterDonation([FromBody] DonationRegistrationDTO registrationDTO)
         {
-            if (id <= 0 || string.IsNullOrEmpty(value))
-            {
-                return BadRequest("Invalid ID or value.");
-            }
-            return NoContent();
-        }
-        // DELETE: api/user/5
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            if (id <= 0)
-            {
-                return BadRequest("Invalid ID.");
-            }
-            return NoContent();
-        }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDTO login)
-        {
             try
             {
-                if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
-                {
-                    return BadRequest(new { status = "failed", message = "Email and password are required" });
-                }
-
-                var token = await _userServices.GenerateToken(login);
-                if (!string.IsNullOrEmpty(token))
-                {
-                    return new JsonResult(new
-                    {
-                        result = token
-                    });
-                }
-                return NotFound(new { status = "failed", message = "Invalid email or password" });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Login error: {ex.Message}");
-                return new JsonResult(new
-                {
-                    status = "failed",
-                    message = "An error occurred during login"
-                });
-            }
-        }
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
-        {
-            try
-            {
-                await _userServices.RegisterDonorAsync(registerDTO);
+                await _donationRegistrationService.AddRegistrationAsync(registrationDTO);
             }
             catch (Exception ex)
             {
@@ -104,8 +38,122 @@ namespace BloodDonationSupportSystem.Controllers
                 });
 
             }
-            return Ok("User registered successfully.");
+            return Ok("Donation registered successfully.");
 
         }
+        [HttpGet("getRegistrationById/{registrationId}")]
+        public async Task<IActionResult> GetRegistrationById(int registrationId)
+        {
+            if (registrationId <= 0)
+            {
+                return BadRequest("Invalid registration ID.");
+            }
+            var registration = await _donationRegistrationService.GetRegistrationByIdAsync(registrationId);
+            if (registration == null)
+            {
+                return NotFound($"No registration found with ID {registrationId}.");
+            }
+            return Ok(registration);
+        }
+        [HttpGet("getRegistrationsByDonorId/{donorId}")]
+        public async Task<IActionResult> GetRegistrationsByDonorId(int donorId)
+        {
+            if (donorId <= 0)
+            {
+                return BadRequest("Invalid donor ID.");
+            }
+            var registrations = await _donationRegistrationService.GetRegistrationsByDonorIdAsync(donorId);
+            if (registrations == null)
+            {
+                return NotFound($"No registrations found for donor ID {donorId}.");
+            }
+            return Ok(registrations);
+        }
+        [HttpGet("getRegistrationsByScheduleId/{scheduleId}")]
+        public async Task<IActionResult> GetRegistrationsByScheduleId(int scheduleId)
+        {
+            if (scheduleId <= 0)
+            {
+                return BadRequest("Invalid schedule ID.");
+            }
+            var registrations = await _donationRegistrationService.GetRegistrationsByScheduleIdAsync(scheduleId);
+            if (registrations == null || !registrations.Any())
+            {
+                return NotFound($"No registrations found for schedule ID {scheduleId}.");
+            }
+            return Ok(registrations);
+        }
+        [HttpGet("getRegistrationsByStatusId/{statusId}")]
+        public async Task<IActionResult> GetRegistrationsByStatusId(int statusId)
+        {
+            if (statusId <= 0)
+            {
+                return BadRequest("Invalid status ID.");
+            }
+            var registrations = await _donationRegistrationService.GetRegistrationsByStatusIdAsync(statusId);
+            if (registrations == null || !registrations.Any())
+            {
+                return NotFound($"No registrations found for status ID {statusId}.");
+            }
+            return Ok(registrations);
+        }
+        [HttpGet("getRegistrationsByTimeSlotId/{timeSlotId}")]
+        public async Task<IActionResult> GetRegistrationsByTimeSlotId(int timeSlotId)
+        {
+            if (timeSlotId <= 0)
+            {
+                return BadRequest("Invalid time slot ID.");
+            }
+            var registrations = await _donationRegistrationService.GetRegistrationsByTimeSlotIdAsync(timeSlotId);
+            if (registrations == null || !registrations.Any())
+            {
+                return NotFound($"No registrations found for time slot ID {timeSlotId}.");
+            }
+            return Ok(registrations);
+        }
+        [HttpGet("getRegistrationsByQrCode/{qrCode}")]
+        public async Task<IActionResult> GetRegistrationsByQrCode(string qrCode)
+        {
+            if (string.IsNullOrEmpty(qrCode))
+            {
+                return BadRequest("QR Code cannot be null or empty.");
+            }
+            var registrations = await _donationRegistrationService.GetRegistrationsByQrCodeAsync(qrCode);
+            if (registrations == null || !registrations.Any())
+            {
+                return NotFound($"No registrations found for QR Code {qrCode}.");
+            }
+            return Ok(registrations);
+        }
+        [HttpPut("updateRegistrationStatus/{registrationId}/{statusId}")]
+        public async Task<IActionResult> UpdateRegistrationStatus(int registrationId, int statusId)
+        {
+            if (registrationId <= 0 || statusId <= 0)
+            {
+                return BadRequest("Invalid registration ID or status ID.");
+            }
+            var result = await _donationRegistrationService.UpdateRegistrationStatusAsync(registrationId, statusId);
+            if (!result)
+            {
+                return NotFound($"No registration found with ID {registrationId} or failed to update status.");
+            }
+            return Ok("Registration status updated successfully.");
+        }
+        [HttpPatch("softDeleteRegistration/{registrationId}")]
+        public async Task<IActionResult> SoftDeleteRegistration(int registrationId)
+        {
+            if (registrationId <= 0)
+            {
+                return BadRequest("Invalid registration ID.");
+            }
+            var result = await _donationRegistrationService.SoftDeleteRegistrationAsync(registrationId);
+            if (!result)
+            {
+                return NotFound($"No registration found with ID {registrationId} or failed to delete.");
+            }
+            return Ok("Registration deleted successfully.");
+        }
+
+        
     }
 }

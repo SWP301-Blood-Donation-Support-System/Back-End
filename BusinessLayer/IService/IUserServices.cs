@@ -1,3 +1,4 @@
+using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 using System;
@@ -21,5 +22,6 @@ namespace BusinessLayer.IService
         Task<bool> UpdateUserStatusAsync(int userId, bool isActive);
         Task<bool> SaveChangesAsync();
         Task<string> GenerateToken(LoginDTO login);
+        Task<string> ValidateGoogleToken(TokenRequest token);
     }
 }

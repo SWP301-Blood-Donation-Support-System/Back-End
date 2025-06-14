@@ -65,9 +65,9 @@ public partial class User
 
     public virtual Gender? Gender { get; set; }
 
-    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
-
     public virtual Occupation? Occupation { get; set; }
 
     public virtual Role Role { get; set; } = null!;
+
+    public virtual ICollection<UserNotification> UserNotifications { get; set; } = new List<UserNotification>();
 }

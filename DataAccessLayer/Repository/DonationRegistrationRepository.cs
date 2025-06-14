@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
 using Microsoft.EntityFrameworkCore;
@@ -40,10 +41,9 @@ namespace DataAccessLayer.Repository
                 .Where(r => r.QrCodeUrl == qrCode && !r.IsDeleted)
                 .ToListAsync();
         }
-        public async Task<DonationRegistration> GetRegistrationByTimeSlotIdAsync(int timeSlotId)
+        public async Task<IEnumerable<DonationRegistration>> GetRegistrationByTimeSlotIdAsync(int timeSlotId)
         {
-            return await _context.DonationRegistrations
-                .FirstOrDefaultAsync(r => r.TimeSlotId == timeSlotId && !r.IsDeleted);
+            return await _context.DonationRegistrations.Where(r => r.TimeSlotId == timeSlotId && !r.IsDeleted).ToListAsync();
         }
         public async Task<bool> UpdateRegistrationStatusAsync(int registrationId, int statusId)
         {
@@ -64,9 +64,28 @@ namespace DataAccessLayer.Repository
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<DonationRegistration>> GetRegistrationsByTimeSlotIdAsync(int timeSlotId)
+        public async Task<IEnumerable<DonationRegistration>> GetRegistrationsByTimeSlotIdAsync(int timeSlotId)
         {
-            throw new NotImplementedException();
+            var registrations = _context.DonationRegistrations
+                .Where(r => r.TimeSlotId == timeSlotId && !r.IsDeleted)
+                .ToListAsync();
+          return await registrations;
         }
+
+        public async Task<bool> SoftDeleteRegistrationAsync(int registrationId)
+        {
+            var registration = await _context.DonationRegistrations.FindAsync(registrationId);
+            if (registration == null || registration.IsDeleted)
+            {
+                return false;
+            }
+            registration.IsDeleted = true;
+            registration.UpdatedAt = DateTime.UtcNow;
+            _context.DonationRegistrations.Update(registration);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+       
     }
 }

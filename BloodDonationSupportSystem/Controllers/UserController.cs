@@ -3,6 +3,7 @@ using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Threading.Tasks;
@@ -65,7 +66,7 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
+                if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.PasswordHash))
                 {
                     return BadRequest(new { status = "failed", message = "Email and password are required" });
                 }
@@ -90,7 +91,7 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
-        [HttpPost("register")]
+        [HttpPost("registerDonor")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
         {
             try
@@ -106,31 +107,23 @@ namespace BloodDonationSupportSystem.Controllers
                 });
 
             }
-            return Ok("User registered successfully.");
+            return Ok("Donor registered successfully.");
 
         }
+
         [HttpPost("google")]
         public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
         {
-            try
+            
+            var token = await _userServices.ValidateGoogleToken(request);
+            if (!string.IsNullOrEmpty(token))
             {
-                var payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, new GoogleJsonWebSignature.ValidationSettings
+                return new JsonResult(new
                 {
-                    Audience = new[] { "439095486459-gvdm000c5lstr8v0j1cl3ng9bg4gs4l2.apps.googleusercontent.com" } // Thay bằng client ID của bạn
-                });
-
-                return Ok(new
-                {
-                    payload.Email,
-                    payload.Name,
-                    payload.Picture,
-                    payload.Subject // ID người dùng Google
+                    result = token
                 });
             }
-            catch (InvalidJwtException)
-            {
-                return Unauthorized("Token không hợp lệ.");
-            }
+            return NotFound(new { status = "failed", message = "Invalid" });
         }
     }
 }

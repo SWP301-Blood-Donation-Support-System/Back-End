@@ -6,10 +6,8 @@ namespace DataAccessLayer.Entity;
 public partial class DonationSchedule
 {
     public int ScheduleId { get; set; }
-
+ 
     public DateTime? ScheduleDate { get; set; }
-
-    public int? TotalSlots { get; set; }
 
     public int RegisteredSlots { get; set; }
 

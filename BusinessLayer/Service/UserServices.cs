@@ -1,9 +1,12 @@
-using AutoMapper;
+﻿using AutoMapper;
+using Azure.Core;
 using BloodDonationSupportSystem.Utils;
 using BusinessLayer.IService;
+using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Options;
@@ -186,7 +189,7 @@ namespace BusinessLayer.Service
                 var user = await _userRepository.GetByEmailAsync(login.Email);
                 
                 // If no user found or password doesn't match
-                if (user == null || user.PasswordHash != EncryptPassword(login.Password))
+                if (user == null || user.PasswordHash != EncryptPassword(login.PasswordHash))
                 {
                     Console.WriteLine($"Login failed: User with email {login.Email} not found or password doesn't match");
                     return null;
@@ -270,6 +273,83 @@ namespace BusinessLayer.Service
 
 
             return Convert.ToBase64String(array);
+        }
+
+        public string DecryptPassword(string cipherText)
+        {
+            var key = "b14ca5898a4e4133bbce2ea2315a1916";
+            byte[] iv = new byte[16];
+            byte[] buffer = Convert.FromBase64String(cipherText);
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(key);
+                aes.IV = iv;
+
+                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+                using (MemoryStream memoryStream = new MemoryStream(buffer))
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader streamReader = new StreamReader(cryptoStream))
+                        {
+                            return streamReader.ReadToEnd();
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task<string> ValidateGoogleToken(TokenRequest request)
+        {
+            try
+            {
+                var payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { "439095486459-gvdm000c5lstr8v0j1cl3ng9bg4gs4l2.apps.googleusercontent.com" } // Thay bằng client ID của bạn
+                    
+                });
+                string email = payload.Email;
+                var user = (await _userRepository.GetAllAsync()).FirstOrDefault(p => p.Email == email);
+
+                if (user == null)
+              
+                {
+                    RegisterDTO googleDTO = new RegisterDTO
+                    {
+                        Email = payload.Email,
+                        FullName = payload.Name,
+                        PasswordHash = EncryptPassword(Guid.NewGuid().ToString()),
+                        NationalId = string.Empty,
+                        PhoneNumber = string.Empty,
+                        Username = string.Empty
+
+
+                    };
+                    await RegisterDonorAsync(googleDTO);
+                    user = (await _userRepository.GetAllAsync()).FirstOrDefault(p => p.Email == email);
+                    LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
+                    await _userRepository.SaveChangesAsync();
+                    return await GenerateToken(userLogin);
+                    
+
+                }
+                else
+                {
+                    LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
+                    userLogin.PasswordHash = DecryptPassword(userLogin.PasswordHash); // Generate a new password hash for security
+                    //thank you Quang
+                    return await GenerateToken(userLogin);
+
+                }   
+
+                }
+            catch (InvalidJwtException)
+            {
+            }
+            return null;
+            
         }
     }
 
