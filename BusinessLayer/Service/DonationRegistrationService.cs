@@ -19,8 +19,8 @@ namespace BusinessLayer.Service
 
         public DonationRegistrationService(IDonationRegistrationRepository donationRegistrationRepository, IMapper mapper)
         {
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _donationRegistrationRepository = donationRegistrationRepository ?? throw new ArgumentNullException(nameof(donationRegistrationRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<DonationRegistration> GetRegistrationByIdAsync(int registrationId)
