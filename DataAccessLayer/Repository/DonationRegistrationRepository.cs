@@ -35,12 +35,6 @@ namespace DataAccessLayer.Repository
                 .Where(r => r.RegistrationStatusId == statusId && !r.IsDeleted)
                 .ToListAsync();
         }
-        public async Task<IEnumerable<DonationRegistration>> GetRegistrationsByQrCodeAsync(string qrCode)
-        {
-            return await _context.DonationRegistrations
-                .Where(r => r.QrCodeUrl == qrCode && !r.IsDeleted)
-                .ToListAsync();
-        }
         public async Task<IEnumerable<DonationRegistration>> GetRegistrationByTimeSlotIdAsync(int timeSlotId)
         {
             return await _context.DonationRegistrations.Where(r => r.TimeSlotId == timeSlotId && !r.IsDeleted).ToListAsync();
