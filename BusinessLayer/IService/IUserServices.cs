@@ -16,6 +16,7 @@ namespace BusinessLayer.IService
         Task<IEnumerable<User>> GetUsersByBloodTypeAsync(int bloodTypeId);
         Task<IEnumerable<User>> GetEligibleDonorsAsync();
         Task RegisterDonorAsync(RegisterDTO donor);
+        Task RegisterStaffAsync(StaffRegisterDTO staff);
         Task<User> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);

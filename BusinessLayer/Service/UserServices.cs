@@ -112,7 +112,29 @@ namespace BusinessLayer.Service
                 throw; // Re-throw the exception to be handled by the caller
             }
         }
-
+        public async Task RegisterStaffAsync(StaffRegisterDTO staff)
+        {
+            try
+            {
+                var existingUser = await _userRepository.GetByEmailAsync(staff.Email);
+                if (existingUser != null)
+                {
+                    throw new InvalidOperationException("Email already exists");
+                }
+                User EntityUser = _mapper.Map<User>(staff);
+                EntityUser.PasswordHash = EncryptPassword(staff.PasswordHash);
+                EntityUser.IsActive = true;
+                EntityUser.RoleId = 2; // Assuming 2 is the role ID for staff
+                await _userRepository.AddAsync(EntityUser);
+                await _userRepository.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (consider using a logging framework)
+                Console.WriteLine($"Error adding staff: {ex.Message}");
+                throw; // Re-throw the exception to be handled by the caller
+            }
+        }
         public async Task<User> UpdateUserAsync(User user)
         {
             if (user == null)
@@ -322,11 +344,11 @@ namespace BusinessLayer.Service
                     RegisterDTO googleDTO = new RegisterDTO
                     {
                         Email = payload.Email,
-                        FullName = payload.Name,
+                        //FullName = payload.Name,
                         PasswordHash = EncryptPassword(Guid.NewGuid().ToString()),
-                        NationalId = string.Empty,
-                        PhoneNumber = string.Empty,
-                        Username = string.Empty
+                        //NationalId = string.Empty,
+                        //PhoneNumber = string.Empty,
+                        //Username = string.Empty
 
 
                     };

@@ -92,7 +92,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
         [HttpPost("registerDonor")]
-        public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
+        public async Task<IActionResult> RegisterDonor([FromBody] RegisterDTO registerDTO)
         {
             try
             {
@@ -109,6 +109,24 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Donor registered successfully.");
 
+        }
+        [HttpPost("registerStaff")]
+        public async Task<IActionResult> RegisterStaff([FromBody] StaffRegisterDTO staffRegisterDTO)
+        {
+            try
+            {
+                await _userServices.RegisterStaffAsync(staffRegisterDTO);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+
+            }
+            return Ok("Staff registered successfully.");
         }
 
         [HttpPost("google")]
