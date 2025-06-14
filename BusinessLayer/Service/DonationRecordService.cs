@@ -39,7 +39,7 @@ namespace BusinessLayer.Service
             return await _donationRecordRepository.GetAllAsync();
         }
 
-        public async Task<DonationRecord> AddRecordsAsync(DonationRecordDTO donationRecord)
+        public async Task AddRecordsAsync(DonationRecordDTO donationRecord)
         {
             if (donationRecord == null)
             {
@@ -51,7 +51,6 @@ namespace BusinessLayer.Service
             var donationRecordEntity = _mapper.Map<DonationRecord>(donationRecord);
             var addedRecord = await _donationRecordRepository.AddAsync(donationRecordEntity);
             await _donationRecordRepository.SaveChangesAsync();
-            return addedRecord;
         }
 
         public async Task<bool> UpdateRecordsAsync(DonationRecord record)
