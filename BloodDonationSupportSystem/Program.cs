@@ -1,4 +1,6 @@
+using BE_Homnayangi.Ultils.EmailServices;
 using BloodDonationSupportSystem.Utils;
+using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
 using BusinessLayer.Service;
 using DataAccessLayer.Entity;
@@ -14,6 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.Configure<AppSetting>(builder.Configuration.GetSection("AppSetting"));
+var emailConfig = builder.Configuration
+    .GetSection("EmailConfiguration")
+    .Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
 builder.Services.AddControllers();
 builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
 {
@@ -68,6 +74,8 @@ builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistration
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
 builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();  
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
+builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddCors(options =>
    {
        options.AddPolicy("AllowCors", policy =>
