@@ -14,10 +14,10 @@ namespace BusinessLayer.Service
 {
     public class DonationRegistrationService : IDonationRegistrationServices
     {
-        private readonly IDonationRecordRepository _donationRegistrationRepository;
+        private readonly IDonationRegistrationRepository _donationRegistrationRepository;
         private readonly IMapper _mapper;
 
-        public DonationRegistrationService(IDonationRecordRepository donationRegistrationRepository, IMapper mapper)
+        public DonationRegistrationService(IDonationRegistrationRepository donationRegistrationRepository, IMapper mapper)
         {
             _donationRegistrationRepository = donationRegistrationRepository ?? throw new ArgumentNullException(nameof(donationRegistrationRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));

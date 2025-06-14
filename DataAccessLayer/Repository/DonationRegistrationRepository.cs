@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessLayer.Repository
 {
-    public class DonationRegistrationRepository : GenericRepository<DonationRegistration>, IDonationRecordRepository
+    public class DonationRegistrationRepository : GenericRepository<DonationRegistration>, IDonationRegistrationRepository
     {
         private readonly BloodDonationDbContext _context;
         public DonationRegistrationRepository(BloodDonationDbContext context) : base(context)

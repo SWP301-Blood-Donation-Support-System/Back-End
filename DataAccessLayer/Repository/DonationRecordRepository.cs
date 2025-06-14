@@ -25,6 +25,7 @@ namespace DataAccessLayer.Repository
                 .ToListAsync();
         }
 
+
         // Fixed method name to match service expectations
         public async Task<DonationRecord> GetByIdAsync(int recordId)
         {
@@ -45,48 +46,10 @@ namespace DataAccessLayer.Repository
                 .Where(r => r.DonationDateTime.Date == donationDateTime.Date && !r.IsDeleted)
                 .ToListAsync();
         }
-
-        // Fixed parameter type from int to decimal to match service
-        public async Task<IEnumerable<DonationRecord>> GetRecordsByDonorWeightAsync(decimal donorWeight)
-        {
-            return await _context.DonationRecords
-                .Where(r => r.DonorWeight == donorWeight && !r.IsDeleted)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<DonationRecord>> GetRecordsByDonorTemperatureAsync(decimal donorTemperature)
-        {
-            return await _context.DonationRecords
-                .Where(r => r.DonorTemperature == donorTemperature && !r.IsDeleted)
-                .ToListAsync();
-        }
-
-        // Fixed method name to match service expectations
         public async Task<IEnumerable<DonationRecord>> GetRecordsByDonationTypeIdAsync(int donationTypeId)
         {
             return await _context.DonationRecords
                 .Where(r => r.DonationTypeId == donationTypeId && !r.IsDeleted)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<DonationRecord>> GetRecordsByBloodPressureAsync(string bloodPressure)
-        {
-            return await _context.DonationRecords
-                .Where(r => r.DonorBloodPressure == bloodPressure && !r.IsDeleted)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<DonationRecord>> GetRecordsByVolumeDonatedAsync(decimal volumeDonated)
-        {
-            return await _context.DonationRecords
-                .Where(r => r.VolumeDonated == volumeDonated && !r.IsDeleted)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<DonationRecord>> GetRecordsByNoteAsync(string note)
-        {
-            return await _context.DonationRecords
-                .Where(r => r.Note.Contains(note) && !r.IsDeleted)
                 .ToListAsync();
         }
 
@@ -106,18 +69,6 @@ namespace DataAccessLayer.Repository
                 .ToListAsync();
         }
 
-        public async Task<DonationRecord> AddAsync(DonationRecord donationRecord)
-        {
-            if (donationRecord == null)
-                throw new ArgumentNullException(nameof(donationRecord));
-
-            donationRecord.CreatedAt = DateTime.UtcNow;
-            donationRecord.UpdatedAt = DateTime.UtcNow;
-            donationRecord.IsDeleted = false;
-
-            await _context.DonationRecords.AddAsync(donationRecord);
-            return donationRecord;
-        }
 
         public async Task<bool> UpdateAsync(DonationRecord donationRecord)
         {
@@ -137,26 +88,34 @@ namespace DataAccessLayer.Repository
             return true;
         }
 
-        public async Task<bool> DeleteAsync(int recordId)
+        public async Task<bool> UpdateDonationRecordAsync(int recordId, DonationRecord updatedRecord)
         {
-            var record = await _context.DonationRecords
+            if (updatedRecord == null)
+                throw new ArgumentNullException(nameof(updatedRecord), "Updated record cannot be null");
+
+            if (recordId <= 0)
+                throw new ArgumentOutOfRangeException(nameof(recordId), "Record ID must be greater than zero");
+
+            var existingRecord = await _context.DonationRecords
                 .FirstOrDefaultAsync(r => r.DonationRecordId == recordId && !r.IsDeleted);
 
-            if (record == null)
+            if (existingRecord == null)
                 return false;
 
-            // Soft delete
-            record.IsDeleted = true;
-            record.UpdatedAt = DateTime.UtcNow;
-            return true;
-        }
+            // Ensure the ID is preserved
+            updatedRecord.DonationRecordId = recordId;
 
-        public async Task<bool> SaveChangesAsync()
-        {
+            // Update properties
+            _context.Entry(existingRecord).CurrentValues.SetValues(updatedRecord);
+
+            // Set update timestamp
+            existingRecord.UpdatedAt = DateTime.UtcNow;
+
+            // Save changes directly in this method
             try
             {
-                var result = await _context.SaveChangesAsync();
-                return result > 0;
+                await _context.SaveChangesAsync();
+                return true;
             }
             catch (Exception)
             {
@@ -164,29 +123,5 @@ namespace DataAccessLayer.Repository
             }
         }
 
-        public Task<IEnumerable<DonationRecord>> GetRecordsByDonationDateTimeIdAsync(DateTime donationDateTime)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<DonationRecord>> GetRecordsByDonorWeightAsync(int donorWeight)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<DonationRecord>> GetDonationRecordsByBloodTypeIdAsync(int bloodTypeId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<DonationRecord>> GetRecordByResultAsync(int result)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateDonationRecordAsync(int recordId, DonationRecord updatedRecord)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

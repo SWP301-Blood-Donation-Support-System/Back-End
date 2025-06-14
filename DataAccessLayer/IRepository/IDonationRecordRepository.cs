@@ -11,14 +11,9 @@ namespace DataAccessLayer.IRepository
     {
         Task<DonationRecord> GetRecordByIdAsync(int recordId);
         Task<IEnumerable<DonationRecord>> GetRecordsByRegistrationIdAsync(int registrationId);
-        Task<IEnumerable<DonationRecord>> GetRecordsByDonationDateTimeIdAsync(DateTime donationDateTime);
-        Task<IEnumerable<DonationRecord>> GetRecordsByDonorWeightAsync(int donorWeight);
-        Task<IEnumerable<DonationRecord>> GetRecordsByDonorTemperatureAsync(decimal donorTemperature);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByBloodTypeIdAsync(int bloodTypeId);
-        Task<IEnumerable<DonationRecord>> GetRecordsByBloodPressureAsync(string bloodPressure);
-        Task<IEnumerable<DonationRecord>> GetRecordsByVolumeDonatedAsync(decimal volumeDonated);
-        Task<IEnumerable<DonationRecord>> GetRecordsByNoteAsync(string note);
-        Task<IEnumerable<DonationRecord>> GetRecordByResultAsync(int result);
+        Task<IEnumerable<DonationRecord>> GetRecordsByDonationDateTimeAsync(DateTime donationDateTime);
+        Task<IEnumerable<DonationRecord>> GetRecordsByDonationTypeIdAsync(int donationTypeId);
+        Task<IEnumerable<DonationRecord>> GetRecordsByResultAsync(int result);
         Task<bool> UpdateDonationRecordAsync(int recordId, DonationRecord updatedRecord);
 
     }

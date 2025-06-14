@@ -76,6 +76,8 @@ builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistration
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
 builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();  
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
+builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>();
+builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
 builder.Services.AddCors(options =>
    {
        options.AddPolicy("AllowCors", policy =>

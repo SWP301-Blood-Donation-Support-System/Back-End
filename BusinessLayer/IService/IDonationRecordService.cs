@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 
 namespace BusinessLayer.IService
@@ -10,19 +11,14 @@ namespace BusinessLayer.IService
     public interface IDonationRecordService
     {
         Task<IEnumerable<DonationRecord>> GetAllDonationRecordsAsync();
-        Task<DonationRecord> GetDonationRecordByIdAsync(int recordId);
-        Task<DonationRecord> AddDonationRecordAsync(DonationRecord donationRecord);
-        Task<bool> UpdateDonationRecordAsync(DonationRecord record);
-        Task<bool> DeleteDonationRecordAsync(int recordId);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByRegistrationIdAsync(int registrationId);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByDonationDateTimeAsync(DateTime donationDateTime);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByDonorWeightAsync(int donorWeight);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByDonorTemperatureAsync(decimal donorTemperature);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByDonationTypeIdAsync(int donationTypeId);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByNoteAsync(string note);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByBloodPressureAsync(string bloodPressure);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByVolumeDonatedAsync(decimal volumeDonated);
-        Task<IEnumerable<DonationRecord>> GetDonationRecordsByResultAsync(int result);
+        Task<DonationRecord> GetRecordsByIdAsync(int recordId);
+        Task<DonationRecord> AddRecordsAsync(DonationRecordDTO donationRecord);
+        Task<bool> UpdateRecordsAsync(DonationRecord record);
+        Task<bool> DeleteRecordsAsync(int recordId);
+        Task<IEnumerable<DonationRecord>> GetRecordsByRegistrationIdAsync(int registrationId);
+        Task<IEnumerable<DonationRecord>> GetRecordsByDonationDateTimeAsync(DateTime donationDateTime);
+        Task<IEnumerable<DonationRecord>> GetRecordsByDonationTypeIdAsync(int donationTypeId);
+        Task<IEnumerable<DonationRecord>> GetRecordsByResultAsync(int result);
         Task<bool> SaveChanges();
     }
 }
