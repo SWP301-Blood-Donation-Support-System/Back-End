@@ -8,7 +8,6 @@ namespace DataAccessLayer.DTO
 {
     public class DonorDTO
     {
-        public string Username { get; set; }
 
         public string? PhoneNumber { get; set; }
 

@@ -23,7 +23,11 @@ namespace DataAccessLayer.Repository
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
         }
-
+        public async Task<User> GetByUsernameAsync(string username)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == username && !u.IsDeleted);
+        }
         public async Task<IEnumerable<User>> GetByRoleIdAsync(int roleId)
         {
 
