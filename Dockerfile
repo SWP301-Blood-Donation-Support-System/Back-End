@@ -22,4 +22,4 @@ RUN dotnet publish "SWP301-BloodDonationSystem.sln" -c Release -o /app/publish /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SWP301-BloodDonationSystem.dll"]
+ENTRYPOINT ["dotnet", "BloodDonationSupportSystem.dll"]
