@@ -12,6 +12,7 @@ namespace DataAccessLayer.IRepository
         Task<IEnumerable<User>> GetByBloodTypeIdAsync(int bloodTypeId);
         Task<IEnumerable<User>> GetEligibleDonorsAsync();
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);
-        Task<bool> UpdateUserStatusAsync(int userId, bool isActive);
+        Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabilityId );
+        Task<bool> UpdateUserRoleAsync(int userId, int roleId);
     }
 }

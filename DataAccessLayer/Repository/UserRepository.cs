@@ -60,13 +60,14 @@ namespace DataAccessLayer.Repository
             user.LastDonationDate = donationDate;
             user.NextEligibleDonationDate = donationDate.AddMonths(3);
             user.DonationCount++;
+            await UpdateUserDonationAvailabilityAsync(userId, 2);
             user.UpdatedAt = DateTime.UtcNow;
 
             _context.Users.Update(user);
             return true;
         }
 
-        public async Task<bool> UpdateUserStatusAsync(int userId, bool isActive)
+        public async Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabililtyId)
         {
 
             var user = await _context.Users.FindAsync(userId);
@@ -75,9 +76,21 @@ namespace DataAccessLayer.Repository
                 return false;
             }
 
-            user.IsActive = isActive;
+            user.DonationAvailabilityId = donationAvailabililtyId;
             user.UpdatedAt = DateTime.UtcNow;
 
+            _context.Users.Update(user);
+            return true;
+        }
+        public async Task<bool> UpdateUserRoleAsync(int userId, int roleId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+            user.RoleId = roleId;
+            user.UpdatedAt = DateTime.UtcNow;
             _context.Users.Update(user);
             return true;
         }

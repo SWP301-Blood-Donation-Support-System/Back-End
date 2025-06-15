@@ -170,7 +170,6 @@ namespace BusinessLayer.Service
             await _userRepository.UpdateAsync(user);
             return await _userRepository.SaveChangesAsync();
         }
-
         public async Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate)
         {
             if (userId <= 0)
@@ -185,27 +184,24 @@ namespace BusinessLayer.Service
             }
             return result;
         }
-
-        public async Task<bool> UpdateUserStatusAsync(int userId, bool isActive)
+        public async Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabililtyId)
         {
             if (userId <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
             }
 
-            bool result = await _userRepository.UpdateUserStatusAsync(userId, isActive);
+            bool result = await _userRepository.UpdateUserDonationAvailabilityAsync(userId,donationAvailabililtyId);
             if (result)
             {
                 await _userRepository.SaveChangesAsync();
             }
             return result;
         }
-
         public async Task<bool> SaveChangesAsync()
         {
             return await _userRepository.SaveChangesAsync();
         }
-
         public async Task<string> GenerateToken(LoginDTO login)
         {
             try
@@ -299,7 +295,6 @@ namespace BusinessLayer.Service
 
             return Convert.ToBase64String(array);
         }
-
         public string DecryptPassword(string cipherText)
         {
             var key = "b14ca5898a4e4133bbce2ea2315a1916";
@@ -325,7 +320,6 @@ namespace BusinessLayer.Service
                 }
             }
         }
-
         public async Task<string> ValidateGoogleToken(TokenRequest request)
         {
             try
@@ -386,6 +380,32 @@ namespace BusinessLayer.Service
                  content: mailBody);
 
             _emailService.SendEmail(message);
+        }
+
+        public async Task<User> UpdateDonorAsync(int donorId, DonorDTO donor)
+        {
+            if (donor == null || donorId <= 0)
+            {
+                throw new ArgumentNullException(nameof(donor), "Donor data cannot be null or empty");
+            }
+            
+            var existingUser = await _userRepository.GetByIdAsync(donorId);
+            
+            if (existingUser == null)
+            {
+                throw new KeyNotFoundException($"Donor with ID {donorId} not found");
+            }
+            
+            _mapper.Map(donor, existingUser);
+            
+            // Set updated timestamp
+            existingUser.UpdatedAt = DateTime.UtcNow;
+            
+            // Save changes
+            await _userRepository.UpdateAsync(existingUser);
+            await _userRepository.SaveChangesAsync();
+            
+            return existingUser;
         }
     }
 
