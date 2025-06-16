@@ -92,7 +92,10 @@ namespace BusinessLayer.Service
             }
 
             var schedule = await _donationScheduleRepository.GetByIdAsync(id);
-            if (schedule == null) return false;
+            if (schedule == null)
+            {
+                return false;
+            }
 
             schedule.IsDeleted = true;
             schedule.UpdatedBy = deletedBy;
@@ -128,13 +131,23 @@ namespace BusinessLayer.Service
                 throw new ArgumentException("Registered by cannot be null or empty", nameof(registeredBy));
             }
 
-            var schedule = await GetDonationScheduleWithRegistrationsAndDetailsAsync(scheduleId);
-            if (schedule == null || schedule.IsDeleted) return false;
+            var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
+            if (schedule == null || schedule.IsDeleted)
+            {
+                return false;
+            }
 
-            // Additional registration logic would be implemented here
-            // This would typically involve creating a new DonationRegistration record
+            // Implement business logic for registering for a donation slot
+            // This would typically involve creating a DonationRegistration record
+            // through a separate repository and service
 
-            return true;
+            // For now, just increment the registered slots count
+            schedule.RegisteredSlots++;
+            schedule.UpdatedBy = registeredBy;
+            schedule.UpdatedAt = DateTime.UtcNow;
+
+            await _donationScheduleRepository.UpdateAsync(schedule);
+            return await _donationScheduleRepository.SaveChangesAsync();
         }
 
         public async Task<bool> IsDonationScheduleFullyBookedAsync(int scheduleId)
@@ -144,13 +157,18 @@ namespace BusinessLayer.Service
                 throw new ArgumentOutOfRangeException(nameof(scheduleId), "Schedule ID must be greater than zero");
             }
 
-            var schedule = await GetDonationScheduleWithRegistrationsAndDetailsAsync(scheduleId);
-            if (schedule == null || schedule.IsDeleted) return false;
+            var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
+            if (schedule == null || schedule.IsDeleted)
+            {
+                // Consider a non-existent or deleted schedule as "fully booked"
+                return true;
+            }
 
-            // Logic to check if the schedule is fully booked
-            // This would compare registration count with the registered slots
-            return schedule.DonationRegistrations != null &&
-                   schedule.DonationRegistrations.Count >= schedule.RegisteredSlots;
+            // Implement logic to determine if a schedule is fully booked
+            // This might involve comparing RegisteredSlots with a MaxSlots property
+            // For now, assuming a fixed capacity of 100 slots per schedule
+            const int maxSlotsPerSchedule = 100;
+            return schedule.RegisteredSlots >= maxSlotsPerSchedule;
         }
 
         public async Task<bool> RestoreDonationScheduleAsync(int scheduleId, string restoredBy)
@@ -165,7 +183,16 @@ namespace BusinessLayer.Service
             }
 
             var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
-            if (schedule == null) return false;
+            if (schedule == null)
+            {
+                return false;
+            }
+
+            if (!schedule.IsDeleted)
+            {
+                // Schedule is not deleted, no need to restore
+                return true;
+            }
 
             schedule.IsDeleted = false;
             schedule.UpdatedBy = restoredBy;
