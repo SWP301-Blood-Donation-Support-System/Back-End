@@ -8,6 +8,8 @@ namespace BloodDonationSupportSystem.Mapper
     {
         public DonationRecordProfile()
         {
+            CreateMap<DonationValidation, DonationValidationDTO>().ReverseMap();
+
             CreateMap<DonationRecord, DonationRecordDTO>().ReverseMap();
         }
     }

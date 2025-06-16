@@ -122,6 +122,85 @@ namespace DataAccessLayer.Repository
                 return false;
             }
         }
+        // Trong DonationRecordRepository.cs
+        public async Task<bool> AddDonationValidationAsync(DonationValidation validation)
+        {
+            if (validation == null)
+                throw new ArgumentNullException(nameof(validation));
+
+            validation.CreatedAt = DateTime.UtcNow;
+            validation.UpdatedAt = DateTime.UtcNow;
+            validation.IsDeleted = false;
+
+            await _context.DonationValidations.AddAsync(validation);
+            return true;
+        }
+
+        public async Task<bool> AddDonationValidationAsync(int donationRecordId, int userId)
+        {
+            // Kiểm tra DonationRecord có tồn tại không
+            var record = await GetByIdAsync(donationRecordId);
+            if (record == null)
+                return false;
+
+            // Kiểm tra User có tồn tại không (có thể cần inject IUserRepository)
+
+            var validation = new DonationValidation
+            {
+                DonationRecordId = donationRecordId,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            };
+
+            await _context.DonationValidations.AddAsync(validation);
+            return true;
+        }
+
+        public async Task<IEnumerable<DonationValidation>> GetValidationsForRecordAsync(int recordId)
+        {
+            return await _context.DonationValidations
+                .Where(v => v.DonationRecordId == recordId && !v.IsDeleted)
+                .Include(v => v.User)  // Nếu cần thông tin người validate
+                .ToListAsync();
+        }
+
+        public async Task<bool> RemoveValidationAsync(int validationId)
+        {
+            var validation = await _context.DonationValidations
+                .FirstOrDefaultAsync(v => v.ValidationId == validationId && !v.IsDeleted);
+
+            if (validation == null)
+                return false;
+
+            // Soft delete
+            validation.IsDeleted = true;
+            validation.UpdatedAt = DateTime.UtcNow;
+            return true;
+        }
+
+        public async Task<bool> HasValidationAsync(int recordId, int userId)
+        {
+            return await _context.DonationValidations
+                .AnyAsync(v => v.DonationRecordId == recordId &&
+                              v.UserId == userId &&
+                              !v.IsDeleted);
+        }
+
+        public async Task<IEnumerable<DonationRecord>> GetRecordsByValidatorAsync(int userId)
+        {
+            var validatedRecordIds = await _context.DonationValidations
+                .Where(v => v.UserId == userId && !v.IsDeleted)
+                .Select(v => v.DonationRecordId)
+                .Distinct()
+                .ToListAsync();
+
+            return await _context.DonationRecords
+                .Where(r => validatedRecordIds.Contains(r.DonationRecordId) && !r.IsDeleted)
+                .ToListAsync();
+        }
+
 
     }
 }

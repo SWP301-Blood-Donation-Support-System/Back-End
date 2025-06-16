@@ -60,5 +60,30 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Record added");
         }
+        [HttpPost("{recordId}/validate")]
+        public async Task<IActionResult> ValidateRecord(int recordId, [FromBody] DonationValidationDTO validationDTO)
+        {
+            if (recordId != validationDTO.DonationRecordId)
+            {
+                return BadRequest("Record ID mismatch");
+            }
+
+            var result = await _donationRecordService.ValidateDonationRecordAsync(recordId, validationDTO.UserId);
+            if (result)
+                return Ok();
+            return BadRequest("Failed to validate record");
+        }
+
+        [HttpGet("{recordId}/validations")]
+        public async Task<IActionResult> GetValidations(int recordId)
+        {
+            var validations = await _donationRecordService.GetRecordsByIdAsync(recordId); // Adjusted method call
+            if (validations == null)
+            {
+                return NotFound("No validations found for the given record ID.");
+            }
+            return Ok(validations);
+        }
+
     }
 }

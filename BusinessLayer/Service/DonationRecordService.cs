@@ -120,5 +120,40 @@ namespace BusinessLayer.Service
         {
             return await _donationRecordRepository.SaveChangesAsync();
         }
+
+        // Trong DonationRecordService, triển khai:
+        public async Task<bool> ValidateDonationRecordAsync(int recordId, int userId)
+        {
+            if (recordId <= 0)
+                throw new ArgumentOutOfRangeException(nameof(recordId));
+            if (userId <= 0)
+                throw new ArgumentOutOfRangeException(nameof(userId));
+
+            // Kiểm tra nếu đã validate rồi thì không validate nữa
+            var hasValidation = await _donationRecordRepository.HasValidationAsync(recordId, userId);
+            if (hasValidation)
+                return true; // Đã validate rồi
+
+            var result = await _donationRecordRepository.AddDonationValidationAsync(recordId, userId);
+            await _donationRecordRepository.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<IEnumerable<DonationValidation>> GetValidationsForRecordAsync(int recordId)
+        {
+            if (recordId <= 0)
+                throw new ArgumentOutOfRangeException(nameof(recordId));
+
+            return await _donationRecordRepository.GetValidationsForRecordAsync(recordId);
+        }
+
+        public async Task<IEnumerable<DonationRecord>> GetRecordsByValidatorAsync(int userId)
+        {
+            if (userId <= 0)
+                throw new ArgumentOutOfRangeException(nameof(userId));
+
+            return await _donationRecordRepository.GetRecordsByValidatorAsync(userId);
+        }
+
     }
 }
