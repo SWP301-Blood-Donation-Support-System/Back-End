@@ -59,7 +59,6 @@ jobs:
           docker rm $IMAGE_NAME || true
 
       - name: Run Docker Container (Inject Connection string Config)
-      
         run: |
           docker run -d --name $IMAGE_NAME \
             -p $DOCKER_PORT:$APP_PORT \
@@ -68,4 +67,5 @@ jobs:
             -e EmailConfiguration__Port="$EMAIL_PORT" \
             -e EmailConfiguration__Username="$EMAIL_USERNAME" \
             -e EmailConfiguration__Password="$EMAIL_PASSWORD" \
+            -e AppSetting__SecretKey="$JWT_SECRET_KEY" \
             $IMAGE_NAME:v1 
