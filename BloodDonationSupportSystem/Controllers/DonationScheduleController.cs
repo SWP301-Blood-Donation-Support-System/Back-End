@@ -30,8 +30,7 @@ namespace BloodDonationSupportSystem.Controllers
             try
             {
                 var schedules = await _donationScheduleService.GetAllDonationSchedulesAsync();
-                var scheduleDTOs = _mapper.Map<IEnumerable<DonationScheduleDTO>>(schedules);
-                return Ok(scheduleDTOs);
+                return Ok(schedules);
             }
             catch (Exception ex)
             {
