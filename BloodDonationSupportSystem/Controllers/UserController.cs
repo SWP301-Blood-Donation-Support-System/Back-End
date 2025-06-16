@@ -41,15 +41,15 @@ namespace BloodDonationSupportSystem.Controllers
         //}
 
 
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] string value)
-        {
-            if (id <= 0 || string.IsNullOrEmpty(value))
-            {
-                return BadRequest("Invalid ID or value.");
-            }
-            return NoContent();
-        }
+        //[HttpPut("{id}")]
+        //public IActionResult Put(int id, [FromBody] string value)
+        //{
+        //    if (id <= 0 || string.IsNullOrEmpty(value))
+        //    {
+        //        return BadRequest("Invalid ID or value.");
+        //    }
+        //    return NoContent();
+        //}
         // DELETE: api/user/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -142,6 +142,83 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
             return NotFound(new { status = "failed", message = "Invalid" });
+        }
+        [HttpPut("updateDonor/{donorId}")]
+        public async Task<IActionResult> UpdateDonor(int donorId, [FromBody] DonorDTO donorDTO)
+        {
+            if (donorDTO == null || donorId <= 0) 
+            {
+                return BadRequest("Invalid donor data.");
+            }
+            try
+            {
+                var updatedDonor = await _userServices.UpdateDonorAsync(donorId, donorDTO);
+                return Ok(updatedDonor);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+        }
+        [HttpGet("getUserByRole/{roleId}")]
+        public async Task<IActionResult> GetUsersByRole(int roleId)
+        {
+            if (roleId <= 0)
+            {
+                return BadRequest("Invalid role ID.");
+            }
+            var users = await _userServices.GetUsersByRoleAsync(roleId);
+            return Ok(users);
+        }
+        [HttpGet("getUserByBloodType/{bloodTypeId}")]
+        public async Task<IActionResult> GetUsersByBloodType(int bloodTypeId)
+        {
+            if (bloodTypeId <= 0)
+            {
+                return BadRequest("Invalid blood type ID.");
+            }
+            var users = await _userServices.GetUsersByBloodTypeAsync(bloodTypeId);
+            return Ok(users);
+        }
+        [HttpGet("getEligibleDonors")]
+        public async Task<IActionResult> GetEligibleDonors()
+        {
+            var eligibleDonors = await _userServices.GetEligibleDonorsAsync();
+            return Ok(eligibleDonors);
+        }
+        [HttpPut("updateDonationInfo/{userId}")]
+        public async Task<IActionResult> UpdateDonationInfo(int userId, [FromBody] DateTime donationDate)
+        {
+            if (userId <= 0 || donationDate == default)
+            {
+                return BadRequest("Invalid user ID or donation date.");
+            }
+            try
+            {
+                var result = await _userServices.UpdateDonationInfoAsync(userId, donationDate);
+                return Ok(new { success = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+        }
+        [HttpPut("updateUserDonationAvailability/{userId}")]
+        public async Task<IActionResult> UpdateUserDonationAvailability(int userId, [FromBody] int donationAvailabilityId)
+        {
+            if (userId <= 0 || donationAvailabilityId <= 0)
+            {
+                return BadRequest("Invalid user ID or donation availability ID.");
+            }
+            try
+            {
+                var result = await _userServices.UpdateUserDonationAvailabilityAsync(userId, donationAvailabilityId);
+                return Ok(new { success = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
         }
     }
 }

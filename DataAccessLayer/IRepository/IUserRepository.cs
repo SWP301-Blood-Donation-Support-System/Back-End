@@ -8,10 +8,12 @@ namespace DataAccessLayer.IRepository
     public interface IUserRepository : IGenericRepository<User>
     {
         Task<User> GetByEmailAsync(string email);
+        Task<User> GetByUsernameAsync(string username);
         Task<IEnumerable<User>> GetByRoleIdAsync(int roleId);
         Task<IEnumerable<User>> GetByBloodTypeIdAsync(int bloodTypeId);
         Task<IEnumerable<User>> GetEligibleDonorsAsync();
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);
-        Task<bool> UpdateUserStatusAsync(int userId, bool isActive);
+        Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabilityId );
+        Task<bool> UpdateUserRoleAsync(int userId, int roleId);
     }
 }
