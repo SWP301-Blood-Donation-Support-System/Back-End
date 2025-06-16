@@ -1,5 +1,6 @@
 ﻿using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,16 @@ namespace DataAccessLayer.Repository
         {
             _context = context;
         }
+        public async Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync()
+        {
+            return await _context.TimeSlots
+                .Where(ts => !ts.IsDeleted).ToListAsync();
+        }
 
+        public async Task<TimeSlot> GetTimeSlotByIdAsync(int timeSlotId)
+        { 
+            return await _context.TimeSlots.Where(ts=>ts.TimeSlotId==timeSlotId && !ts.IsDeleted)
+                .FirstOrDefaultAsync();
+        }
     }
 }

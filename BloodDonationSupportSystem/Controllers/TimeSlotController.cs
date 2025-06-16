@@ -15,12 +15,29 @@ namespace BloodDonationSupportSystem.Controllers
             _timeSlotServices = timeSlotServices ?? throw new ArgumentNullException(nameof(timeSlotServices));
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllTimeSlots()
+        public async Task<IActionResult> GetAvailableTimeSlots()
         {
             try
             {
-                var timeSlots = await _timeSlotServices.GetAllTimeSlotsAsync();
+                var timeSlots = await _timeSlotServices.GetAvailableTimeSlotsAsync();
                 return Ok(timeSlots);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { status = "failed", msg = ex.Message });
+            }
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTimeSlotById(int id)
+        {
+            try
+            {
+                var timeSlot = await _timeSlotServices.GetTimeSlotByIdAsync(id);
+                if (timeSlot == null)
+                {
+                    return NotFound(new { status = "failed", msg = "Time slot not found" });
+                }
+                return Ok(timeSlot);
             }
             catch (Exception ex)
             {

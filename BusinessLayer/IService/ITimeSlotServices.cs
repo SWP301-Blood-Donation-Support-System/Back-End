@@ -11,7 +11,7 @@ namespace BusinessLayer.IService
     {
         Task<IEnumerable<TimeSlot>> GetAllTimeSlotsAsync();
         Task<TimeSlot> GetTimeSlotByIdAsync(int timeSlotId);
-        Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync(DateTime date);
+        Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync();
         Task<bool> AddTimeSlotAsync(TimeSlot timeSlot);
         Task<bool> UpdateTimeSlotAsync(TimeSlot timeSlot);
         Task<bool> DeleteTimeSlotAsync(int timeSlotId);
