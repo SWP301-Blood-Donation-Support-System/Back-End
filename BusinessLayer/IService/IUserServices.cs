@@ -16,10 +16,12 @@ namespace BusinessLayer.IService
         Task<IEnumerable<User>> GetUsersByBloodTypeAsync(int bloodTypeId);
         Task<IEnumerable<User>> GetEligibleDonorsAsync();
         Task RegisterDonorAsync(RegisterDTO donor);
+        Task RegisterStaffAsync(StaffRegisterDTO staff);
         Task<User> UpdateUserAsync(User user);
+        Task<User> UpdateDonorAsync(int donorId, DonorDTO donor);
         Task<bool> DeleteUserAsync(int userId);
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);
-        Task<bool> UpdateUserStatusAsync(int userId, bool isActive);
+        Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabilityId);
         Task<bool> SaveChangesAsync();
         Task<string> GenerateToken(LoginDTO login);
         Task<string> ValidateGoogleToken(TokenRequest token);

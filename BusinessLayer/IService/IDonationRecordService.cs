@@ -12,7 +12,7 @@ namespace BusinessLayer.IService
     {
         Task<IEnumerable<DonationRecord>> GetAllDonationRecordsAsync();
         Task<DonationRecord> GetRecordsByIdAsync(int recordId);
-        Task<DonationRecord> AddRecordsAsync(DonationRecordDTO donationRecord);
+        Task AddRecordsAsync(DonationRecordDTO donationRecord);
         Task<bool> UpdateRecordsAsync(DonationRecord record);
         Task<bool> DeleteRecordsAsync(int recordId);
         Task<IEnumerable<DonationRecord>> GetRecordsByRegistrationIdAsync(int registrationId);

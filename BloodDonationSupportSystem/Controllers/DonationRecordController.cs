@@ -43,9 +43,22 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest("Donation record cannot be null.");
             }
+            try
+            {
+                await _donationRecordService.AddRecordsAsync(donationRecord);
 
-            var addedRecord = await _donationRecordService.AddRecordsAsync(donationRecord);
-            return CreatedAtAction(nameof(GetRecordById), new { recordId = addedRecord.DonationRecordId }, addedRecord);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+
+
+            }
+            return Ok("Record added");
         }
         [HttpPost("{recordId}/validate")]
         public async Task<IActionResult> ValidateRecord(int recordId, [FromBody] DonationValidationDTO validationDTO)
