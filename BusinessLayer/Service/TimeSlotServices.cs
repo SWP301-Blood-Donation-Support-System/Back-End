@@ -35,14 +35,14 @@ namespace BusinessLayer.Service
             return await _timeSlotRepository.GetAllAsync();
         }
 
-        public Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync(DateTime date)
+        public async Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync()
         {
-            throw new NotImplementedException();
+            return await _timeSlotRepository.GetAvailableTimeSlotsAsync();
         }
 
         public Task<TimeSlot> GetTimeSlotByIdAsync(int timeSlotId)
         {
-            return _timeSlotRepository.GetByIdAsync(timeSlotId);
+            return _timeSlotRepository.GetTimeSlotByIdAsync(timeSlotId);
         }
 
         public Task<bool> SaveChangesAsync()
