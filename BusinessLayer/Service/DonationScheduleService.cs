@@ -22,6 +22,14 @@ namespace BusinessLayer.Service
         {
             return await _donationScheduleRepository.GetAllAsync();
         }
+        public async Task<DonationSchedule> GetDonationSchedulesByDateAsync(DateOnly date)
+        {
+            if (date == default)
+            {
+                throw new ArgumentException("Date cannot be default", nameof(date));
+            }
+            return await _donationScheduleRepository.getSchedulebyDateAsync(date);
+        }
 
         public async Task<DonationSchedule> GetDonationScheduleByIdAsync(int id)
         {

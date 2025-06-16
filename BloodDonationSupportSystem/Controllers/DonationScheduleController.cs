@@ -239,5 +239,23 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest(new { status = "failed", message = ex.Message });
             }
         }
+        [HttpGet("schedule-by-date")]
+        public async Task<IActionResult> GetScheduleByDate([FromQuery] DateOnly date)
+        {
+            try
+            {
+                var schedule = await _donationScheduleService.GetDonationSchedulesByDateAsync(date);
+                if (schedule == null)
+                {
+                    return NotFound($"No schedule found for date {date.ToShortDateString()}.");
+                }
+                
+                return Ok(schedule);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+        }
     }
 }

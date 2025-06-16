@@ -12,6 +12,7 @@ namespace BusinessLayer.IService
         Task<IEnumerable<DonationSchedule>> GetAllDonationSchedulesAsync();
         Task<DonationSchedule> GetDonationScheduleByIdAsync(int id);
         Task<DonationSchedule> CreateDonationScheduleAsync(DonationSchedule schedule, string createdBy);
+        Task<DonationSchedule> GetDonationSchedulesByDateAsync(DateOnly date);
         Task<bool> UpdateDonationScheduleAsync(DonationSchedule schedule, string updatedBy);
         Task<bool> DeleteDonationScheduleAsync(int id, string deletedBy); // Chú ý đổi tên phương thức
         Task<bool> SoftDeleteDonationScheduleAsync(int id, string deletedBy); // Giữ lại xóa mềm
