@@ -91,7 +91,7 @@ namespace BloodDonationSupportSystem.Controllers
                 var createdSchedule = await _donationScheduleService.CreateDonationScheduleAsync(schedule, createdBy);
                 
                 var createdScheduleDTO = _mapper.Map<DonationScheduleDTO>(createdSchedule);
-                return CreatedAtAction(nameof(GetScheduleById), new { id = createdScheduleDTO.ScheduleId }, createdScheduleDTO);
+                return CreatedAtAction(nameof(GetScheduleById), new { id = createdSchedule.ScheduleId }, createdScheduleDTO);
             }
             catch (Exception ex)
             {
@@ -107,9 +107,9 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest("Schedule data is required.");
             }
 
-            if (id <= 0 || id != scheduleDTO.ScheduleId)
+            if (id <= 0)
             {
-                return BadRequest("ID in URL doesn't match ID in request body.");
+                return BadRequest("Invalid schedule ID.");
             }
 
             if (!ModelState.IsValid)
@@ -126,7 +126,7 @@ namespace BloodDonationSupportSystem.Controllers
                     return NotFound($"No schedule found with ID {id}.");
                 }
                 
-                // Update only the properties included in the DTO
+                // Update only the ScheduleDate property from the DTO
                 existingSchedule.ScheduleDate = scheduleDTO.ScheduleDate;
                 
                 string updatedBy = User.Identity?.Name ?? "System";
@@ -203,7 +203,7 @@ namespace BloodDonationSupportSystem.Controllers
                     return NotFound($"No schedule found with ID {id}.");
                 }
 
-                // Just return the simplified DTO with ID and date
+                // Just return the simplified DTO with schedule date
                 var scheduleDTO = _mapper.Map<DonationScheduleDTO>(schedule);
                 return Ok(scheduleDTO);
             }
