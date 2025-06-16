@@ -11,8 +11,8 @@ WORKDIR /src
 # Copy và restore file .sln và các file .csproj đầu tiên
 # Điều này tận dụng Docker cache hiệu quả hơn
 COPY ["SWP301-BloodDonationSystem.sln", "./"]
-COPY ["SchoolMedicalSystem/SchoolMedicalSystem.csproj", "SchoolMedicalSystem/"]
-COPY ["BussinessLayer/BussinessLayer.csproj", "BussinessLayer/"]
+COPY ["BloodDonationSupportSystem/BloodDonationSupportSystem.csproj", "BloodDonationSupportSystem/"]
+COPY ["BusinessLayer/BusinessLayer.csproj", "BusinessLayer/"]
 COPY ["DataAccessLayer/DataAccessLayer.csproj", "DataAccessLayer/"]
 
 # Chạy dotnet restore cho toàn bộ solution
@@ -23,19 +23,18 @@ RUN dotnet restore "SWP301-BloodDonationSystem.sln"
 # Đảm bảo bạn đang ở /src khi COPY . . để có cấu trúc dự án chính xác
 COPY . .
 
-# Thay đổi thư mục làm việc vào thư mục dự án ASP.NET Core API của bạn
+# Thay đổi thư mục làm việc vào thư mục dự án ASP.NET Core API chính của bạn
 # Đây là bước quan trọng để dotnet publish hoạt động đúng
-WORKDIR "/src/SchoolMedicalSystem"
+WORKDIR "/src/BloodDonationSupportSystem"
 
-# Publish ứng dụng chính
-# Chỉ publish dự án SchoolMedicalSystem.csproj (giả định đây là dự án web API của bạn)
+# Publish ứng dụng chính (dự án API của bạn)
 # Output sẽ nằm trong /app/publish trong giai đoạn build này
-RUN dotnet publish "SchoolMedicalSystem.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "BloodDonationSupportSystem.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Giai đoạn Final Image: Chỉ chứa runtime và ứng dụng đã publish
 FROM base AS final
 WORKDIR /app
 # Sao chép tất cả các file đã publish từ giai đoạn build vào thư mục /app cuối cùng
 COPY --from=build /app/publish .
-# Thiết lập điểm vào cho ứng dụng
-ENTRYPOINT ["dotnet", "SchoolMedicalSystem.dll"]
+# Thiết lập điểm vào cho ứng dụng của bạn
+ENTRYPOINT ["dotnet", "BloodDonationSupportSystem.dll"]
