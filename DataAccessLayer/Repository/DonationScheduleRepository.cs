@@ -26,6 +26,12 @@ namespace DataAccessLayer.Repository
                                  .OrderBy(s => s.ScheduleDate)
                                  .ToListAsync();
         }
+        public async Task<DonationSchedule> getSchedulebyDateAsync(DateOnly date)
+        {
+            return await _context.DonationSchedules
+                                 .FirstOrDefaultAsync(s => s.ScheduleDate == date.ToDateTime(TimeOnly.MinValue) && !s.IsDeleted);
+
+        }
 
         public async Task<DonationSchedule> GetScheduleWithRegistrationsID(int scheduleId)
         {
@@ -107,5 +113,7 @@ namespace DataAccessLayer.Repository
             var schedule = await _context.DonationSchedules.FindAsync(scheduleId);
             return schedule != null ? DefaultMaxCapacity : 0;
         }
+
+       
     }
 }
