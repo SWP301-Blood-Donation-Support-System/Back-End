@@ -91,7 +91,7 @@ publish/
 *.user
 *.suo.old
 *.user.old
-
+*.appsetting.json
 # NuGet packages
 packages/
 *.nupkg
