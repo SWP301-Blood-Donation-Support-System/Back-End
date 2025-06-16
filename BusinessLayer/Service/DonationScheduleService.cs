@@ -1,6 +1,7 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
+using DataAccessLayer.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,14 @@ namespace BusinessLayer.Service
         public async Task<IEnumerable<DonationSchedule>> GetAllDonationSchedulesAsync()
         {
             return await _donationScheduleRepository.GetAllAsync();
+        }
+        public async Task<DonationSchedule> GetDonationSchedulesByDateAsync(DateOnly date)
+        {
+            if (date == default)
+            {
+                throw new ArgumentException("Date cannot be default", nameof(date));
+            }
+            return await _donationScheduleRepository.getSchedulebyDateAsync(date);
         }
 
         public async Task<DonationSchedule> GetDonationScheduleByIdAsync(int id)
@@ -165,7 +174,6 @@ namespace BusinessLayer.Service
             }
 
             // Implement logic to determine if a schedule is fully booked
-            // This might involve comparing RegisteredSlots with a MaxSlots property
             // For now, assuming a fixed capacity of 100 slots per schedule
             const int maxSlotsPerSchedule = 100;
             return schedule.RegisteredSlots >= maxSlotsPerSchedule;
@@ -201,5 +209,6 @@ namespace BusinessLayer.Service
             await _donationScheduleRepository.UpdateAsync(schedule);
             return await _donationScheduleRepository.SaveChangesAsync();
         }
+      
     }
 }

@@ -28,28 +28,6 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(users);
         }
 
-        // POST: api/user
-        //[HttpPost]
-        //public async Task<IActionResult> Post([FromBody] UserDTO userDTO)
-        //{
-        //    if(userDTO == null)
-        //    {
-        //        Console.WriteLine("UserDTO is null in Post method.");
-        //    }
-        //     await _userServices.AddUserAsync(userDTO);
-        //    return CreatedAtAction(nameof(GetAllUsers), new {}, userDTO);
-        //}
-
-
-        //[HttpPut("{id}")]
-        //public IActionResult Put(int id, [FromBody] string value)
-        //{
-        //    if (id <= 0 || string.IsNullOrEmpty(value))
-        //    {
-        //        return BadRequest("Invalid ID or value.");
-        //    }
-        //    return NoContent();
-        //}
         // DELETE: api/user/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -218,6 +196,35 @@ namespace BloodDonationSupportSystem.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { status = "failed", message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(new { status = "failed", message = "Invalid user ID" });
+            }
+            
+            try
+            {
+                var user = await _userServices.GetUserByIdAsync(id);
+                
+                if (user == null)
+                {
+                    return NotFound(new { status = "failed", message = $"User with ID {id} not found" });
+                }
+                
+                return Ok(user);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { status = "failed", message = "An error occurred while retrieving the user" });
             }
         }
     }

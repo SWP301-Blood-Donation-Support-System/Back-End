@@ -9,6 +9,8 @@ namespace DataAccessLayer.IRepository
 {
     public interface IDonationScheduleRepository : IGenericRepository<DonationSchedule>
     {
+        Task<DonationSchedule> getSchedulebyDateAsync(DateOnly date);
+
         /// <summary>
         /// Gets all upcoming schedules that are not deleted
         /// </summary>

@@ -99,6 +99,10 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
 builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
+
+builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
+builder.Services.AddScoped<IDonationScheduleService, DonationScheduleService>();
+
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
@@ -134,10 +138,10 @@ var app = builder.Build();
 // ====================== MIDDLEWARE PIPELINE ====================== //
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    
 }
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");

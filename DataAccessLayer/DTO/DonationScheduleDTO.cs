@@ -8,8 +8,6 @@ namespace DataAccessLayer.DTO
 {
     public class DonationScheduleDTO
     {
-        public int ScheduleId { get; set; }
-        
         public DateTime? ScheduleDate { get; set; }
     }
 }
