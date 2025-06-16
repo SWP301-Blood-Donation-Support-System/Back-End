@@ -18,6 +18,8 @@ namespace BusinessLayer.IService
         Task<IEnumerable<DonationRecord>> GetRecordsByRegistrationIdAsync(int registrationId);
         Task<IEnumerable<DonationRecord>> GetRecordsByDonationDateTimeAsync(DateTime donationDateTime);
         Task<IEnumerable<DonationRecord>> GetRecordsByDonationTypeIdAsync(int donationTypeId);
+        Task<bool> ValidateDonationRecordAsync(int recordId, int userId);
+
         Task<IEnumerable<DonationRecord>> GetRecordsByResultAsync(int result);
         Task<bool> SaveChanges();
     }
