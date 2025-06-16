@@ -14,83 +14,108 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ====================== CONFIGURATION ====================== //
 builder.Services.Configure<AppSetting>(builder.Configuration.GetSection("AppSetting"));
 //new
 var emailConfig = builder.Configuration
     .GetSection("EmailConfiguration")
     .Get<EmailConfiguration>();
 builder.Services.AddSingleton(emailConfig);
+
+// ====================== CONTROLLERS & API BEHAVIOR ====================== //
 builder.Services.AddControllers();
 builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = (errorContext) =>
     {
         var errorMessages = errorContext.ModelState.Values
-            .SelectMany(e => e.Errors
-            .Select(m => m.ErrorMessage))
+            .SelectMany(e => e.Errors.Select(m => m.ErrorMessage))
             .ToList();
 
         var result = new
         {
             status = "failed",
-            msg = errorMessages  
+            msg = errorMessages
         };
         return new BadRequestObjectResult(result);
     };
 });
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReact",
-        builder => builder.WithOrigins("http://localhost:3000") // Adjust the origin as needed
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials());
-});
+
+// ====================== DATABASE ====================== //
+builder.Services.AddDbContext<BloodDonationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("BloodDonationDB")));
+
+// ====================== AUTHENTICATION ====================== //
 string? secretKey = builder.Configuration["AppSetting:SecretKey"];
 if (string.IsNullOrEmpty(secretKey))
 {
-    // Handle the case where the secret key is missing,
-    // perhaps throw an exception or log an error,
-    // as Encoding.UTF8.GetBytes will throw if secretKey is null.
     throw new InvalidOperationException("AppSetting:SecretKey is not configured.");
 }
 var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
         };
-        // Configure JWT Bearer options (issuer, audience, key, etc.)
     });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// ====================== CORS ====================== //
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowCors", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// ====================== SWAGGER ====================== //
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<BloodDonationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("BloodDonationDB")));
+
+// ====================== AUTOMAPPER ====================== //
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// ====================== DEPENDENCY INJECTION ====================== //
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+// Services
 builder.Services.AddScoped<IUserServices, UserServices>();
-builder.Services.AddScoped<IUserRepository,UserRepository>();
-builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistrationRepository>();
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
-builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();  
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
-builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>();
 builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
+
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IDonationScheduleService, DonationScheduleService>();
+
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
+
+// Repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistrationRepository>();
+builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
+builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>();
+builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
+builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
+
+// Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();
 builder.Services.AddScoped<IGenericRepository<BloodType>, GenericRepository<BloodType>>();
 builder.Services.AddScoped<IGenericRepository<BloodComponent>, GenericRepository<BloodComponent>>();
@@ -107,36 +132,22 @@ builder.Services.AddScoped<IGenericRepository<ArticleCategory>, GenericRepositor
 builder.Services.AddScoped<IGenericRepository<ArticleStatus>, GenericRepository<ArticleStatus>>();
 builder.Services.AddScoped<IGenericRepository<BloodTestResult>, GenericRepository<BloodTestResult>>();
 
-builder.Services.AddCors(options =>
-   {
-       options.AddPolicy("AllowCors", policy =>
-       {
-           policy.AllowAnyOrigin()
-                 .AllowAnyMethod()
-                 .AllowAnyHeader();
-       });
-       options.AddPolicy("AllowReact", policy =>
-       {
-           policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Common React dev servers
-                 .AllowAnyHeader()
-                 .AllowAnyMethod()
-                 .AllowCredentials(); // Allows cookies/credentials to be sent
-       });
-   });
+// ====================== BUILD APPLICATION ====================== //
 var app = builder.Build();
 
-
-// Configure the HTTP request pipeline.
+// ====================== MIDDLEWARE PIPELINE ====================== //
 if (app.Environment.IsDevelopment())
 {
-    
+
 }
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
+
 app.UseCors("AllowAllOrigins");
 app.UseCors("AllowCors");
 app.UseCors("AllowReact");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
