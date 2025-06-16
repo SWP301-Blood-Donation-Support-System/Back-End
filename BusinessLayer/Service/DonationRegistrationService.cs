@@ -75,16 +75,22 @@ namespace BusinessLayer.Service
         {
             try
             {
-               var entity = _mapper.Map<DonationRegistration>(registration);
-                entity.RegistrationStatusId = 1; // 1 is the default status for new registrations
+                // Check if donor already has active registration
+                var existingRegistrations = await _donationRegistrationRepository.GetRegistrationsByDonorIdAsync(registration.DonorId);
+                if (existingRegistrations.Any(r => r.RegistrationStatusId == 1))
+                {
+                    throw new InvalidOperationException("You already have an active donation registration. Please complete or cancel it before registering again.");
+                }
+                
+                var entity = _mapper.Map<DonationRegistration>(registration);
+                entity.RegistrationStatusId = 1; // Set default status to 1 (active/pending)
                 await _donationRegistrationRepository.AddAsync(entity);
                 await _donationRegistrationRepository.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding registration: {ex.Message}");
-                throw; // Re-throw the exception to be handled by the caller
+                throw;
             }
         }
        
