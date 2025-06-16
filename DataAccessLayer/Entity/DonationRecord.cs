@@ -44,4 +44,5 @@ public partial class DonationRecord
     public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
 
     public virtual DonationRegistration Registration { get; set; } = null!;
+
 }

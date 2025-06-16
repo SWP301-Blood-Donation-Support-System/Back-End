@@ -10,7 +10,7 @@ namespace BloodDonationSupportSystem.Controllers
     [ApiController]
     public class DonationRecordController : ControllerBase
     {
-       private readonly IDonationRecordService _donationRecordService;
+        private readonly IDonationRecordService _donationRecordService;
         public DonationRecordController(IDonationRecordService donationRecordService)
         {
             _donationRecordService = donationRecordService ?? throw new ArgumentNullException(nameof(donationRecordService));
@@ -43,7 +43,7 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest("Donation record cannot be null.");
             }
-            
+
             var addedRecord = await _donationRecordService.AddRecordsAsync(donationRecord);
             return CreatedAtAction(nameof(GetRecordById), new { recordId = addedRecord.DonationRecordId }, addedRecord);
         }
@@ -71,6 +71,20 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok(validations);
         }
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetRecordsByUserId(int userId)
+        {
+            if (userId <= 0)
+            {
+                return BadRequest("Invalid user ID.");
+            }
+            var records = await _donationRecordService.GetRecordsByUserId(userId);
+            if (records == null || !records.Any())
+            {
+                return NotFound("No records found for the given user ID.");
+            }
+            return Ok(records);
 
+        }
     }
 }

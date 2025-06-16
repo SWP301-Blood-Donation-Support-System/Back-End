@@ -21,5 +21,6 @@ namespace DataAccessLayer.IRepository
         Task<bool> RemoveValidationAsync(int validationId);
         Task<bool> HasValidationAsync(int recordId, int userId);
         Task<IEnumerable<DonationRecord>> GetRecordsByValidatorAsync(int userId);
+        Task<IEnumerable<DonationRecord>> GetRecordsByUserIdAsync(int userId);
     }
 }

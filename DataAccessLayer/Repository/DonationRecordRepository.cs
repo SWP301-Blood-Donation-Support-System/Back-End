@@ -201,6 +201,12 @@ namespace DataAccessLayer.Repository
                 .ToListAsync();
         }
 
-
+        public async Task<IEnumerable<DonationRecord>> GetRecordsByUserIdAsync(int userId)
+        {
+            return await _context.DonationRecords
+                .Where(dr => dr.Registration.Donor.UserId == userId)
+                .Include(dr => dr.Registration) // Thêm Include để tránh lỗi lazy loading
+                .ToListAsync();
+        }
     }
 }

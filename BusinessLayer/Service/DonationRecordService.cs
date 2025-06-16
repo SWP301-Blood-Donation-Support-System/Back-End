@@ -156,5 +156,15 @@ namespace BusinessLayer.Service
             return await _donationRecordRepository.GetRecordsByValidatorAsync(userId);
         }
 
+        public async Task<IEnumerable<DonationRecordDTO>> GetRecordsByUserId(int userId)
+        {
+            if (userId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+            }
+            
+            return await _donationRecordRepository.GetRecordsByUserIdAsync(userId)
+                .ContinueWith(task=>task.Result.Select(rc=>_mapper.Map<DonationRecordDTO>(rc)));
+        }
     }
 }
