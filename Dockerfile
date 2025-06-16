@@ -10,14 +10,14 @@ WORKDIR /src
 
 # Copy và restore file .sln và các file .csproj đầu tiên
 # Điều này tận dụng Docker cache hiệu quả hơn
-COPY ["SchoolMedicalSystem.sln", "./"]
+COPY ["SWP301-BloodDonationSystem.sln", "./"]
 COPY ["SchoolMedicalSystem/SchoolMedicalSystem.csproj", "SchoolMedicalSystem/"]
 COPY ["BussinessLayer/BussinessLayer.csproj", "BussinessLayer/"]
 COPY ["DataAccessLayer/DataAccessLayer.csproj", "DataAccessLayer/"]
 
 # Chạy dotnet restore cho toàn bộ solution
 # (Đảm bảo tất cả các package được tải)
-RUN dotnet restore "SchoolMedicalSystem.sln"
+RUN dotnet restore "SWP301-BloodDonationSystem.sln"
 
 # Copy toàn bộ mã nguồn còn lại
 # Đảm bảo bạn đang ở /src khi COPY . . để có cấu trúc dự án chính xác
