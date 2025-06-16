@@ -84,6 +84,20 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok(validations);
         }
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetRecordsByUserId(int userId)
+        {
+            if (userId <= 0)
+            {
+                return BadRequest("Invalid user ID.");
+            }
+            var records = await _donationRecordService.GetRecordsByUserId(userId);
+            if (records == null || !records.Any())
+            {
+                return NotFound("No records found for the given user ID.");
+            }
+            return Ok(records);
 
+        }
     }
 }
