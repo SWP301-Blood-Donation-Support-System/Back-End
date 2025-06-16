@@ -16,6 +16,11 @@ jobs:
       IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
       DOCKER_PORT: ${{ secrets.DOCKER_PORT }}
       APP_PORT: ${{ secrets.APP_PORT }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+      EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
+      EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+      EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,6 +59,13 @@ jobs:
           docker rm $IMAGE_NAME || true
 
       - name: Run Docker Container (Inject Connection string Config)
+      
         run: |
           docker run -d --name $IMAGE_NAME \
-            -p $DOCKER_PORT:$APP_PORT $IMAGE_NAME:v1
+            -p $DOCKER_PORT:$APP_PORT \
+            -e EmailConfiguration__From="$EMAIL_FROM" \
+            -e EmailConfiguration__SmtpServer="$EMAIL_SMTP_SERVER" \
+            -e EmailConfiguration__Port="$EMAIL_PORT" \
+            -e EmailConfiguration__Username="$EMAIL_USERNAME" \
+            -e EmailConfiguration__Password="$EMAIL_PASSWORD" \
+            $IMAGE_NAME:v1 
