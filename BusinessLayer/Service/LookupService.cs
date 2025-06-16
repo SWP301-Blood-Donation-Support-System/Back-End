@@ -97,7 +97,18 @@ namespace BusinessLayer.Service
         public Task<IEnumerable<LookupDTO>> GetBloodTypesAsync()
         {
             return _bloodTypeRepository.GetAllAsync()
-                .ContinueWith(task => task.Result.Select(bt => _mapper.Map<LookupDTO>(bt)));
+                .ContinueWith(task => {
+                    // Map entities to DTOs
+                    var bloodTypeDtos = task.Result.Select(bt => _mapper.Map<LookupDTO>(bt)).ToList();
+                    
+                    // Order with "Chưa biết" (ID 1001) first, then others by ID
+                    var orderedBloodTypes = bloodTypeDtos
+                        .OrderBy(t => t.Id == 1001 ? 0 : 1)
+                        .ThenBy(t => t.Id);
+                    
+                    // Return as IEnumerable<LookupDTO>
+                    return orderedBloodTypes.AsEnumerable();
+                });
         }
 
         public Task<IEnumerable<LookupDTO>> GetBloodUnitStatusesAsync()
