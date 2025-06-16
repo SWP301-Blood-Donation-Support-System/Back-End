@@ -21,6 +21,7 @@ jobs:
       EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
       EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
       EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
