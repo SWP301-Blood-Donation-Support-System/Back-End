@@ -85,6 +85,7 @@ builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
 builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>();
 builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
+builder.Services.AddScoped<IDonationScheduleService, DonationScheduleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
