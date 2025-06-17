@@ -140,7 +140,21 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Registration deleted successfully.");
         }
+        [HttpPut("cancelRegistration/{registrationId}")]
+        public async Task<IActionResult> CancelRegistration(int registrationId)
+        {
+            if (registrationId <= 0)
+            {
+                return BadRequest("Invalid registration ID.");
+            }
 
-        
+            // Status ID 4 represents cancelled status
+            var result = await _donationRegistrationService.UpdateRegistrationStatusAsync(registrationId, 4);
+            if (!result)
+            {
+                return NotFound($"No registration found with ID {registrationId} or failed to cancel registration.");
+            }
+            return Ok("Registration cancelled successfully.");
+        }
     }
 }
