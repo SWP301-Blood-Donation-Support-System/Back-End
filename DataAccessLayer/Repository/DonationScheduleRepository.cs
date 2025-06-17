@@ -21,11 +21,13 @@ namespace DataAccessLayer.Repository
 
         public async Task<IEnumerable<DonationSchedule>> GetUpcomingSchedules()
         {
+            var yesterday = DateTime.UtcNow.Date.AddDays(-1);
             return await _context.DonationSchedules
-                                 .Where(s => s.ScheduleDate >= DateTime.UtcNow && !s.IsDeleted)
+                                 .Where(s => s.ScheduleDate > yesterday && !s.IsDeleted)
                                  .OrderBy(s => s.ScheduleDate)
                                  .ToListAsync();
         }
+
         public async Task<DonationSchedule> getSchedulebyDateAsync(DateOnly date)
         {
             return await _context.DonationSchedules
