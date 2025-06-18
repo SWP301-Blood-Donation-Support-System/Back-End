@@ -60,19 +60,21 @@ namespace DataAccessLayer.Repository
             return Task.FromResult(entity);
         }
 
-        public Task<bool> SaveChangesAsync()
+        // In GenericRepository.cs
+        public async Task<bool> SaveChangesAsync()
         {
             try
             {
-                return Task.FromResult(_context.SaveChanges() > 0);
+                return await _context.SaveChangesAsync() > 0;
             }
             catch (DbUpdateException ex)
             {
                 string errorMessage = ex.InnerException?.Message ?? ex.Message;
-                // Log the exception (not implemented here)
+                // Log the exception
                 throw new Exception($"Database error: {errorMessage}", ex);
             }
         }
+
 
         public Task<T> UpdateAsync(T entity)
         {

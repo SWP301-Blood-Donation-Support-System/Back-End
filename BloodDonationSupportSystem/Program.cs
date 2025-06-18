@@ -138,7 +138,7 @@ var app = builder.Build();
 // ====================== MIDDLEWARE PIPELINE ====================== //
 if (app.Environment.IsDevelopment())
 {
-    
+
 }
 app.UseSwagger();
 app.UseSwaggerUI();

@@ -9,64 +9,38 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.Repository
 {
-    /// <summary>
-    /// Repository xử lý dữ liệu liên quan đến đơn vị máu (BloodUnit).
-    /// </summary>
-    public class BloodUnitRepository : GenericRepository<BloodUnit>, IBloodUnitRepository
+    public class BloodUnitRepository: GenericRepository<BloodUnit>, IBloodUnitRepository
     {
         private readonly BloodDonationDbContext _context;
-
-        /// <summary>
-        /// Hàm khởi tạo repository với DbContext.
-        /// </summary>
         public BloodUnitRepository(BloodDonationDbContext context) : base(context)
         {
             _context = context;
         }
 
-        /// <summary>
-        /// Lấy danh sách đơn vị máu theo thành phần máu (ComponentId).
-        /// </summary>
         public async Task<IEnumerable<BloodUnit>> GetUnitsByBloodComponentIdAsync(int bloodComponentId)
         {
             return await _context.BloodUnits
-                .Where(p => p.ComponentId == bloodComponentId)
-                .ToListAsync();
+                .Where(p=>p.ComponentId==bloodComponentId).ToListAsync();
         }
 
-        /// <summary>
-        /// Lấy danh sách đơn vị máu theo nhóm máu (BloodTypeId).
-        /// </summary>
         public async Task<IEnumerable<BloodUnit>> GetUnitsByBloodTypeIdAsync(int bloodTypeId)
         {
             return await _context.BloodUnits
-                .Where(p => p.BloodTypeId == bloodTypeId)
-                .ToListAsync();
+                .Where(p=>p.BloodTypeId==bloodTypeId).ToListAsync();
         }
 
-        /// <summary>
-        /// Lấy danh sách đơn vị máu theo ID phiếu hiến máu (DonationRecordId).
-        /// </summary>
         public async Task<IEnumerable<BloodUnit>> GetUnitsByRecordIdAsync(int recordId)
         {
             return await _context.BloodUnits
-                .Where(p => p.DonationRecordId == recordId)
-                .ToListAsync();
+                .Where(p=>p.DonationRecordId==recordId).ToListAsync();
         }
 
-        /// <summary>
-        /// Lấy danh sách đơn vị máu theo trạng thái (BloodUnitStatusId).
-        /// </summary>
         public async Task<IEnumerable<BloodUnit>> GetUnitsByStatusAsync(int bloodUnitStatusId)
         {
             return await _context.BloodUnits
-                .Where(p => p.BloodUnitStatusId == bloodUnitStatusId)
-                .ToListAsync();
+                .Where(p => p.BloodUnitStatusId == bloodUnitStatusId).ToListAsync();
         }
 
-        /// <summary>
-        /// Cập nhật trạng thái của một đơn vị máu.
-        /// </summary>
         public Task<bool> UpdateUnitStatusAsync(int unitId, int bloodUnitStatusId)
         {
             var unit = _context.BloodUnits.Find(unitId);
@@ -74,7 +48,6 @@ namespace DataAccessLayer.Repository
             {
                 return Task.FromResult(false);
             }
-
             unit.BloodUnitStatusId = bloodUnitStatusId;
             _context.BloodUnits.Update(unit);
             return Task.FromResult(true);
