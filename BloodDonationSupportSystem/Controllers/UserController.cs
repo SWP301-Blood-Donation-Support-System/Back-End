@@ -145,6 +145,7 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest("Invalid role ID.");
             }
+
             var users = await _userServices.GetUsersByRoleAsync(roleId);
             return Ok(users);
         }

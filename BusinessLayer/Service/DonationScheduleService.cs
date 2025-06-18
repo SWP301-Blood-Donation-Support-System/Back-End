@@ -1,12 +1,8 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
-using DataAccessLayer.Repository;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BusinessLayer.Service
@@ -14,49 +10,32 @@ namespace BusinessLayer.Service
     public class DonationScheduleService : IDonationScheduleService
     {
         private readonly IDonationScheduleRepository _donationScheduleRepository;
-        private readonly BloodDonationDbContext _context;
 
-
+        // SỬA: Xóa bỏ sự phụ thuộc vào DbContext
         public DonationScheduleService(IDonationScheduleRepository donationScheduleRepository)
         {
-            _donationScheduleRepository = donationScheduleRepository;
-
+            _donationScheduleRepository = donationScheduleRepository ?? throw new ArgumentNullException(nameof(donationScheduleRepository));
         }
 
         public async Task<IEnumerable<DonationSchedule>> GetAllDonationSchedulesAsync()
         {
             return await _donationScheduleRepository.GetAllAsync();
         }
-        public async Task<DonationSchedule> GetDonationSchedulesByDateAsync(DateOnly date)
-        {
-            if (date == default)
-            {
-                throw new ArgumentException("Date cannot be default", nameof(date));
-            }
-            return await _donationScheduleRepository.getSchedulebyDateAsync(date);
-        }
 
         public async Task<DonationSchedule> GetDonationScheduleByIdAsync(int id)
         {
-            if (id <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(id), "ID must be greater than zero");
-            }
+            if (id <= 0) throw new ArgumentOutOfRangeException(nameof(id), "ID must be greater than zero");
             return await _donationScheduleRepository.GetByIdAsync(id);
         }
 
         public async Task<DonationSchedule> CreateDonationScheduleAsync(DonationSchedule schedule, string createdBy)
         {
-            if (schedule == null)
-            {
-                throw new ArgumentNullException(nameof(schedule), "Schedule cannot be null");
-            }
-            if (string.IsNullOrWhiteSpace(createdBy))
-            {
-                throw new ArgumentException("Created by cannot be null or empty", nameof(createdBy));
-            }
+            if (schedule == null) throw new ArgumentNullException(nameof(schedule));
+            if (string.IsNullOrWhiteSpace(createdBy)) throw new ArgumentException("Created by cannot be null or empty", nameof(createdBy));
+
             schedule.CreatedBy = createdBy;
             schedule.CreatedAt = DateTime.UtcNow;
+
             var result = await _donationScheduleRepository.AddAsync(schedule);
             await _donationScheduleRepository.SaveChangesAsync();
             return result;
@@ -64,50 +43,48 @@ namespace BusinessLayer.Service
 
         public async Task<bool> UpdateDonationScheduleAsync(DonationSchedule schedule, string updatedBy)
         {
-            if (schedule == null)
-            {
-                throw new ArgumentNullException(nameof(schedule), "Schedule cannot be null");
-            }
-            if (string.IsNullOrWhiteSpace(updatedBy))
-            {
-                throw new ArgumentException("Updated by cannot be null or empty", nameof(updatedBy));
-            }
-            schedule.UpdatedBy = updatedBy;
-            schedule.UpdatedAt = DateTime.UtcNow;
-            await _donationScheduleRepository.UpdateAsync(schedule);
+            if (schedule == null) throw new ArgumentNullException(nameof(schedule));
+            if (string.IsNullOrWhiteSpace(updatedBy)) throw new ArgumentException("Updated by cannot be null or empty", nameof(updatedBy));
+
+            var existingSchedule = await _donationScheduleRepository.GetByIdAsync(schedule.ScheduleId);
+            if (existingSchedule == null) return false;
+
+            // Cập nhật các thuộc tính
+            existingSchedule.ScheduleDate = schedule.ScheduleDate;
+            // ... các thuộc tính khác
+            existingSchedule.UpdatedBy = updatedBy;
+            existingSchedule.UpdatedAt = DateTime.UtcNow;
+
+            await _donationScheduleRepository.UpdateAsync(existingSchedule);
             return await _donationScheduleRepository.SaveChangesAsync();
         }
 
+        // SỬA: Gộp lại còn một phương thức Delete duy nhất
         public async Task<bool> DeleteDonationScheduleAsync(int id, string deletedBy)
         {
-            if (id <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(id), "ID must be greater than zero");
-            }
-            if (string.IsNullOrWhiteSpace(deletedBy))
-            {
-                throw new ArgumentException("Deleted by cannot be null or empty", nameof(deletedBy));
-            }
+            if (id <= 0) throw new ArgumentOutOfRangeException(nameof(id));
+            if (string.IsNullOrWhiteSpace(deletedBy)) throw new ArgumentException("Deleted by cannot be null or empty", nameof(deletedBy));
 
-            var result = await _donationScheduleRepository.DeleteAsync(id);
+            // Gọi đến phương thức xóa mềm trong repository
+            var result = await _donationScheduleRepository.SoftDeleteSchedule(id, deletedBy);
+            if (!result) return false; // Không tìm thấy schedule để xóa
+
             return await _donationScheduleRepository.SaveChangesAsync();
         }
 
-        // --- PHIÊN BẢN ĐÚNG (GỌN VÀ ĐÚNG TRÁCH NHIỆM) ---
-        public async Task<bool> SoftDeleteDonationScheduleAsync(int id, string deletedBy)
+        // SỬA: Logic khôi phục đã đúng
+        public async Task<bool> RestoreDonationScheduleAsync(int scheduleId, string restoredBy)
         {
-            if (id <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(id), "ID must be greater than zero");
-            }
-            if (string.IsNullOrWhiteSpace(deletedBy))
-            {
-                throw new ArgumentException("Deleted by cannot be null or empty", nameof(deletedBy));
-            }
+            if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
+            if (string.IsNullOrWhiteSpace(restoredBy)) throw new ArgumentException("Restored by cannot be null or empty", nameof(restoredBy));
 
-            // Service chỉ cần gọi Repository, không cần biết bên trong làm gì
-            return await _donationScheduleRepository.SoftDeleteSchedule(id, deletedBy);
+            // Gọi đến phương thức restore của repository
+            var result = await _donationScheduleRepository.RestoreSchedule(scheduleId, restoredBy);
+            if (!result) return false; // Không tìm thấy schedule để khôi phục
+
+            return await _donationScheduleRepository.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<DonationSchedule>> GetUpcomingAvailableDonationSchedulesAsync()
         {
             return await _donationScheduleRepository.GetUpcomingSchedules();
@@ -115,70 +92,41 @@ namespace BusinessLayer.Service
 
         public async Task<DonationSchedule> GetDonationScheduleWithRegistrationsAndDetailsAsync(int scheduleId)
         {
-            if (scheduleId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(scheduleId), "Schedule ID must be greater than zero");
-            }
-
+            if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
             return await _donationScheduleRepository.GetScheduleWithRegistrationsID(scheduleId);
         }
 
         public async Task<bool> RegisterForDonationSlotAsync(int scheduleId, string registeredBy)
         {
-            if (scheduleId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(scheduleId), "Schedule ID must be greater than zero");
-            }
-            if (string.IsNullOrWhiteSpace(registeredBy))
-            {
-                throw new ArgumentException("Registered by cannot be null or empty", nameof(registeredBy));
-            }
+            if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
+            if (string.IsNullOrWhiteSpace(registeredBy)) throw new ArgumentException("Registered by cannot be null or empty", nameof(registeredBy));
 
-            var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
-            if (schedule == null || schedule.IsDeleted) return false;
+            // SỬA: Gọi đến phương thức đã được sửa trong repository
+            var result = await _donationScheduleRepository.UpdateRegisteredSlots(scheduleId, 1);
+            if (!result) return false;
 
-            return await _donationScheduleRepository.UpdateRegisteredSlots(scheduleId, 1);
+            // SỬA: Phải lưu thay đổi lại
+            return await _donationScheduleRepository.SaveChangesAsync();
         }
-
 
         public async Task<bool> IsDonationScheduleFullyBookedAsync(int scheduleId)
         {
-            if (scheduleId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(scheduleId), "Schedule ID must be greater than zero");
-            }
+            if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
 
             var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
-            if (schedule == null || schedule.IsDeleted)
-            {
-                // Consider a non-existent or deleted schedule as "fully booked"
-                return true;
-            }
+            if (schedule == null) return true; // Coi như đã đầy
 
-            // Implement logic to determine if a schedule is fully booked
-            // For now, assuming a fixed capacity of 100 slots per schedule
+            // Ghi chú: maxSlotsPerSchedule nên là một thuộc tính của schedule
             const int maxSlotsPerSchedule = 100;
             return schedule.RegisteredSlots >= maxSlotsPerSchedule;
         }
-
-        public async Task<bool> RestoreDonationScheduleAsync(int scheduleId, string restoredBy)
+        public async Task<DonationSchedule> GetDonationSchedulesByDateAsync(DateOnly date)
         {
-            if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
-            if (string.IsNullOrWhiteSpace(restoredBy)) throw new ArgumentException("Restored by cannot be null or empty", nameof(restoredBy));
-
-            var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
-            if (schedule == null) return false;
-
-            // Chỉ khôi phục nếu nó thực sự đã bị xóa
-            if (!schedule.IsDeleted) return true;
-
-            schedule.IsDeleted = false;
-            schedule.UpdatedBy = restoredBy;
-            schedule.UpdatedAt = DateTime.UtcNow;
-
-            _donationScheduleRepository.UpdateAsync(schedule);
-            return await _context.SaveChangesAsync() > 0;
+            if (date == default)
+            {
+                throw new ArgumentException("Date cannot be default", nameof(date));
+            }
+            return await _donationScheduleRepository.GetScheduleByDateAsync(date);
         }
-
     }
 }

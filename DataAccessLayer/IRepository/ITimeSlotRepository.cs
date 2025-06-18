@@ -10,6 +10,5 @@ namespace DataAccessLayer.IRepository
      public interface ITimeSlotRepository : IGenericRepository<TimeSlot>
      {
         Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync();
-        Task<TimeSlot> GetTimeSlotByIdAsync(int timeSlotId);
     }
 }

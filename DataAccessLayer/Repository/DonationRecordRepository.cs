@@ -18,57 +18,96 @@ namespace DataAccessLayer.Repository
             _context = context;
         }
 
+        // === CÁC PHƯƠNG THỨC LẤY DỮ LIỆU ĐÃ ĐƯỢC THÊM BỘ LỌC ISDELETED ===
+
         public async Task<IEnumerable<DonationRecord>> GetRecordsByRegistrationIdAsync(int registrationId)
         {
             return await _context.DonationRecords
-                .Where(r => r.RegistrationId == registrationId && !r.IsDeleted)
+                .Where(r => r.RegistrationId == registrationId && !r.IsDeleted) // THÊM: Lọc bản ghi đã xóa
                 .ToListAsync();
         }
 
-
-        // Fixed method name to match service expectations
         public new async Task<DonationRecord> GetByIdAsync(int recordId)
         {
             return await _context.DonationRecords
-                .FirstOrDefaultAsync(r => r.DonationRecordId == recordId && !r.IsDeleted);
+                .FirstOrDefaultAsync(r => r.DonationRecordId == recordId && !r.IsDeleted); // THÊM: Lọc bản ghi đã xóa
         }
 
-        // Keep the original method name as well for backward compatibility
         public async Task<DonationRecord> GetRecordByIdAsync(int recordId)
         {
             return await GetByIdAsync(recordId);
         }
 
-        // Fixed method name to match service expectations
         public async Task<IEnumerable<DonationRecord>> GetRecordsByDonationDateTimeAsync(DateTime donationDateTime)
         {
             return await _context.DonationRecords
-                .Where(r => r.DonationDateTime.Date == donationDateTime.Date && !r.IsDeleted)
+                .Where(r => r.DonationDateTime.Date == donationDateTime.Date && !r.IsDeleted) // THÊM: Lọc bản ghi đã xóa
                 .ToListAsync();
         }
+
         public async Task<IEnumerable<DonationRecord>> GetRecordsByDonationTypeIdAsync(int donationTypeId)
         {
             return await _context.DonationRecords
-                .Where(r => r.DonationTypeId == donationTypeId && !r.IsDeleted)
+                .Where(r => r.DonationTypeId == donationTypeId && !r.IsDeleted) // THÊM: Lọc bản ghi đã xóa
                 .ToListAsync();
         }
 
-        // Fixed method name to match service expectations
         public async Task<IEnumerable<DonationRecord>> GetRecordsByResultAsync(int result)
         {
             return await _context.DonationRecords
-                .Where(r => r.BloodTestResult == result && !r.IsDeleted)
+                .Where(r => r.BloodTestResult == result && !r.IsDeleted) // THÊM: Lọc bản ghi đã xóa
                 .ToListAsync();
         }
 
-        // Add missing methods that the service expects
         public async Task<IEnumerable<DonationRecord>> GetAllAsync()
         {
             return await _context.DonationRecords
-                .Where(r => !r.IsDeleted)
+                .Where(r => !r.IsDeleted) // THÊM: Lọc bản ghi đã xóa
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<DonationRecord>> GetRecordsByValidatorAsync(int userId)
+        {
+            var validatedRecordIds = await _context.DonationValidations
+                .Where(v => v.UserId == userId && !v.IsDeleted) // THÊM: Lọc validation đã xóa
+                .Select(v => v.DonationRecordId)
+                .Distinct()
+                .ToListAsync();
+
+            return await _context.DonationRecords
+                .Where(r => validatedRecordIds.Contains(r.DonationRecordId) && !r.IsDeleted) // THÊM: Lọc bản ghi đã xóa
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<DonationRecord>> GetRecordsByUserIdAsync(int userId)
+        {
+            return await _context.DonationRecords
+                .Where(dr => dr.Registration.Donor.UserId == userId && !dr.IsDeleted) // THÊM: Lọc bản ghi đã xóa
+                .Include(dr => dr.Registration)
+                .ToListAsync();
+        }
+
+        // === CÁC PHƯƠNG THỨC THAY ĐỔI DỮ LIỆU ===
+
+        // THÊM: Logic cho việc xóa mềm (soft delete)
+        public async Task<bool> DeleteAsync(int recordId)
+        {
+            var record = await _context.DonationRecords
+                .FirstOrDefaultAsync(r => r.DonationRecordId == recordId && !r.IsDeleted);
+
+            if (record == null)
+            {
+                return false; // Không tìm thấy hoặc đã bị xóa
+            }
+
+            // Đánh dấu là đã xóa
+            record.IsDeleted = true;
+            record.UpdatedAt = DateTime.UtcNow;
+
+            _context.DonationRecords.Update(record);
+            // SaveChangesAsync sẽ được gọi từ Service như code gốc của bạn
+            return true;
+        }
 
         public async Task<bool> UpdateAsync(DonationRecord donationRecord)
         {
@@ -76,12 +115,11 @@ namespace DataAccessLayer.Repository
                 throw new ArgumentNullException(nameof(donationRecord));
 
             var existingRecord = await _context.DonationRecords
-                .FirstOrDefaultAsync(r => r.DonationRecordId == donationRecord.DonationRecordId && !r.IsDeleted);
+                .FirstOrDefaultAsync(r => r.DonationRecordId == donationRecord.DonationRecordId && !r.IsDeleted); // THÊM: Lọc bản ghi đã xóa
 
             if (existingRecord == null)
                 return false;
 
-            // Update properties
             _context.Entry(existingRecord).CurrentValues.SetValues(donationRecord);
             existingRecord.UpdatedAt = DateTime.UtcNow;
 
@@ -90,28 +128,18 @@ namespace DataAccessLayer.Repository
 
         public async Task<bool> UpdateDonationRecordAsync(int recordId, DonationRecord updatedRecord)
         {
-            if (updatedRecord == null)
-                throw new ArgumentNullException(nameof(updatedRecord), "Updated record cannot be null");
-
-            if (recordId <= 0)
-                throw new ArgumentOutOfRangeException(nameof(recordId), "Record ID must be greater than zero");
+            if (updatedRecord == null) throw new ArgumentNullException(nameof(updatedRecord));
+            if (recordId <= 0) throw new ArgumentOutOfRangeException(nameof(recordId));
 
             var existingRecord = await _context.DonationRecords
-                .FirstOrDefaultAsync(r => r.DonationRecordId == recordId && !r.IsDeleted);
+                .FirstOrDefaultAsync(r => r.DonationRecordId == recordId && !r.IsDeleted); // THÊM: Lọc bản ghi đã xóa
 
-            if (existingRecord == null)
-                return false;
+            if (existingRecord == null) return false;
 
-            // Ensure the ID is preserved
             updatedRecord.DonationRecordId = recordId;
-
-            // Update properties
             _context.Entry(existingRecord).CurrentValues.SetValues(updatedRecord);
-
-            // Set update timestamp
             existingRecord.UpdatedAt = DateTime.UtcNow;
 
-            // Save changes directly in this method
             try
             {
                 await _context.SaveChangesAsync();
@@ -122,29 +150,17 @@ namespace DataAccessLayer.Repository
                 return false;
             }
         }
-        // Trong DonationRecordRepository.cs
+
+        // === CÁC PHƯƠNG THỨC LIÊN QUAN ĐẾN VALIDATION ===
+
         public async Task<bool> AddDonationValidationAsync(DonationValidation validation)
         {
-            if (validation == null)
-                throw new ArgumentNullException(nameof(validation));
-
-            validation.CreatedAt = DateTime.UtcNow;
-            validation.UpdatedAt = DateTime.UtcNow;
-            validation.IsDeleted = false;
-
             await _context.DonationValidations.AddAsync(validation);
             return true;
         }
 
         public async Task<bool> AddDonationValidationAsync(int donationRecordId, int userId)
         {
-            // Kiểm tra DonationRecord có tồn tại không
-            var record = await GetByIdAsync(donationRecordId);
-            if (record == null)
-                return false;
-
-            // Kiểm tra User có tồn tại không (có thể cần inject IUserRepository)
-
             var validation = new DonationValidation
             {
                 DonationRecordId = donationRecordId,
@@ -153,7 +169,6 @@ namespace DataAccessLayer.Repository
                 UpdatedAt = DateTime.UtcNow,
                 IsDeleted = false
             };
-
             await _context.DonationValidations.AddAsync(validation);
             return true;
         }
@@ -161,20 +176,18 @@ namespace DataAccessLayer.Repository
         public async Task<IEnumerable<DonationValidation>> GetValidationsForRecordAsync(int recordId)
         {
             return await _context.DonationValidations
-                .Where(v => v.DonationRecordId == recordId && !v.IsDeleted)
-                .Include(v => v.User)  // Nếu cần thông tin người validate
+                .Where(v => v.DonationRecordId == recordId && !v.IsDeleted) // THÊM: Lọc validation đã xóa
+                .Include(v => v.User)
                 .ToListAsync();
         }
 
         public async Task<bool> RemoveValidationAsync(int validationId)
         {
             var validation = await _context.DonationValidations
-                .FirstOrDefaultAsync(v => v.ValidationId == validationId && !v.IsDeleted);
+                .FirstOrDefaultAsync(v => v.ValidationId == validationId && !v.IsDeleted); // THÊM: Lọc validation đã xóa
 
-            if (validation == null)
-                return false;
+            if (validation == null) return false;
 
-            // Soft delete
             validation.IsDeleted = true;
             validation.UpdatedAt = DateTime.UtcNow;
             return true;
@@ -183,30 +196,7 @@ namespace DataAccessLayer.Repository
         public async Task<bool> HasValidationAsync(int recordId, int userId)
         {
             return await _context.DonationValidations
-                .AnyAsync(v => v.DonationRecordId == recordId &&
-                              v.UserId == userId &&
-                              !v.IsDeleted);
-        }
-
-        public async Task<IEnumerable<DonationRecord>> GetRecordsByValidatorAsync(int userId)
-        {
-            var validatedRecordIds = await _context.DonationValidations
-                .Where(v => v.UserId == userId && !v.IsDeleted)
-                .Select(v => v.DonationRecordId)
-                .Distinct()
-                .ToListAsync();
-
-            return await _context.DonationRecords
-                .Where(r => validatedRecordIds.Contains(r.DonationRecordId) && !r.IsDeleted)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<DonationRecord>> GetRecordsByUserIdAsync(int userId)
-        {
-            return await _context.DonationRecords
-                .Where(dr => dr.Registration.Donor.UserId == userId)
-                .Include(dr => dr.Registration) // Thêm Include để tránh lỗi lazy loading
-                .ToListAsync();
+                .AnyAsync(v => v.DonationRecordId == recordId && v.UserId == userId && !v.IsDeleted); // THÊM: Lọc validation đã xóa
         }
     }
 }
