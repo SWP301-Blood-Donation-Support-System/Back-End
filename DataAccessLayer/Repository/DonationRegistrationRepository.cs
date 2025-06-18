@@ -42,7 +42,7 @@ namespace DataAccessLayer.Repository
         public async Task<bool> UpdateRegistrationStatusAsync(int registrationId, int statusId)
         {
             var registration = await _context.DonationRegistrations.FindAsync(registrationId);
-            if (registration == null)
+            if (registration == null || registration.IsDeleted)
             {
                 return false;
             }

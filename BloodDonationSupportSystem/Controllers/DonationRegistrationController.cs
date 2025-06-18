@@ -112,20 +112,27 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(registrations);
         }
       
-        [HttpPut("updateRegistrationStatus/{registrationId}/{statusId}")]
-        public async Task<IActionResult> UpdateRegistrationStatus(int registrationId, int statusId)
+        [HttpPut("updateRegistrationStatus")]
+        public async Task<IActionResult> UpdateRegistrationStatus([FromBody] UpdateRegistrationStatusDTO request)
         {
-            if (registrationId <= 0 || statusId <= 0)
+            if (request == null)
+            {
+                return BadRequest("Request data is required.");
+            }
+
+            if (request.RegistrationId <= 0 || request.StatusId <= 0)
             {
                 return BadRequest("Invalid registration ID or status ID.");
             }
-            var result = await _donationRegistrationService.UpdateRegistrationStatusAsync(registrationId, statusId);
+
+            var result = await _donationRegistrationService.UpdateRegistrationStatusAsync(request.RegistrationId, request.StatusId);
             if (!result)
             {
-                return NotFound($"No registration found with ID {registrationId} or failed to update status.");
+                return NotFound($"No registration found with ID {request.RegistrationId} or failed to update status.");
             }
             return Ok("Registration status updated successfully.");
         }
+
         [HttpPatch("softDeleteRegistration/{registrationId}")]
         public async Task<IActionResult> SoftDeleteRegistration(int registrationId)
         {
@@ -140,19 +147,24 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Registration deleted successfully.");
         }
-        [HttpPut("cancelRegistration/{registrationId}")]
-        public async Task<IActionResult> CancelRegistration(int registrationId)
+        [HttpPut("cancelRegistration")]
+        public async Task<IActionResult> CancelRegistration([FromBody] UpdateRegistrationStatusDTO request)
         {
-            if (registrationId <= 0)
+            if (request == null)
+            {
+                return BadRequest("Request data is required.");
+            }
+
+            if (request.RegistrationId <= 0)
             {
                 return BadRequest("Invalid registration ID.");
             }
 
             // Status ID 4 represents cancelled status
-            var result = await _donationRegistrationService.UpdateRegistrationStatusAsync(registrationId, 4);
+            var result = await _donationRegistrationService.UpdateRegistrationStatusAsync(request.RegistrationId, 4);
             if (!result)
             {
-                return NotFound($"No registration found with ID {registrationId} or failed to cancel registration.");
+                return NotFound($"No registration found with ID {request.RegistrationId} or failed to cancel registration.");
             }
             return Ok("Registration cancelled successfully.");
         }
