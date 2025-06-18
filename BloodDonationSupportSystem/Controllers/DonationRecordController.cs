@@ -60,6 +60,42 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Record added");
         }
+        
+        [HttpPut("{recordId}")]
+        public async Task<IActionResult> UpdateRecord(int recordId, [FromBody] DonationRecordUpdateDTO updateDTO)
+        {
+            if (recordId <= 0)
+            {
+                return BadRequest("Invalid record ID.");
+            }
+
+            if (recordId != updateDTO.RecordId)
+            {
+                return BadRequest("Record ID mismatch.");
+            }
+
+            try
+            {
+                var result = await _donationRecordService.UpdateRecordByFieldsAsync(updateDTO);
+                if (result)
+                {
+                    return Ok(new { status = "success", message = "Record updated successfully." });
+                }
+                else
+                {
+                    return NotFound("Record not found or could not be updated.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
+        }
+        
         [HttpPost("{recordId}/validate")]
         public async Task<IActionResult> ValidateRecord(int recordId, [FromBody] DonationValidationDTO validationDTO)
         {
