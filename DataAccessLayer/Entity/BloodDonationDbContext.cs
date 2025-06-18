@@ -344,6 +344,15 @@ public partial class BloodDonationDbContext : DbContext
                 .HasConstraintName("FK_DonationRecord_Registration");
         });
 
+        // Nó sẽ tự động lọc tất cả các bản ghi DonationRecord có IsDeleted = true
+        modelBuilder.Entity<DonationRecord>().HasQueryFilter(dr => !dr.IsDeleted);
+        modelBuilder.Entity<DonationRegistration>().HasQueryFilter(reg => !reg.IsDeleted);
+        modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+        modelBuilder.Entity<TimeSlot>().HasQueryFilter(ts => !ts.IsDeleted);
+        modelBuilder.Entity<DonationSchedule>().HasQueryFilter(ds => !ds.IsDeleted);
+
+
+
         modelBuilder.Entity<DonationRegistration>(entity =>
         {
             entity.HasKey(e => e.RegistrationId).HasName("PK__Donation__6EF58830F5DEBF2A");

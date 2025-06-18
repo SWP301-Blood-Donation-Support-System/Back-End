@@ -10,7 +10,7 @@ namespace BusinessLayer.IService
     public interface ITimeSlotServices
     {
         Task<IEnumerable<TimeSlot>> GetAllTimeSlotsAsync();
-        Task<TimeSlot> GetTimeSlotByIdAsync(int timeSlotId);
+        Task<TimeSlot> GetTimeSlotByIdAsync(int id);
         Task<IEnumerable<TimeSlot>> GetAvailableTimeSlotsAsync();
         Task<bool> AddTimeSlotAsync(TimeSlot timeSlot);
         Task<bool> UpdateTimeSlotAsync(TimeSlot timeSlot);

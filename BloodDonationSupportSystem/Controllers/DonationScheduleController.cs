@@ -156,7 +156,7 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 string deletedBy = User.Identity?.Name ?? "System";
                 
-                var success = await _donationScheduleService.SoftDeleteDonationScheduleAsync(id, deletedBy);
+                var success = await _donationScheduleService.DeleteDonationScheduleAsync(id, deletedBy);
 
                 if (!success)
                 {
