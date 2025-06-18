@@ -2,6 +2,7 @@
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
 using DataAccessLayer.Repository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,13 @@ namespace BusinessLayer.Service
     public class DonationScheduleService : IDonationScheduleService
     {
         private readonly IDonationScheduleRepository _donationScheduleRepository;
+        private readonly BloodDonationDbContext _context;
+
 
         public DonationScheduleService(IDonationScheduleRepository donationScheduleRepository)
         {
             _donationScheduleRepository = donationScheduleRepository;
+
         }
 
         public async Task<IEnumerable<DonationSchedule>> GetAllDonationSchedulesAsync()
@@ -89,6 +93,7 @@ namespace BusinessLayer.Service
             return await _donationScheduleRepository.SaveChangesAsync();
         }
 
+        // --- PHIÊN BẢN ĐÚNG (GỌN VÀ ĐÚNG TRÁCH NHIỆM) ---
         public async Task<bool> SoftDeleteDonationScheduleAsync(int id, string deletedBy)
         {
             if (id <= 0)
@@ -100,20 +105,9 @@ namespace BusinessLayer.Service
                 throw new ArgumentException("Deleted by cannot be null or empty", nameof(deletedBy));
             }
 
-            var schedule = await _donationScheduleRepository.GetByIdAsync(id);
-            if (schedule == null)
-            {
-                return false;
-            }
-
-            schedule.IsDeleted = true;
-            schedule.UpdatedBy = deletedBy;
-            schedule.UpdatedAt = DateTime.UtcNow;
-
-            await _donationScheduleRepository.UpdateAsync(schedule);
-            return await _donationScheduleRepository.SaveChangesAsync();
+            // Service chỉ cần gọi Repository, không cần biết bên trong làm gì
+            return await _donationScheduleRepository.SoftDeleteSchedule(id, deletedBy);
         }
-
         public async Task<IEnumerable<DonationSchedule>> GetUpcomingAvailableDonationSchedulesAsync()
         {
             return await _donationScheduleRepository.GetUpcomingSchedules();
@@ -141,23 +135,11 @@ namespace BusinessLayer.Service
             }
 
             var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
-            if (schedule == null || schedule.IsDeleted)
-            {
-                return false;
-            }
+            if (schedule == null || schedule.IsDeleted) return false;
 
-            // Implement business logic for registering for a donation slot
-            // This would typically involve creating a DonationRegistration record
-            // through a separate repository and service
-
-            // For now, just increment the registered slots count
-            schedule.RegisteredSlots++;
-            schedule.UpdatedBy = registeredBy;
-            schedule.UpdatedAt = DateTime.UtcNow;
-
-            await _donationScheduleRepository.UpdateAsync(schedule);
-            return await _donationScheduleRepository.SaveChangesAsync();
+            return await _donationScheduleRepository.UpdateRegisteredSlots(scheduleId, 1);
         }
+
 
         public async Task<bool> IsDonationScheduleFullyBookedAsync(int scheduleId)
         {
@@ -181,34 +163,22 @@ namespace BusinessLayer.Service
 
         public async Task<bool> RestoreDonationScheduleAsync(int scheduleId, string restoredBy)
         {
-            if (scheduleId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(scheduleId), "Schedule ID must be greater than zero");
-            }
-            if (string.IsNullOrWhiteSpace(restoredBy))
-            {
-                throw new ArgumentException("Restored by cannot be null or empty", nameof(restoredBy));
-            }
+            if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
+            if (string.IsNullOrWhiteSpace(restoredBy)) throw new ArgumentException("Restored by cannot be null or empty", nameof(restoredBy));
 
             var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
-            if (schedule == null)
-            {
-                return false;
-            }
+            if (schedule == null) return false;
 
-            if (!schedule.IsDeleted)
-            {
-                // Schedule is not deleted, no need to restore
-                return true;
-            }
+            // Chỉ khôi phục nếu nó thực sự đã bị xóa
+            if (!schedule.IsDeleted) return true;
 
             schedule.IsDeleted = false;
             schedule.UpdatedBy = restoredBy;
             schedule.UpdatedAt = DateTime.UtcNow;
 
-            await _donationScheduleRepository.UpdateAsync(schedule);
-            return await _donationScheduleRepository.SaveChangesAsync();
+            _donationScheduleRepository.UpdateAsync(schedule);
+            return await _context.SaveChangesAsync() > 0;
         }
-      
+
     }
 }

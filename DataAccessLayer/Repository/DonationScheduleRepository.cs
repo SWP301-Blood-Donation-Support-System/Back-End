@@ -21,11 +21,13 @@ namespace DataAccessLayer.Repository
 
         public async Task<IEnumerable<DonationSchedule>> GetUpcomingSchedules()
         {
+            var yesterday = DateTime.UtcNow.Date.AddDays(-1);
             return await _context.DonationSchedules
-                                 .Where(s => s.ScheduleDate >= DateTime.UtcNow && !s.IsDeleted)
+                                 .Where(s => s.ScheduleDate > yesterday && !s.IsDeleted)
                                  .OrderBy(s => s.ScheduleDate)
                                  .ToListAsync();
         }
+
         public async Task<DonationSchedule> getSchedulebyDateAsync(DateOnly date)
         {
             return await _context.DonationSchedules
@@ -75,28 +77,19 @@ namespace DataAccessLayer.Repository
         public async Task<bool> UpdateRegisteredSlots(int scheduleId, int change)
         {
             var schedule = await _context.DonationSchedules.FindAsync(scheduleId);
-            if (schedule == null)
-            {
-                return false;
-            }
+            if (schedule == null) return false;
 
-            // Prevent negative values
-            if (schedule.RegisteredSlots + change < 0)
-            {
-                return false;
-            }
+            if (schedule.RegisteredSlots + change < 0) return false;
 
-            // Check against max capacity
             var maxCapacity = await GetMaxCapacity(scheduleId);
-            if (schedule.RegisteredSlots + change > maxCapacity)
-            {
-                return false;
-            }
+            if (schedule.RegisteredSlots + change > maxCapacity) return false;
 
             schedule.RegisteredSlots += change;
             schedule.UpdatedAt = DateTime.UtcNow;
 
-            _context.DonationSchedules.Update(schedule);
+            //if (!string.IsNullOrEmpty(updatedBy))
+            //    schedule.UpdatedBy = updatedBy;
+
             return await _context.SaveChangesAsync() > 0;
         }
 
