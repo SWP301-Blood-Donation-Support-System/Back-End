@@ -55,8 +55,6 @@ namespace BloodDonationSupportSystem.Controllers
                     status = "failed",
                     msg = ex.Message
                 });
-
-
             }
             return Ok("Record added");
         }
@@ -113,13 +111,14 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpGet("{recordId}/validations")]
         public async Task<IActionResult> GetValidations(int recordId)
         {
-            var validations = await _donationRecordService.GetRecordsByIdAsync(recordId); // Adjusted method call
+            var validations = await _donationRecordService.GetValidationsForRecordAsync(recordId); // Fixed method call
             if (validations == null)
             {
                 return NotFound("No validations found for the given record ID.");
             }
             return Ok(validations);
         }
+        
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetRecordsByUserId(int userId)
         {
@@ -133,7 +132,8 @@ namespace BloodDonationSupportSystem.Controllers
                 return NotFound("No records found for the given user ID.");
             }
             return Ok(records);
-
         }
+        
+        // Removed duplicate UpdateRecord method
     }
 }
