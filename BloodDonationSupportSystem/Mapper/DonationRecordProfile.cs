@@ -11,6 +11,9 @@ namespace BloodDonationSupportSystem.Mapper
             CreateMap<DonationValidation, DonationValidationDTO>().ReverseMap();
 
             CreateMap<DonationRecord, DonationRecordDTO>().ReverseMap();
+
+            CreateMap<DonationRecordUpdateDTO, DonationRecord>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }
