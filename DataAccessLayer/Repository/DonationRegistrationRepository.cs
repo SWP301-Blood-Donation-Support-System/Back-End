@@ -54,7 +54,9 @@ namespace DataAccessLayer.Repository
             // FindAsync sẽ tìm cả những record đã bị soft-delete, nên cần kiểm tra thêm
             var registration = await _context.DonationRegistrations.FindAsync(registrationId);
 
+
             // THÊM: Kiểm tra xem bản ghi có tồn tại và chưa bị xóa không
+
             if (registration == null || registration.IsDeleted)
             {
                 return false;

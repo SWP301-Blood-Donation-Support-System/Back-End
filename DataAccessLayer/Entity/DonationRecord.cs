@@ -24,6 +24,7 @@ public partial class DonationRecord
     public string? Note { get; set; }
 
     public int? BloodTestResult { get; set; }
+    public string? CertificateId { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

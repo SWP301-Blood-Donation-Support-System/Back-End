@@ -83,7 +83,9 @@ namespace DataAccessLayer.Repository
 
         public async Task<bool> UpdateRegisteredSlots(int scheduleId, int change)
         {
+
             var schedule = await _context.DonationSchedules.FirstOrDefaultAsync(s => s.ScheduleId == scheduleId);
+
             if (schedule == null) return false;
 
             if (schedule.RegisteredSlots + change < 0) return false;
@@ -95,6 +97,7 @@ namespace DataAccessLayer.Repository
             schedule.UpdatedAt = DateTime.UtcNow;
 
             return true; // Xóa SaveChangesAsync()
+
         }
 
         public async Task<int> GetRegisteredSlotsCount(int scheduleId)

@@ -1,6 +1,8 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
+using DataAccessLayer.Repository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,11 +12,15 @@ namespace BusinessLayer.Service
     public class DonationScheduleService : IDonationScheduleService
     {
         private readonly IDonationScheduleRepository _donationScheduleRepository;
+        private readonly BloodDonationDbContext _context;
+
 
         // SỬA: Xóa bỏ sự phụ thuộc vào DbContext
         public DonationScheduleService(IDonationScheduleRepository donationScheduleRepository)
         {
+
             _donationScheduleRepository = donationScheduleRepository ?? throw new ArgumentNullException(nameof(donationScheduleRepository));
+
         }
 
         public async Task<IEnumerable<DonationSchedule>> GetAllDonationSchedulesAsync()
@@ -72,6 +78,7 @@ namespace BusinessLayer.Service
             return await _donationScheduleRepository.SaveChangesAsync();
         }
 
+
         // SỬA: Logic khôi phục đã đúng
         public async Task<bool> RestoreDonationScheduleAsync(int scheduleId, string restoredBy)
         {
@@ -83,8 +90,8 @@ namespace BusinessLayer.Service
             if (!result) return false; // Không tìm thấy schedule để khôi phục
 
             return await _donationScheduleRepository.SaveChangesAsync();
-        }
 
+        }
         public async Task<IEnumerable<DonationSchedule>> GetUpcomingAvailableDonationSchedulesAsync()
         {
             return await _donationScheduleRepository.GetUpcomingSchedules();
@@ -101,13 +108,16 @@ namespace BusinessLayer.Service
             if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
             if (string.IsNullOrWhiteSpace(registeredBy)) throw new ArgumentException("Registered by cannot be null or empty", nameof(registeredBy));
 
+
             // SỬA: Gọi đến phương thức đã được sửa trong repository
             var result = await _donationScheduleRepository.UpdateRegisteredSlots(scheduleId, 1);
             if (!result) return false;
 
             // SỬA: Phải lưu thay đổi lại
             return await _donationScheduleRepository.SaveChangesAsync();
+
         }
+
 
         public async Task<bool> IsDonationScheduleFullyBookedAsync(int scheduleId)
         {
@@ -122,11 +132,13 @@ namespace BusinessLayer.Service
         }
         public async Task<DonationSchedule> GetDonationSchedulesByDateAsync(DateOnly date)
         {
+
             if (date == default)
             {
                 throw new ArgumentException("Date cannot be default", nameof(date));
             }
             return await _donationScheduleRepository.GetScheduleByDateAsync(date);
         }
+
     }
 }

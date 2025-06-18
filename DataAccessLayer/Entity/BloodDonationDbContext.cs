@@ -322,6 +322,7 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.DonationTypeId).HasColumnName("DonationTypeID");
             entity.Property(e => e.DonorBloodPressure).HasMaxLength(20);
+            entity.Property(e => e.CertificateId).HasMaxLength(20);
             entity.Property(e => e.DonorTemperature).HasColumnType("decimal(4, 2)");
             entity.Property(e => e.DonorWeight).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
