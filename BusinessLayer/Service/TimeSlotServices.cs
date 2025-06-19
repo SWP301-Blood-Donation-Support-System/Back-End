@@ -40,11 +40,6 @@ namespace BusinessLayer.Service
             return await _timeSlotRepository.GetAvailableTimeSlotsAsync();
         }
 
-        public Task<TimeSlot> GetTimeSlotByIdAsync(int timeSlotId)
-        {
-            return _timeSlotRepository.GetTimeSlotByIdAsync(timeSlotId);
-        }
-
         public Task<bool> SaveChangesAsync()
         {
             return _timeSlotRepository.SaveChangesAsync();
@@ -53,6 +48,12 @@ namespace BusinessLayer.Service
         public Task<bool> UpdateTimeSlotAsync(TimeSlot timeSlot)
         {
             throw new NotImplementedException();
+        }
+
+        public Task<TimeSlot> GetTimeSlotByIdAsync(int id)
+        {
+            if (id <= 0) throw new ArgumentOutOfRangeException(nameof(id), "ID must be greater than zero");
+            return _timeSlotRepository.GetByIdAsync(id);
         }
     }
 }

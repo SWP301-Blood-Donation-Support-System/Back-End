@@ -68,6 +68,36 @@ namespace BusinessLayer.Service
             return true;
         }
 
+        public async Task<bool> UpdateRecordsAsync(int recordId, DonationRecordUpdateDTO updateDto)
+        {
+            if (updateDto == null)
+            {
+                throw new ArgumentNullException(nameof(updateDto), "Update data cannot be null");
+            }
+
+            if (recordId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(recordId), "Record ID must be greater than zero");
+            }
+
+            // Verify record exists
+            var existingRecord = await _donationRecordRepository.GetByIdAsync(recordId);
+            if (existingRecord == null)
+            {
+                return false;
+            }
+
+            // Map DTO to entity, preserving properties not included in the DTO
+            _mapper.Map(updateDto, existingRecord);
+            
+            // Update timestamp
+            existingRecord.UpdatedAt = DateTime.UtcNow;
+
+            await _donationRecordRepository.UpdateAsync(existingRecord);
+            await _donationRecordRepository.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> DeleteRecordsAsync(int recordId)
         {
             if (recordId <= 0)

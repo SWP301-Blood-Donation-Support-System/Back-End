@@ -17,45 +17,38 @@ namespace DataAccessLayer.Repository
             _context = context;
         }
 
+        // Ghi chú: T?t c? các b? l?c `IsDeleted` và `IsActive` ?ã ???c xóa nh? Global Filter.
         public async Task<User> GetByEmailAsync(string email)
         {
-
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
+
         public async Task<User> GetByUsernameAsync(string username)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == username && !u.IsDeleted);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
+
         public async Task<IEnumerable<User>> GetByRoleIdAsync(int roleId)
         {
-
-            return await _context.Users
-                .Where(u => u.RoleId == roleId && !u.IsDeleted)
-                .ToListAsync();
+            return await _context.Users.Where(u => u.RoleId == roleId).ToListAsync();
         }
 
         public async Task<IEnumerable<User>> GetByBloodTypeIdAsync(int bloodTypeId)
         {
-
-            return await _context.Users
-                .Where(u => u.BloodTypeId == bloodTypeId && u.IsActive && !u.IsDeleted)
-                .ToListAsync();
+            return await _context.Users.Where(u => u.BloodTypeId == bloodTypeId).ToListAsync();
         }
 
         public async Task<IEnumerable<User>> GetEligibleDonorsAsync()
         {
             return await _context.Users
-                .Where(u => u.NextEligibleDonationDate <= DateTime.UtcNow
-                         && u.IsActive
-                         && !u.IsDeleted)
+                .Where(u => u.NextEligibleDonationDate <= DateTime.UtcNow)
                 .ToListAsync();
         }
 
         public async Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate)
         {
-            var user = await _context.Users.FindAsync(userId);
+            // S?A: Dùng FirstOrDefaultAsync ?? tuân th? Global Filter
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
             {
                 return false;
@@ -64,31 +57,35 @@ namespace DataAccessLayer.Repository
             user.LastDonationDate = donationDate;
             user.NextEligibleDonationDate = donationDate.AddMonths(3);
             user.DonationCount++;
-            await UpdateUserDonationAvailabilityAsync(userId, 2);
             user.UpdatedAt = DateTime.UtcNow;
+
+            // GHI CHÚ: Logic g?i UpdateUserDonationAvailabilityAsync nên ???c chuy?n lên Service Layer.
+            // await UpdateUserDonationAvailabilityAsync(userId, 2); // Dòng này nên n?m ? Service
 
             _context.Users.Update(user);
             return true;
         }
 
-        public async Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabililtyId)
+        public async Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabilityId)
         {
-
-            var user = await _context.Users.FindAsync(userId);
+            // S?A: Dùng FirstOrDefaultAsync ?? tuân th? Global Filter
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
             {
                 return false;
             }
 
-            user.DonationAvailabilityId = donationAvailabililtyId;
+            user.DonationAvailabilityId = donationAvailabilityId;
             user.UpdatedAt = DateTime.UtcNow;
 
             _context.Users.Update(user);
             return true;
         }
+
         public async Task<bool> UpdateUserRoleAsync(int userId, int roleId)
         {
-            var user = await _context.Users.FindAsync(userId);
+            // S?A: Dùng FirstOrDefaultAsync ?? tuân th? Global Filter
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
             {
                 return false;

@@ -99,5 +99,37 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(records);
 
         }
+
+        [HttpPut("{recordId}")]
+        public async Task<IActionResult> UpdateRecord(int recordId, [FromBody] DonationRecordUpdateDTO updateDto)
+        {
+            if (updateDto == null)
+            {
+                return BadRequest("Update data cannot be null.");
+            }
+
+            if (recordId != updateDto.DonationRecordId)
+            {
+                return BadRequest("Record ID mismatch between URL and body.");
+            }
+
+            try
+            {
+                var result = await _donationRecordService.UpdateRecordsAsync(recordId, updateDto);
+                if (!result)
+                {
+                    return NotFound($"Donation record with ID {recordId} not found.");
+                }
+                return Ok(new { status = "success", message = "Record updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
+        }
     }
 }
