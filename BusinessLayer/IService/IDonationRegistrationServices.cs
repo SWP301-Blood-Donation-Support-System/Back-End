@@ -20,5 +20,9 @@ namespace BusinessLayer.IService
         Task<bool> UpdateRegistrationStatusAsync(int registrationId, int statusId);
         Task<bool> SoftDeleteRegistrationAsync(int registrationId); 
         Task<bool> SaveChangesAsync();
+        Task<DonationRegistration?> CheckInByNationalIdAsync(string nationalId, int approvedStatusId, int checkedInStatusId);
+        Task<IEnumerable<DonationRegistration>> GetByScheduleAndTimeSlotAsync(int scheduleId, int timeSlotId);
+        Task<DonationRegistration?> GetTodayRegistrationByNationalIdAsync(string nationalId, int approvedStatusId);
+
     }
 }

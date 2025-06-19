@@ -15,5 +15,10 @@ namespace DataAccessLayer.IRepository
         Task<IEnumerable<DonationRegistration>> GetRegistrationsByTimeSlotIdAsync(int timeSlotId);
         Task<bool> UpdateRegistrationStatusAsync(int registrationId, int statusId);
         Task<bool> SoftDeleteRegistrationAsync(int registrationId);
+        Task<DonationRegistration?> CheckInByNationalIdAsync(string nationalId, int approvedStatusId, int checkedInStatusId);
+        Task<DonationRegistration?> GetByNationalIdAsync(string nationalId);
+        Task<IEnumerable<DonationRegistration>> GetByScheduleAndTimeSlotAsync(int scheduleId, int timeSlotId);
+        Task<DonationRegistration?> GetTodayRegistrationByNationalIdAsync(string nationalId, int approvedStatusId);
+
     }
 }
