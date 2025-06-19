@@ -149,5 +149,15 @@ namespace DataAccessLayer.Repository
             return await registration;
         }
 
+        public Task<DonationRegistration> GetRegistrationByCertificateIdAsync(string certificateId)
+        {
+            var registration = _context.DonationRegistrations
+                .Include(r => r.Donor)
+                .Include(r => r.DonationRecord)
+                .FirstOrDefaultAsync(r => r.DonationRecord.CertificateId == certificateId && !r.IsDeleted);
+            return registration;
+
+        }
+
     }
 }

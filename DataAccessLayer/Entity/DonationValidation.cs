@@ -25,4 +25,3 @@ public partial class DonationValidation
 
     public virtual User User { get; set; } = null!;
 }
-
