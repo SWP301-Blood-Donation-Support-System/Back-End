@@ -132,10 +132,65 @@ namespace BusinessLayer.Service
             }
         }
 
-
         public async Task<bool> UpdateRegistrationStatusAsync(int registrationId, int statusId)
         {
-            return await _donationRegistrationRepository.UpdateRegistrationStatusAsync(registrationId, statusId);
+            // Get the registration with related donor and donation record
+            var registration = await _donationRegistrationRepository.GetRegistrationWithDonorAndRecordAsync(registrationId);
+            
+            if (registration == null || registration.IsDeleted)
+            {
+                return false;
+            }
+            
+            registration.RegistrationStatusId = statusId;
+            registration.UpdatedAt = DateTime.UtcNow;
+            
+            // If status is "Completed" and there's a donor linked
+            if (statusId == 3 && registration.Donor != null && registration.DonationRecord != null)
+            {
+                var donor = registration.Donor;
+                var donationRecord = registration.DonationRecord;
+
+                if (string.IsNullOrEmpty(donationRecord.CertificateId))
+                {
+                    // Format: BDC-{DonorID}-{Year}-{Month}-{Counter}
+                    string year = donationRecord.DonationDateTime.Year.ToString();
+                    string month = donationRecord.DonationDateTime.Month.ToString().PadLeft(2, '0');
+                    string donorIdPart = donor.UserId.ToString().PadLeft(5, '0');
+
+                    // Get donation count for this user as the counter
+                    int donationCount = donor.DonationCount ?? 0;
+                    string counter = (donationCount + 1).ToString().PadLeft(3, '0');
+
+                    donationRecord.CertificateId = $"BDC-{donorIdPart}-{year}{month}-{counter}";
+                    donationRecord.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // Update last donation date to record date
+                donor.LastDonationDate = donationRecord.DonationDateTime;
+                
+                // Calculate next eligible donation date based on donation type
+                int donationTypeId = donationRecord.DonationTypeId??1;
+                
+                if (donationTypeId == 1 || donationTypeId == 4)
+                {
+                    // Types 1 and 4: Add 12 weeks (84 days)
+                    donor.NextEligibleDonationDate = donor.LastDonationDate.Value.AddDays(84); 
+                }
+                else if (donationTypeId == 2 || donationTypeId == 3)
+                {
+                    // Types 2 and 3: Add 2 weeks (14 days)
+                    donor.NextEligibleDonationDate = donor.LastDonationDate.Value.AddDays(14);
+                }
+                
+                // Increment donation count
+                donor.DonationCount += 1;
+                donor.DonationAvailabilityId = 2;
+            }
+            
+            // Update the registration
+            await _donationRegistrationRepository.UpdateAsync(registration);
+            return await _donationRegistrationRepository.SaveChangesAsync();
         }
 
         public async Task<bool> SaveChangesAsync()
