@@ -168,5 +168,65 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Registration cancelled successfully.");
         }
+        [HttpGet("getRegistrationsByTimeSlotIdAndScheduleId/{timeSlotId}/{scheduleId}")]
+        public async Task<IActionResult> GetRegistrationsByTimeSlotIdAndScheduleId(int timeSlotId, int scheduleId)
+        {
+            // Phần kiểm tra này của bạn đã đúng
+            if (timeSlotId <= 0 || scheduleId <= 0)
+            {
+                return BadRequest("Invalid time slot ID or schedule ID.");
+            }
+
+            // SỬA LẠI DÒNG NÀY ĐỂ GỌI ĐÚNG PHƯƠNG THỨC
+            var registrations = await _donationRegistrationService.GetByScheduleAndTimeSlotAsync(scheduleId, timeSlotId);
+
+            // Phần logic trả về này của bạn đã đúng
+            if (registrations == null || !registrations.Any())
+            {
+                return NotFound($"No registrations found for time slot ID {timeSlotId} and schedule ID {scheduleId}.");
+            }
+
+            return Ok(registrations);
+        }
+
+        [HttpPut("checkin/{nationalId}")]
+        public async Task<IActionResult> CheckIn(string nationalId)
+        {
+            // Bước kiểm tra này vẫn rất quan trọng
+            if (string.IsNullOrWhiteSpace(nationalId))
+            {
+                return BadRequest("National ID is required and cannot be empty.");
+            }
+
+            try
+            {
+                // Vẫn dùng các hằng số hoặc enum như trước để code dễ đọc
+                const int approvedStatusId = 1; // Trạng thái "Đã duyệt"
+                const int checkedInStatusId = 2; // Trạng thái "Đã check-in"
+
+                var checkedInRegistration = await _donationRegistrationService.CheckInByNationalIdAsync(
+                    nationalId, // Dùng nationalId trực tiếp từ tham số của phương thức
+                    approvedStatusId,
+                    checkedInStatusId
+                );
+
+                if (checkedInRegistration == null)
+                {
+                    // Trả về lỗi 404 Not Found nếu không tìm thấy
+                    return NotFound($"No approved registration found for today with National ID: {nationalId}.");
+                }
+
+                // Trả về 200 OK cùng với thông tin của lượt đăng ký đã được check-in
+                return Ok(checkedInRegistration);
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi ra console hoặc hệ thống log của bạn
+                // Console.WriteLine(ex); 
+                return StatusCode(500, "An internal error occurred while trying to check-in.");
+            }
+        }
+
+
     }
 }
