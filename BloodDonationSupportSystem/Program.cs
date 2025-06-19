@@ -114,6 +114,7 @@ builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
 builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>();
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
+builder.Services.AddScoped<ICertificateService, CertificateService>();
 
 // Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();

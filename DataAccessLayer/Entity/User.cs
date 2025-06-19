@@ -11,7 +11,7 @@ public partial class User
 
     public string PasswordHash { get; set; } = null!;
 
-    public string? Email { get; set; }
+    public string Email { get; set; } = null!;
 
     public string? PhoneNumber { get; set; }
 
@@ -62,6 +62,8 @@ public partial class User
     public virtual ICollection<DonationRegistration> DonationRegistrations { get; set; } = new List<DonationRegistration>();
 
     public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
+
+    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
     public virtual Gender? Gender { get; set; }
 
