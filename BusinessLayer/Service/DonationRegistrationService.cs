@@ -150,9 +150,24 @@ namespace BusinessLayer.Service
             {
                 var donor = registration.Donor;
                 var donationRecord = registration.DonationRecord;
-                
-                // Update last donation date to current date
-                donor.LastDonationDate = DateTime.UtcNow;
+
+                if (string.IsNullOrEmpty(donationRecord.CertificateId))
+                {
+                    // Format: BDC-{DonorID}-{Year}-{Month}-{Counter}
+                    string year = donationRecord.DonationDateTime.Year.ToString();
+                    string month = donationRecord.DonationDateTime.Month.ToString().PadLeft(2, '0');
+                    string donorIdPart = donor.UserId.ToString().PadLeft(5, '0');
+
+                    // Get donation count for this user as the counter
+                    int donationCount = donor.DonationCount ?? 0;
+                    string counter = (donationCount + 1).ToString().PadLeft(3, '0');
+
+                    donationRecord.CertificateId = $"BDC-{donorIdPart}-{year}{month}-{counter}";
+                    donationRecord.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // Update last donation date to record date
+                donor.LastDonationDate = donationRecord.DonationDateTime;
                 
                 // Calculate next eligible donation date based on donation type
                 int donationTypeId = donationRecord.DonationTypeId??1;
