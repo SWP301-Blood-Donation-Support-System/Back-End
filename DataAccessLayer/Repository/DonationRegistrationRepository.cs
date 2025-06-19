@@ -80,6 +80,13 @@ namespace DataAccessLayer.Repository
             return true;
         }
 
-       
+        public async Task<DonationRegistration> GetRegistrationWithDonorAndRecordAsync(int registrationId)
+        {
+            var registration =  _context.DonationRegistrations
+                .Include(r => r.Donor)
+                .Include(r => r.DonationRecord)
+                .FirstOrDefaultAsync(r => r.RegistrationId == registrationId && !r.IsDeleted);
+            return await registration;
+        }
     }
 }
