@@ -202,5 +202,33 @@ namespace BusinessLayer.Service
         {
             return _donationRegistrationRepository.SoftDeleteRegistrationAsync(registrationId);
         }
+
+        public async Task<DonationRegistration?> CheckInByNationalIdAsync(string nationalId, int approvedStatusId, int checkedInStatusId)
+        {
+            if (string.IsNullOrWhiteSpace(nationalId))
+            {
+                throw new ArgumentException("National ID cannot be null or empty", nameof(nationalId));
+            }
+
+            // SỬA: Gọi đúng method từ Repository (có logic tìm theo ngày hôm nay)
+            var registration = await _donationRegistrationRepository.CheckInByNationalIdAsync(nationalId, approvedStatusId, checkedInStatusId);
+
+            return registration;
+        }
+
+        public async Task<IEnumerable<DonationRegistration>> GetByScheduleAndTimeSlotAsync(int scheduleId, int timeSlotId)
+        {
+            // Hiện tại chỉ cần gọi xuống Repository, sau này có thể thêm các logic khác nếu cần
+            return await _donationRegistrationRepository.GetByScheduleAndTimeSlotAsync(scheduleId, timeSlotId);
+        }
+        public async Task<DonationRegistration?> GetTodayRegistrationByNationalIdAsync(string nationalId, int approvedStatusId)
+        {
+            if (string.IsNullOrWhiteSpace(nationalId))
+            {
+                throw new ArgumentException("National ID cannot be null or empty", nameof(nationalId));
+            }
+
+            return await _donationRegistrationRepository.GetTodayRegistrationByNationalIdAsync(nationalId, approvedStatusId);
+        }
     }
 }

@@ -85,6 +85,60 @@ namespace DataAccessLayer.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<DonationRegistration?> CheckInByNationalIdAsync(string nationalId, int approvedStatusId, int checkedInStatusId)
+        {
+            var today = DateTime.Today;
+
+            var registration = await _context.DonationRegistrations
+                .Include(r => r.Donor)
+                .Include(r => r.Schedule)
+                .FirstOrDefaultAsync(r =>
+                    r.Donor.NationalId == nationalId &&
+                    r.Schedule.ScheduleDate.Value.Date == today &&
+                    r.RegistrationStatusId == approvedStatusId); // Dùng tham số approvedStatusId
+
+            if (registration == null)
+            {
+                return null;
+            }
+
+            // Cập nhật trạng thái bằng tham số checkedInStatusId
+            registration.RegistrationStatusId = checkedInStatusId;
+            registration.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return registration;
+        }
+
+        public async Task<DonationRegistration?> GetByNationalIdAsync(string nationalId)
+        {
+            return await _context.DonationRegistrations
+                .Include(r => r.Donor)
+                .FirstOrDefaultAsync(r => r.Donor.NationalId == nationalId && !r.IsDeleted);
+        }
+        public async Task<IEnumerable<DonationRegistration>> GetByScheduleAndTimeSlotAsync(int scheduleId, int timeSlotId)
+        {
+            return await _context.DonationRegistrations
+                .Where(r => r.ScheduleId == scheduleId && r.TimeSlotId == timeSlotId)
+                .Include(r => r.Donor) // Lấy luôn thông tin người hiến máu
+                .ToListAsync();
+        }
+
+        public async Task<DonationRegistration?> GetTodayRegistrationByNationalIdAsync(string nationalId, int approvedStatusId)
+{
+    var today = DateTime.Today;
+
+    return await _context.DonationRegistrations
+        .Include(r => r.Donor)
+        .Include(r => r.Schedule)
+        .Include(r => r.TimeSlot) // Include TimeSlot để hiển thị thông tin ca làm việc
+        .FirstOrDefaultAsync(r =>
+            r.Donor.NationalId == nationalId &&
+            r.Schedule.ScheduleDate.Value.Date == today &&
+            r.RegistrationStatusId == approvedStatusId &&
+            !r.IsDeleted);
+}
 
         public async Task<DonationRegistration> GetRegistrationWithDonorAndRecordAsync(int registrationId)
         {
@@ -104,5 +158,6 @@ namespace DataAccessLayer.Repository
             return registration;
 
         }
+
     }
 }
