@@ -1,13 +1,1 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataAccessLayer.DTO
-{
-    public class TimeSlotDTO
-    {
-
-    }
-}
+﻿// File được đánh dấu để xóa - không cần sử dụng vì TimeSlotDTO đã được định nghĩa trong DonationRegistrationDTO.cs
