@@ -46,6 +46,7 @@ public partial class BloodDonationDbContext : DbContext
     public virtual DbSet<DonationType> DonationTypes { get; set; }
 
     public virtual DbSet<DonationValidation> DonationValidations { get; set; }
+    public virtual DbSet<Feedback> Feedback { get; set; }
 
     public virtual DbSet<Feedback> Feedbacks { get; set; }
 
