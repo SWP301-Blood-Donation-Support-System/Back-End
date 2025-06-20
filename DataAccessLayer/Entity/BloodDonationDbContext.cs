@@ -48,6 +48,8 @@ public partial class BloodDonationDbContext : DbContext
     public virtual DbSet<DonationValidation> DonationValidations { get; set; }
     public virtual DbSet<Feedback> Feedback { get; set; }
 
+    public virtual DbSet<Feedback> Feedbacks { get; set; }
+
     public virtual DbSet<Gender> Genders { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
@@ -319,11 +321,13 @@ public partial class BloodDonationDbContext : DbContext
             entity.HasIndex(e => e.RegistrationId, "UQ_DonationRecord_RegistrationID").IsUnique();
 
             entity.Property(e => e.DonationRecordId).HasColumnName("DonationRecordID");
+            entity.Property(e => e.CertificateId)
+                .HasMaxLength(20)
+                .HasColumnName("CertificateID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.DonationTypeId).HasColumnName("DonationTypeID");
             entity.Property(e => e.DonorBloodPressure).HasMaxLength(20);
-            entity.Property(e => e.CertificateId).HasMaxLength(20);
             entity.Property(e => e.DonorTemperature).HasColumnType("decimal(4, 2)");
             entity.Property(e => e.DonorWeight).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
@@ -345,21 +349,11 @@ public partial class BloodDonationDbContext : DbContext
                 .HasConstraintName("FK_DonationRecord_Registration");
         });
 
-        // Nó sẽ tự động lọc tất cả các bản ghi DonationRecord có IsDeleted = true
-        modelBuilder.Entity<DonationRecord>().HasQueryFilter(dr => !dr.IsDeleted);
-        modelBuilder.Entity<DonationRegistration>().HasQueryFilter(reg => !reg.IsDeleted);
-        modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
-        modelBuilder.Entity<TimeSlot>().HasQueryFilter(ts => !ts.IsDeleted);
-        modelBuilder.Entity<DonationSchedule>().HasQueryFilter(ds => !ds.IsDeleted);
-
-
-
         modelBuilder.Entity<DonationRegistration>(entity =>
         {
             entity.HasKey(e => e.RegistrationId).HasName("PK__Donation__6EF58830F5DEBF2A");
 
             entity.ToTable("DonationRegistration");
-
 
             entity.HasIndex(e => new { e.ScheduleId, e.DonorId }, "UQ_DonationRegistration_Schedule_Donor").IsUnique();
 
@@ -443,6 +437,25 @@ public partial class BloodDonationDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DonationValidation_User");
+        });
+
+        modelBuilder.Entity<Feedback>(entity =>
+        {
+            entity.HasKey(e => e.FeedbackId).HasName("PK__Feedback__6A4BEDF602C8ED55");
+
+            entity.ToTable("Feedback");
+
+            entity.Property(e => e.FeedbackId).HasColumnName("FeedbackID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.DonorId).HasColumnName("DonorID");
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+            entity.HasOne(d => d.Donor).WithMany(p => p.Feedbacks)
+                .HasForeignKey(d => d.DonorId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Feedback_User");
         });
 
         modelBuilder.Entity<Gender>(entity =>

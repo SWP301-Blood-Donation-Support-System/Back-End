@@ -3,6 +3,7 @@ using BloodDonationSupportSystem.Utils;
 using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
 using BusinessLayer.Service;
+using BusinessLayer.Utils;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
 using DataAccessLayer.Repository;
@@ -22,6 +23,8 @@ var emailConfig = builder.Configuration
     .Get<EmailConfiguration>();
 builder.Services.AddSingleton(emailConfig);
 
+builder.Services.Configure<CertificateSettings>(
+    builder.Configuration.GetSection("CertificateSettings"));
 // ====================== CONTROLLERS & API BEHAVIOR ====================== //
 builder.Services.AddControllers();
 builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
@@ -115,6 +118,7 @@ builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>(
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
 builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+builder.Services.AddScoped<ICertificateService, CertificateService>();
 
 // Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();

@@ -8,10 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="DocX" Version="4.0.25105.5786" />
     <PackageReference Include="Google.Apis.Auth" Version="1.70.0" />
+    <PackageReference Include="IronPdf" Version="2025.6.8" />
+    <PackageReference Include="IronPdf.Native.Chrome.Windows" Version="2025.6.16" />
     <PackageReference Include="MailKit" Version="4.12.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="MimeKit" Version="4.12.0" />
+    <PackageReference Include="Syncfusion.DocToPdfConverter.AspNet.Mvc5" Version="29.2.11" />
   </ItemGroup>
 
   <ItemGroup>

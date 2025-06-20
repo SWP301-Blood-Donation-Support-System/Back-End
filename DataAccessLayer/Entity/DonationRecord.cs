@@ -24,6 +24,7 @@ public partial class DonationRecord
     public string? Note { get; set; }
 
     public int? BloodTestResult { get; set; }
+
     public string? CertificateId { get; set; }
 
     public DateTime? CreatedAt { get; set; }
@@ -45,5 +46,4 @@ public partial class DonationRecord
     public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
 
     public virtual DonationRegistration Registration { get; set; } = null!;
-
 }
