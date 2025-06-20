@@ -24,14 +24,5 @@ namespace BusinessLayer.IService
         Task<IEnumerable<DonationRegistration>> GetByScheduleAndTimeSlotAsync(int scheduleId, int timeSlotId);
         Task<DonationRegistration?> GetTodayRegistrationByNationalIdAsync(string nationalId, int approvedStatusId);
 
-        // Add the DTO-based methods to prevent circular references
-        Task<IEnumerable<DonationRegistrationResponseDTO>> GetAllRegistrationsResponseAsync();
-        Task<DonationRegistrationResponseDTO> GetRegistrationByIdResponseAsync(int registrationId);
-        Task<IEnumerable<DonationRegistrationResponseDTO>> GetRegistrationsByDonorIdResponseAsync(int donorId);
-        Task<DonationRegistrationResponseDTO> CheckInByNationalIdResponseAsync(string nationalId, int approvedStatusId, int checkedInStatusId);
-        Task<IEnumerable<DonationRegistrationResponseDTO>> GetRegistrationsByScheduleIdResponseAsync(int scheduleId);
-        Task<IEnumerable<DonationRegistrationResponseDTO>> GetRegistrationsByStatusIdResponseAsync(int statusId);
-        Task<IEnumerable<DonationRegistrationResponseDTO>> GetRegistrationsByTimeSlotIdResponseAsync(int timeSlotId);
-        Task<IEnumerable<DonationRegistrationResponseDTO>> GetByScheduleAndTimeSlotResponseAsync(int scheduleId, int timeSlotId);
     }
 }
