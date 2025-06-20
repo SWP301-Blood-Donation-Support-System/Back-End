@@ -23,7 +23,15 @@ var emailConfig = builder.Configuration
 builder.Services.AddSingleton(emailConfig);
 
 // ====================== CONTROLLERS & API BEHAVIOR ====================== //
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    // Configure JSON serialization to handle reference cycles
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    // Optionally ignore null values
+    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    // Optionally use camelCase for property names (frontend-friendly)
+    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+});
 builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = (errorContext) =>
