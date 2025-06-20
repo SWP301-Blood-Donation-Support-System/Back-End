@@ -106,7 +106,7 @@ builder.Services.AddScoped<IDonationScheduleService, DonationScheduleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
-
+builder.Services.AddScoped<IFeedbackService, FeedbackService > ();
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistrationRepository>();
@@ -114,6 +114,7 @@ builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
 builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>();
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
+builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
 
 // Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();
@@ -131,7 +132,6 @@ builder.Services.AddScoped<IGenericRepository<RegistrationStatus>, GenericReposi
 builder.Services.AddScoped<IGenericRepository<ArticleCategory>, GenericRepository<ArticleCategory>>();
 builder.Services.AddScoped<IGenericRepository<ArticleStatus>, GenericRepository<ArticleStatus>>();
 builder.Services.AddScoped<IGenericRepository<BloodTestResult>, GenericRepository<BloodTestResult>>();
-
 // ====================== BUILD APPLICATION ====================== //
 var app = builder.Build();
 
