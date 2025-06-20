@@ -21,5 +21,10 @@
     <ProjectReference Include="..\BusinessLayer\BusinessLayer.csproj" />
     <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj" />
   </ItemGroup>
+  <ItemGroup>
+	<Content Include="Resources\**">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+  </ItemGroup>
 
 </Project>

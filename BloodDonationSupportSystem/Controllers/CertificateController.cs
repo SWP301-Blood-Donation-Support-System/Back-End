@@ -22,8 +22,11 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                var pdfBytes = await _certificateService.GenerateCertificateAsync(registrationId);
-                return File(pdfBytes, "application/pdf", $"blood-donation-certificate.pdf");
+                var docxBytes = await _certificateService.GenerateCertificateAsync(registrationId);
+                return File(
+                    docxBytes, 
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+                    $"blood-donation-certificate.docx");
             }
             catch (KeyNotFoundException ex)
             {
@@ -47,8 +50,11 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                var pdfBytes = await _certificateService.GetCertificateByIdAsync(certificateId);
-                return File(pdfBytes, "application/pdf", $"blood-donation-certificate.pdf");
+                var docxBytes = await _certificateService.GetCertificateByIdAsync(certificateId);
+                return File(
+                    docxBytes, 
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+                    $"blood-donation-certificate.docx");
             }
             catch (KeyNotFoundException ex)
             {
