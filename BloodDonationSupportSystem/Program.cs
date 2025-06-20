@@ -3,6 +3,7 @@ using BloodDonationSupportSystem.Utils;
 using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
 using BusinessLayer.Service;
+using BusinessLayer.Utils;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
 using DataAccessLayer.Repository;
@@ -22,6 +23,8 @@ var emailConfig = builder.Configuration
     .Get<EmailConfiguration>();
 builder.Services.AddSingleton(emailConfig);
 
+builder.Services.Configure<CertificateSettings>(
+    builder.Configuration.GetSection("CertificateSettings"));
 // ====================== CONTROLLERS & API BEHAVIOR ====================== //
 builder.Services.AddControllers();
 builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
