@@ -15,13 +15,13 @@ namespace BloodDonationSupportSystem.Controllers
         {
             _bloodUnitService = bloodUnitService;
         }
-        [HttpGet("GetAllBloodUnits")]
+        [HttpGet]
         public async Task<IActionResult> GetAllBloodUnits()
         {
             var bloodUnits = await _bloodUnitService.GetAllBloodUnitsAsync();
             return Ok(bloodUnits);
         }
-        [HttpGet("GetBloodUnitById/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetBloodUnitById(int id)
         {
             var bloodUnit = await _bloodUnitService.GetBloodUnitByIdAsync(id);
@@ -31,7 +31,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok(bloodUnit);
         }
-        [HttpPost("AddBloodUnit")]
+        [HttpPost]
         public async Task<IActionResult> AddBloodUnit([FromBody] BloodUnitDTO bloodUnitDTO)
         {
             try

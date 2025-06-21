@@ -45,25 +45,25 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
 
-        [HttpGet("by-id/{certificateId}")]
-        public async Task<IActionResult> GetCertificateById(string certificateId)
-        {
-            try
-            {
-                var docxBytes = await _certificateService.GetCertificateByIdAsync(certificateId);
-                return File(
-                    docxBytes, 
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
-                    $"blood-donation-certificate.docx");
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //[HttpGet("by-id/{certificateId}")]
+        //public async Task<IActionResult> GetCertificateById(string certificateId)
+        //{
+        //    try
+        //    {
+        //        var docxBytes = await _certificateService.GetCertificateByIdAsync(certificateId);
+        //        return File(
+        //            docxBytes, 
+        //            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+        //            $"blood-donation-certificate.docx");
+        //    }
+        //    catch (KeyNotFoundException ex)
+        //    {
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
     }
 }
