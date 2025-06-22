@@ -198,5 +198,13 @@ namespace DataAccessLayer.Repository
             return await _context.DonationValidations
                 .AnyAsync(v => v.DonationRecordId == recordId && v.UserId == userId && !v.IsDeleted); // THÊM: Lọc validation đã xóa
         }
+
+        public async Task<DonationRecord> GetRecordAndRegistrationAndUserAsync(int recordId)
+        {
+            return await _context.DonationRecords
+                .Include(r => r.Registration)
+                .ThenInclude(d => d.Donor)
+                .FirstOrDefaultAsync(r => r.DonationRecordId == recordId && !r.IsDeleted);
+        }
     }
 }

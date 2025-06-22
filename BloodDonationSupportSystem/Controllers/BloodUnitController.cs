@@ -48,25 +48,25 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood unit added successfully.");
         }
-        [HttpGet("GetBloodUnitsByBloodType/{bloodTypeId}")]
+        [HttpGet("by-blood-type/{bloodTypeId}")]
         public async Task<IActionResult> GetBloodUnitsByBloodType(int bloodTypeId)
         {
             var bloodUnits = await _bloodUnitService.GetBloodUnitsByBloodTypeAsync(bloodTypeId);
             return Ok(bloodUnits);
         }
-        [HttpGet("GetBloodUnitsByBloodComponent/{bloodComponentId}")]
+        [HttpGet("by-blood-component/{bloodComponentId}")]
         public async Task<IActionResult> GetBloodUnitsByBloodComponent(int bloodComponentId)
         {
             var bloodUnits = await _bloodUnitService.GetBloodUnitsByBloodComponentAsync(bloodComponentId);
             return Ok(bloodUnits);
         }
-        [HttpGet("GetBloodUnitsByStatus/{statusId}")]
+        [HttpGet("by-status/{statusId}")]
         public async Task<IActionResult> GetBloodUnitsByStatus(int statusId)
         {
             var bloodUnits = await _bloodUnitService.GetBloodUnitsByStatusAsync(statusId);
             return Ok(bloodUnits);
         }
-        [HttpPut("UpdateBloodUnitStatus/{unitId}/{bloodUnitStatusId}")]
+        [HttpPut("status/{unitId}/{bloodUnitStatusId}")]
         public async Task<IActionResult> UpdateBloodUnitStatus(int unitId, int bloodUnitStatusId)
         {
 
@@ -77,7 +77,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood unit status updated successfully.");
         }
-        [HttpDelete("DeleteBloodUnit/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBloodUnit(int id)
         {
             var result = await _bloodUnitService.DeleteBloodUnitAsync(id);
@@ -87,7 +87,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood unit deleted successfully.");
         }
-        [HttpPut("UpdateBloodUnit")]
+        [HttpPut]
         public async Task<IActionResult> UpdateBloodUnit([FromBody] BloodUnit bloodUnit)
         {
             if (bloodUnit == null || bloodUnit.BloodUnitId <= 0)
