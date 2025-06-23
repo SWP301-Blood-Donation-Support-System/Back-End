@@ -1,7 +1,11 @@
 using BusinessLayer.IService;
+using BusinessLayer.QuartzJobs.Schedulers;
+using BuisinessLayer.Utils.EmailConfiguration;
 using DataAccessLayer.DTO;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,10 +17,14 @@ namespace BloodDonationSupportSystem.Controllers
     public class EmailController : ControllerBase
     {
         private readonly IUserServices _userServices;
+        private readonly NotifQuartzScheduler _quartzScheduler;
+        private readonly ISchedulerFactory _schedulerFactory;
 
-        public EmailController(IUserServices userServices)
+        public EmailController(IUserServices userServices, NotifQuartzScheduler notifQuartzScheduler, ISchedulerFactory schedulerFactory)
         {
             _userServices = userServices ?? throw new ArgumentNullException(nameof(userServices));
+            _quartzScheduler = notifQuartzScheduler ?? throw new ArgumentNullException(nameof(notifQuartzScheduler));
+            _schedulerFactory = schedulerFactory ?? throw new ArgumentNullException(nameof(schedulerFactory));
         }
 
         /// <summary>
@@ -150,6 +158,62 @@ namespace BloodDonationSupportSystem.Controllers
                 {
                     Success = false,
                     Message = $"Failed to send template email: {ex.Message}"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Schedule an email to be sent repeatedly
+        /// </summary>
+        /// <param name="request">Email request details</param>
+        /// <param name="id">Optional custom ID for the notification (defaults to a generated GUID)</param>
+        /// <returns>Status of the scheduled email operation</returns>
+        [HttpPost("schedule-repeat")]
+        [ProducesResponseType(typeof(EmailResponseDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SendEmailRepeatly([FromBody] EmailRequestDTO request, [FromQuery] string id = null)
+        { 
+            try
+            {
+                // Create a unique notification ID if not provided
+                string notifyId = !string.IsNullOrWhiteSpace(id) 
+                    ? id 
+                    : $"email_{Guid.NewGuid()}";
+                
+                // Create Message object
+                var message = new Message(
+                    to: new[] { request.Recipient },
+                    subject: request.Subject,
+                    content: request.Body
+                );
+                
+                // Schedule the notification using NotifQuartzScheduler
+                bool scheduled = await _quartzScheduler.ScheduleNotifyJob(notifyId, message);
+                
+                if (scheduled)
+                {
+                    return Ok(new EmailResponseDTO
+                    {
+                        Success = true,
+                        Message = $"Email scheduled successfully with ID: {notifyId}. Will be sent repeatedly according to the scheduler configuration."
+                    });
+                }
+                else
+                {
+                    return StatusCode(500, new EmailResponseDTO
+                    {
+                        Success = false,
+                        Message = "Failed to schedule email notification"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new EmailResponseDTO
+                {
+                    Success = false,
+                    Message = $"Failed to schedule email: {ex.Message}"
                 });
             }
         }

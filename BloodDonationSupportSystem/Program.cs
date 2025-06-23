@@ -2,6 +2,7 @@ using BE_Homnayangi.Ultils.EmailServices;
 using BloodDonationSupportSystem.Utils;
 using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
+using BusinessLayer.QuartzJobs.Schedulers;
 using BusinessLayer.Service;
 using BusinessLayer.Utils;
 using DataAccessLayer.Entity;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Quartz;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +27,10 @@ builder.Services.AddSingleton(emailConfig);
 
 builder.Services.Configure<CertificateSettings>(
     builder.Configuration.GetSection("CertificateSettings"));
+builder.Services.AddQuartz();
+builder.Services.AddTransient<NotifQuartzScheduler>();
+builder.Services.AddQuartzHostedService();
+
 // ====================== CONTROLLERS & API BEHAVIOR ====================== //
 builder.Services.AddControllers();
 builder.Services.AddMvcCore().ConfigureApiBehaviorOptions(options =>
