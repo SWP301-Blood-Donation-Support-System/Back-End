@@ -9,8 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Auth" Version="1.70.0" />
-    <PackageReference Include="itext7" Version="9.2.0" />
-    <PackageReference Include="itext7.bouncy-castle-adapter" Version="9.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.16" />
