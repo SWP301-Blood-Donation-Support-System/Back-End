@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -194,6 +195,57 @@ namespace BusinessLayer.Service
             
             return await _donationRecordRepository.GetRecordsByUserIdAsync(userId)
                 .ContinueWith(task=>task.Result.Select(rc=>_mapper.Map<DonationRecordDTO>(rc)));
+        }
+
+        public async Task<bool> UpdateRecordsStatusAsync(int recordId, int statusId)
+        {
+            var record = await _donationRecordRepository.GetRecordAndRegistrationAndUserAsync(recordId);
+            record.BloodTestResult = statusId;
+            record.UpdatedAt = DateTime.UtcNow;
+            
+            if (statusId == 2) // If status is "approved" (assuming 2 is for approved status)
+            {
+                // Get the donor information to determine blood type
+                
+                
+                // Create a new blood unit
+                var bloodUnit = new BloodUnit
+                {
+                    DonationRecordId = recordId,
+                    // Use donor's blood type if available and not unknown (1001)
+                    BloodTypeId = record.Registration.Donor.BloodTypeId ?? 1001, // Default or use test result
+                    ComponentId = record.DonationTypeId, // Use donation type as component ID
+                    Volume = record.VolumeDonated, // Use the volume donated
+                    CollectedDateTime=record.DonationDateTime,
+                    BloodUnitStatusId = 1 // Default status for new blood units
+                };
+                if (record.DonationTypeId.HasValue)
+                {
+                    switch (record.DonationTypeId.Value)
+                    {
+                        case 1: // Whole Blood
+                        case 4: // Red Blood Cells
+                            bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(42);
+                            break;
+                        case 2: // Plasma
+                            bloodUnit.ExpiryDateTime = record.DonationDateTime.AddYears(1);
+                            break;
+                        case 3: // Platelets
+                            bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(5);
+                            break;
+                        default:
+                            // Use a default expiration if component type is unknown
+                            bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(42);
+                            break;
+                    }
+                }
+
+                // Add the blood unit to the donation record
+                record.BloodUnits.Add(bloodUnit);
+            }
+            
+            await _donationRecordRepository.UpdateAsync(record);
+            return await _donationRecordRepository.SaveChangesAsync();
         }
     }
 }
