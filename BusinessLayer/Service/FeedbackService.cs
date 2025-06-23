@@ -4,7 +4,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using BusinessLayer.IService;
+using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
 
@@ -13,15 +15,19 @@ namespace BusinessLayer.Service
     public class FeedbackService : IFeedbackService
     {
         private readonly IFeedbackRepository _feedbackRepository;
-        public FeedbackService(IFeedbackRepository feedbackRepository)
+        private readonly IMapper Mapper;
+        public FeedbackService(IFeedbackRepository feedbackRepository, IMapper mapper)
         {
+
             _feedbackRepository = feedbackRepository ?? throw new ArgumentNullException(nameof(feedbackRepository));
+            Mapper = mapper;
         }
-        public async Task<bool> AddAsync(Feedback feedback)
+        public async Task<bool> AddAsync(FeedbackDTO feedback)
         {
             if (feedback == null)
                 throw new ArgumentNullException(nameof(feedback));
-            await _feedbackRepository.AddAsync(feedback);
+            var entity = Mapper.Map<Feedback>(feedback);
+            await _feedbackRepository.AddAsync(entity);
             return await _feedbackRepository.SaveChangesAsync();
         }
         public async Task<IEnumerable<Feedback>> GetAllFeedbacksAsync()

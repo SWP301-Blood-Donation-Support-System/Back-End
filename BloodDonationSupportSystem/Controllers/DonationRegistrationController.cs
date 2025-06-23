@@ -178,85 +178,90 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Registration cancelled successfully.");
         }
-        
-        
 
-        [HttpPut("check-in/{nationalId}")]
-        public async Task<IActionResult> CheckIn(string nationalId)
+
+
+        [HttpPost("check-in")]
+        public async Task<IActionResult> CheckIn([FromBody] CheckInDTO request)
         {
-            if (string.IsNullOrWhiteSpace(nationalId))
-            {
-                return BadRequest(new { 
-                    status = "failed", 
-                    message = "National ID is required and cannot be empty." 
-                });
-            }
+            // 2. Không cần check null/empty thủ công cho NationalId nữa
+            // vì [ApiController] và [Required] trong model đã tự động xử lý.
+            // Nếu request thiếu nationalId, client sẽ tự nhận lỗi 400 Bad Request.
 
             try
             {
-                const int approvedStatusId = 1; // Status "Approved"
-                const int checkedInStatusId = 2; // Status "Checked-in"
+                // Sử dụng Enum để code dễ đọc hơn
+                const int approvedStatusId = 1; // Hoặc (int)RegistrationStatus.Approved
+                const int checkedInStatusId = 2; // Hoặc (int)RegistrationStatus.CheckedIn
 
+                // 3. Gọi phương thức service mới, có thể truyền vào cả ScheduleId để xử lý chính xác hơn
+                // Service sẽ tìm đăng ký có NationalId và ScheduleId tương ứng, đang ở trạng thái Approved, diễn ra trong ngày hôm nay.
                 var checkedInRegistration = await _donationRegistrationService.CheckInByNationalIdResponseAsync(
-                    nationalId,
+                    request.NationalId,
                     approvedStatusId,
                     checkedInStatusId
                 );
 
+                // 4. Toàn bộ cấu trúc response (success, warning, failed) được giữ nguyên
                 if (checkedInRegistration == null)
                 {
-                    return NotFound(new { 
-                        status = "failed", 
-                        message = $"No approved registration found for today with National ID: {nationalId}." 
+                    return NotFound(new
+                    {
+                        status = "failed",
+                        message = $"Không tìm thấy đăng ký hợp lệ (trạng thái 'Approved') cho ngày hôm nay với CCCD/CMND: {request.NationalId} tại lịch hiến máu này."
                     });
                 }
 
-                // Check if the status is already "checked-in"
+                // Đoạn logic này vẫn có thể hữu ích nếu service của bạn trả về thông tin
+                // ngay cả khi người dùng đã check-in rồi, để controller quyết định thông báo.
                 if (checkedInRegistration.RegistrationStatusId == checkedInStatusId)
                 {
-                    return Ok(new { 
+                    return Ok(new
+                    {
                         status = "warning",
-                        message = "User already checked in today.",
-                        registration = checkedInRegistration 
+                        message = "Người dùng đã điểm danh (check-in) trong hôm nay rồi.",
+                        registration = checkedInRegistration
                     });
                 }
 
-                return Ok(new { 
+                return Ok(new
+                {
                     status = "success",
-                    message = "Check-in successful.",
-                    registration = checkedInRegistration 
+                    message = "Check-in thành công.",
+                    registration = checkedInRegistration
                 });
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException ex) // Lỗi do đầu vào không hợp lệ từ service
             {
-                return BadRequest(new { 
-                    status = "failed", 
-                    message = ex.Message 
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                // Log the exception details
-                Console.WriteLine($"Error during check-in: {ex.Message}");
-                return StatusCode(500, new { 
-                    status = "error", 
-                    message = "An internal error occurred while trying to check-in." 
+                // Log the exception details (quan trọng cho việc debug)
+                Console.WriteLine($"Error during check-in: {ex.ToString()}");
+                return StatusCode(500, new
+                {
+                    status = "error",
+                    message = "Đã có lỗi hệ thống xảy ra trong quá trình check-in."
                 });
             }
         }
-        [HttpPatch("soft-delete{registrationId}")]
-        public async Task<IActionResult> SoftDeleteRegistration(int registrationId)
+        [HttpPost("soft-delete")]
+        [ProducesResponseType(204)] // No Content
+        public async Task<IActionResult> SoftDeleteRegistration([FromBody] SoftDeleteRegistrationDTO request)
         {
-            if (registrationId <= 0)
+            var success = await _donationRegistrationService.SoftDeleteRegistrationAsync(request.RegistrationId);
+
+            if (!success)
             {
-                return BadRequest("Invalid registration ID.");
+                return NotFound($"Không tìm thấy đăng ký với ID {request.RegistrationId} để xóa.");
             }
-            var result = await _donationRegistrationService.SoftDeleteRegistrationAsync(registrationId);
-            if (!result)
-            {
-                return NotFound($"No registration found with ID {registrationId} or failed to delete.");
-            }
-            return Ok("Registration deleted successfully.");
+
+            return NoContent(); // Xóa thành công, không cần trả về nội dung
         }
     }
 }
