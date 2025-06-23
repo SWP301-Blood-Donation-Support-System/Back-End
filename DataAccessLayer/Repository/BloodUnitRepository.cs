@@ -52,5 +52,31 @@ namespace DataAccessLayer.Repository
             _context.BloodUnits.Update(unit);
             return Task.FromResult(true);
         }
+
+        // Use 'new' keyword instead of 'override'
+        public new async Task<IEnumerable<BloodUnit>> GetAllAsync()
+        {
+            return await _context.BloodUnits
+                .Include(b => b.DonationRecord)
+                    .ThenInclude(dr => dr.Registration)
+                        .ThenInclude(r => r.Donor)
+                .Include(b => b.BloodType)
+                .Include(b => b.Component)
+                .Include(b => b.BloodUnitStatus)
+                .ToListAsync();
+        }
+
+        // Use 'new' keyword instead of 'override'
+        public new async Task<BloodUnit> GetByIdAsync(int id)
+        {
+            return await _context.BloodUnits
+                .Include(b => b.DonationRecord)
+                    .ThenInclude(dr => dr.Registration)
+                        .ThenInclude(r => r.Donor)
+                .Include(b => b.BloodType)
+                .Include(b => b.Component)
+                .Include(b => b.BloodUnitStatus)
+                .FirstOrDefaultAsync(b => b.BloodUnitId == id);
+        }
     }
 }
