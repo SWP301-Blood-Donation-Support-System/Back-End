@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.IService;
+using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,7 +41,7 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddFeedback([FromBody] Feedback feedback)
+        public async Task<IActionResult> AddFeedback([FromBody] FeedbackDTO feedback)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -48,7 +49,7 @@ namespace BloodDonationSupportSystem.Controllers
             var result = await _feedbackService.AddAsync(feedback);
             if (!result)
                 return StatusCode(500, "An error occurred while saving feedback.");
-            return CreatedAtAction(nameof(GetFeedbackById), new { id = feedback.FeedbackId }, feedback);
+            return Ok(new { message = "Feedback added successfully." });
         }
 
         [HttpPatch("{id:int}")]

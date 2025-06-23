@@ -178,9 +178,9 @@ namespace BusinessLayer.Service
             return await _donationRegistrationRepository.SaveChangesAsync();
         }
 
-        public Task<bool> SoftDeleteRegistrationAsync(int registrationId)
+        public async Task<bool> SoftDeleteRegistrationAsync(int registrationId)
         {
-            return _donationRegistrationRepository.SoftDeleteRegistrationAsync(registrationId);
+            return await _donationRegistrationRepository.SoftDeleteRegistrationAsync(registrationId);
         }
 
         public async Task<DonationRegistration?> CheckInByNationalIdAsync(string nationalId, int approvedStatusId, int checkedInStatusId)
