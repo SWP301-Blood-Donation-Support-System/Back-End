@@ -18,6 +18,7 @@ namespace BusinessLayer.Service
         private readonly IDonationRegistrationRepository _registrationRepository;
         private readonly CertificateSettings _certificateSettings;
         private static readonly string ArialFontPath = Path.Combine("Utils", "Font", "arial.ttf");
+        private static readonly string NotoSansFontPath = Path.Combine("Utils", "Font", "NotoSans-Regular.ttf");
 
         // The hex code for rgb(245, 245, 220) is #F5F5DC
         private static readonly string BeigeBgColor = "#F5F5DC";
@@ -40,6 +41,10 @@ namespace BusinessLayer.Service
             if (File.Exists(ArialFontPath))
             {
                 FontManager.RegisterFont(File.OpenRead(ArialFontPath));
+            }
+            if (File.Exists(NotoSansFontPath))
+            {
+                FontManager.RegisterFont(File.OpenRead(NotoSansFontPath));
             }
         }
 
@@ -137,7 +142,7 @@ namespace BusinessLayer.Service
                     page.Size(PageSizes.A3.Landscape());
                     page.Margin(0);
                     page.PageColor(BeigeBgColor); // Light beige background
-                    page.DefaultTextStyle(x => x.FontFamily("Arial"));
+                    page.DefaultTextStyle(x => x.FontFamily("Noto Sans"));
                     // Main content container
                     page.Content()
                         .PaddingHorizontal(10)
@@ -151,7 +156,7 @@ namespace BusinessLayer.Service
                                 {
                                     // Title
                                     leftColumn.Item().AlignCenter().Text("HIẾN MÁU CỨU NGƯỜI\nMỘT NGHĨA CỬ CAO ĐẸP")
-                                        .FontSize(22)
+                                        .FontSize(21)
                                         .FontColor(DarkRedColor)
                                         .Bold();
 
@@ -159,19 +164,19 @@ namespace BusinessLayer.Service
                                     leftColumn.Item().PaddingTop(30).Column(notes =>
                                     {
                                         notes.Item().Text("+ Giấy chứng nhận này được trao cho người hiến máu sau mỗi lần hiến máu tình nguyện.")
-                                            .FontSize(18)
+                                            .FontSize(17)
                                             .FontColor(DarkRedColor);
                                             
                                         notes.Item().PaddingTop(8).Text("+ Có giá trị để truyền máu miễn phí bằng số lượng máu đã hiến, khi bản thân người hiến máu có nhu cầu sử dụng máu, tại tất cả các cơ sở y tế công lập trên toàn quốc.")
-                                            .FontSize(18)
+                                            .FontSize(17)
                                             .FontColor(DarkRedColor);
                                             
                                         notes.Item().PaddingTop(8).Text("+ Người hiến máu cần xuất trình Giấy chứng nhận này để làm cơ sở cho các cơ sở y tế thực hiện việc truyền máu miễn phí.")
-                                            .FontSize(18)
+                                            .FontSize(17)
                                             .FontColor(DarkRedColor);
                                             
                                         notes.Item().PaddingTop(8).Text("+ Cơ sở y tế có trách nhiệm ký, đóng dấu, xác nhận số lượng máu đã truyền miễn phí cho người hiến máu vào giấy chứng nhận.")
-                                            .FontSize(18)
+                                            .FontSize(17)
                                             .FontColor(DarkRedColor);
                                     });
 
@@ -185,16 +190,16 @@ namespace BusinessLayer.Service
                                     leftColumn.Item().PaddingTop(50).AlignCenter().Column(sign =>
                                     {
                                         sign.Item().AlignCenter().Text("CHỨNG NHẬN CỦA CƠ SỞ Y TẾ\nĐÃ TRUYỀN MÁU")
-                                            .FontSize(20)
+                                            .FontSize(19)
                                             .FontColor(DarkRedColor)
                                             .Bold();
                                             
                                         sign.Item().AlignCenter().PaddingTop(40).Text(currentDate)
-                                            .FontSize(20)
+                                            .FontSize(19)
                                             .FontColor(DarkRedColor);
                                             
                                         sign.Item().AlignCenter().PaddingTop(20).Text($"Số lượng: {volumeDonated} ml")
-                                            .FontSize(20)
+                                            .FontSize(19)
                                             .FontColor(DarkRedColor);
                                     });
                                 });
@@ -209,13 +214,13 @@ namespace BusinessLayer.Service
                                 {
                                     // Header - first line
                                     rightColumn.Item().AlignCenter().Text("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM")
-                                        .FontSize(18)
+                                        .FontSize(17)
                                         .FontColor(DarkRedColor)
                                         .Bold();
                                     
                                     // Header - second line
                                     rightColumn.Item().AlignCenter().Text("Độc lập - Tự do - Hạnh phúc")
-                                        .FontSize(18)
+                                        .FontSize(17)
                                         .FontColor(DarkRedColor)
                                         .Bold();
                                     rightColumn.Item()
@@ -226,7 +231,7 @@ namespace BusinessLayer.Service
                                     // Title
                                     rightColumn.Item().PaddingTop(20).AlignCenter().Text("GIẤY CHỨNG NHẬN\nHIẾN MÁU TÌNH NGUYỆN")
                                         .FontColor(DarkRedColor)
-                                        .FontSize(26)
+                                        .FontSize(25)
                                         .Bold();
 
                                     // Info section
@@ -234,12 +239,12 @@ namespace BusinessLayer.Service
                                     {
                                         // Location
                                         info.Item().AlignLeft().Text("Ban chỉ đạo hiến máu nhân đạo tỉnh/thành phố: HCM")
-                                            .FontSize(20)
+                                            .FontSize(19)
                                             .FontColor(DarkRedColor);
 
                                         // Certification
                                         info.Item().PaddingTop(25).AlignCenter().Text("Chứng nhận:")
-                                            .FontSize(22)
+                                            .FontSize(21)
                                             .FontColor(DarkRedColor)
                                             .Bold();
 
@@ -250,51 +255,51 @@ namespace BusinessLayer.Service
                                             
                                             donor.Item().Text(text =>
                                             {
-                                                text.Span("Ông/Bà: ").FontSize(18).FontColor(DarkRedColor);
-                                                text.Span(donorName).FontSize(18).Bold().FontColor(DarkRedColor);
+                                                text.Span("Ông/Bà: ").FontSize(17).FontColor(DarkRedColor);
+                                                text.Span(donorName).FontSize(17).Bold().FontColor(DarkRedColor);
                                             });
                                             
                                             donor.Item().Text(text =>
                                             {
-                                                text.Span("Sinh ngày: ").FontSize(18).FontColor(DarkRedColor);
-                                                text.Span(birthDate).FontSize(18).Bold().FontColor(DarkRedColor);
+                                                text.Span("Sinh ngày: ").FontSize(17).FontColor(DarkRedColor);
+                                                text.Span(birthDate).FontSize(17).Bold().FontColor(DarkRedColor);
                                             });
                                             
                                             donor.Item().Text(text =>
                                             {
-                                                text.Span("Số CCCD: ").FontSize(18).FontColor(DarkRedColor);
-                                                text.Span(nationalId).FontSize(18).Bold().FontColor(DarkRedColor);
+                                                text.Span("Số CCCD: ").FontSize(17).FontColor(DarkRedColor);
+                                                text.Span(nationalId).FontSize(17).Bold().FontColor(DarkRedColor);
                                             });
                                             
                                             donor.Item().Text(text =>
                                             {
-                                                text.Span("Địa chỉ: ").FontSize(18).FontColor(DarkRedColor);
-                                                text.Span(address).FontSize(18).Bold().FontColor(DarkRedColor);
+                                                text.Span("Địa chỉ: ").FontSize(17).FontColor(DarkRedColor);
+                                                text.Span(address).FontSize(17).Bold().FontColor(DarkRedColor);
                                             });
                                         });
 
                                         // Donation information
                                         info.Item().PaddingTop(25).AlignCenter().Text("Đã hiến máu tình nguyện")
-                                            .FontSize(22)
+                                            .FontSize(21)
                                             .FontColor(DarkRedColor)
                                             .Bold();
                                             
                                         info.Item().PaddingTop(15).Text(text => 
                                         {
-                                            text.Span("Tại cơ sở tiếp nhận máu: ").FontSize(18).FontColor(DarkRedColor);
-                                            text.Span("BloodDonation").FontSize(18).FontColor(DarkRedColor);
+                                            text.Span("Tại cơ sở tiếp nhận máu: ").FontSize(17).FontColor(DarkRedColor);
+                                            text.Span("BloodDonation").FontSize(17).FontColor(DarkRedColor);
                                         });
 
                                         // Volume checkboxes
                                         info.Item().PaddingTop(15).Text(text => 
                                         {
-                                            text.Span("Số lượng: ").FontSize(18).FontColor(DarkRedColor);
-                                            text.Span($"250ml{vol250} 350ml{vol350} 450ml{vol450}").FontSize(18).FontColor(DarkRedColor).FontFamily("Arial");
+                                            text.Span("Số lượng: ").FontSize(17).FontColor(DarkRedColor);
+                                            text.Span($"250ml{vol250} 350ml{vol350} 450ml{vol450}").FontSize(17).FontColor(DarkRedColor);
                                         });
 
                                         // Thank you note
                                         info.Item().PaddingTop(15).Text("Người bệnh luôn ghi ơn tấm lòng nhân ái của Ông/Bà.")
-                                            .FontSize(18)
+                                            .FontSize(17)
                                             .FontColor(DarkRedColor);
 
                                         // Blood type and date row
@@ -302,12 +307,12 @@ namespace BusinessLayer.Service
                                         {
                                             row.RelativeItem().Text(text => 
                                             {
-                                                text.Span("Nhóm máu: ").FontSize(18).FontColor(DarkRedColor);
-                                                text.Span(bloodType).FontSize(18).FontColor(DarkRedColor);
+                                                text.Span("Nhóm máu: ").FontSize(17).FontColor(DarkRedColor);
+                                                text.Span(bloodType).FontSize(17).FontColor(DarkRedColor);
                                             });
                                                 
                                             row.RelativeItem().AlignRight().Text(currentDate)
-                                                .FontSize(18)
+                                                .FontSize(17)
                                                 .FontColor(DarkRedColor);
                                         });
 
@@ -315,12 +320,12 @@ namespace BusinessLayer.Service
                                         info.Item().PaddingTop(30).AlignRight().Column(sign =>
                                         {
                                             sign.Item().AlignCenter().Text("T/M BAN CHỈ ĐẠO")
-                                                .FontSize(18)
+                                                .FontSize(17)
                                                 .FontColor(DarkRedColor)
                                                 .Bold();
                                                 
                                             sign.Item().AlignCenter().Text("(Ký tên, đóng dấu)")
-                                                .FontSize(18)
+                                                .FontSize(17)
                                                 .FontColor(DarkRedColor);
                                                 
                                             // Add more vertical space for signature
@@ -328,10 +333,10 @@ namespace BusinessLayer.Service
                                         });
 
                                         // Certificate ID
-                                        info.Item().PaddingTop(40).AlignLeft().Text(text => 
+                                        info.Item().PaddingTop(20).AlignLeft().Text(text => 
                                         {
-                                            text.Span("Số: ").FontSize(18).Bold().FontColor(DarkRedColor);
-                                            text.Span(certificateId).FontSize(18).Bold().FontColor(DarkRedColor);
+                                            text.Span("Số: ").FontSize(17).Bold().FontColor(DarkRedColor);
+                                            text.Span(certificateId).FontSize(17).Bold().FontColor(DarkRedColor);
                                         });
                                     });
                                 });
