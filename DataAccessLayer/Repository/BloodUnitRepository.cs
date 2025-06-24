@@ -20,25 +20,53 @@ namespace DataAccessLayer.Repository
         public async Task<IEnumerable<BloodUnit>> GetUnitsByBloodComponentIdAsync(int bloodComponentId)
         {
             return await _context.BloodUnits
-                .Where(p=>p.ComponentId==bloodComponentId).ToListAsync();
+                .Where(p => p.ComponentId == bloodComponentId)
+                .Include(b => b.DonationRecord)
+                    .ThenInclude(dr => dr.Registration)
+                        .ThenInclude(r => r.Donor)
+                .Include(b => b.BloodType)
+                .Include(b => b.Component)
+                .Include(b => b.BloodUnitStatus)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<BloodUnit>> GetUnitsByBloodTypeIdAsync(int bloodTypeId)
         {
             return await _context.BloodUnits
-                .Where(p=>p.BloodTypeId==bloodTypeId).ToListAsync();
+                .Where(p => p.BloodTypeId == bloodTypeId)
+                .Include(b => b.DonationRecord)
+                    .ThenInclude(dr => dr.Registration)
+                        .ThenInclude(r => r.Donor)
+                .Include(b => b.BloodType)
+                .Include(b => b.Component)
+                .Include(b => b.BloodUnitStatus)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<BloodUnit>> GetUnitsByRecordIdAsync(int recordId)
         {
             return await _context.BloodUnits
-                .Where(p=>p.DonationRecordId==recordId).ToListAsync();
+                .Where(p => p.DonationRecordId == recordId)
+                .Include(b => b.DonationRecord)
+                    .ThenInclude(dr => dr.Registration)
+                        .ThenInclude(r => r.Donor)
+                .Include(b => b.BloodType)
+                .Include(b => b.Component)
+                .Include(b => b.BloodUnitStatus)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<BloodUnit>> GetUnitsByStatusAsync(int bloodUnitStatusId)
         {
             return await _context.BloodUnits
-                .Where(p => p.BloodUnitStatusId == bloodUnitStatusId).ToListAsync();
+                .Where(p => p.BloodUnitStatusId == bloodUnitStatusId)
+                .Include(b => b.DonationRecord)
+                    .ThenInclude(dr => dr.Registration)
+                        .ThenInclude(r => r.Donor)
+                .Include(b => b.BloodType)
+                .Include(b => b.Component)
+                .Include(b => b.BloodUnitStatus)
+                .ToListAsync();
         }
 
         public Task<bool> UpdateUnitStatusAsync(int unitId, int bloodUnitStatusId)
