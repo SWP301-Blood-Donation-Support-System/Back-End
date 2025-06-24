@@ -21,16 +21,19 @@ namespace BusinessLayer.IService
         /// </summary>
         /// <returns>A task representing the asynchronous operation, containing a list of feedbacks.</returns>
         Task<IEnumerable<Feedback>> GetAllFeedbacksAsync();
+        Task<IEnumerable<FeedbackDTO>> GetAllFeedbacksAsync();
         /// <summary>
         /// Gets feedback by ID.
         /// </summary>
         /// <param name="feedId">The ID of the feedback.</param>
         /// <returns>A task representing the asynchronous operation, containing the feedback if found.</returns>
         Task<Feedback?> GetFeedbackByIdAsync(int feedId);
+        Task<Feedback> GetFeedbackByIdAsync(int feedId);
         /// <summary>
         /// Gets feedback by donor ID.
         /// </summary>
         /// <param name="donorId"> The ID of the donor.</param>
+        /// <param name="registrationId"> The ID of the registration.</param>
         /// <returns>A task representing the asynchronous operation, containing the feedback if found.</returns>
         Task<Feedback?> GetFeedbackByRegistrationIdAsync(int registrationId);
         /// <summary>

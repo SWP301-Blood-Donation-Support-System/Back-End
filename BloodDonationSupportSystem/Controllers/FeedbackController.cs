@@ -32,7 +32,7 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpGet("donor/{donorId:int}")]
-        public async Task<IActionResult> GetFeedbackByDonorId(int registrationId)
+        public async Task<IActionResult> GetFeedbackByRegistrationId(int registrationId)
         {
             var feedback = await _feedbackService.GetFeedbackByRegistrationIdAsync(registrationId);
             if (feedback == null)

@@ -30,9 +30,10 @@ namespace BusinessLayer.Service
             await _feedbackRepository.AddAsync(entity);
             return await _feedbackRepository.SaveChangesAsync();
         }
-        public async Task<IEnumerable<Feedback>> GetAllFeedbacksAsync()
+        public async Task<IEnumerable<FeedbackDTO>> GetAllFeedbacksAsync()
         {
-            return await _feedbackRepository.GetAllFeedbacksAsync();
+            var entity = await _feedbackRepository.GetAllFeedbacksAsync();
+            return Mapper.Map<IEnumerable<FeedbackDTO>>(entity);
         }
         public async Task<Feedback> GetFeedbackByIdAsync(int feedId)
         {

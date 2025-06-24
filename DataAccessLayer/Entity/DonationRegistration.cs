@@ -36,4 +36,5 @@ public partial class DonationRegistration
     public virtual DonationSchedule Schedule { get; set; } = null!;
 
     public virtual TimeSlot? TimeSlot { get; set; }
+
 }

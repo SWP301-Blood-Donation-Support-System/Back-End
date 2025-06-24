@@ -11,6 +11,6 @@ namespace DataAccessLayer.DTO
         public string FeedbackInfo { get; set; } = string.Empty;
         // Optional: You can add additional properties if needed
         // e.g., Rating, Response, etc.
-        public int UserId { get; set; }
+        public int RegistrationId { get; set; }
     }
 }

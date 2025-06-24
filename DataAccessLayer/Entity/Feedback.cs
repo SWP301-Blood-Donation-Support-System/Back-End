@@ -21,5 +21,5 @@ public partial class Feedback
 
     public bool? IsDeleted { get; set; }
 
-    public virtual DonationRegistration Registration { get; set; } = null!;
+    public virtual DonationRegistration DonationRegistration { get; set; } = null!;
 }
