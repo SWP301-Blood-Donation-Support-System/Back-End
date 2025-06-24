@@ -35,7 +35,7 @@ namespace BusinessLayer.Service
             var entity = await _feedbackRepository.GetAllFeedbacksAsync();
             return Mapper.Map<IEnumerable<FeedbackDTO>>(entity);
         }
-        public async Task<Feedback> GetFeedbackByIdAsync(int feedId)
+        public async Task<FeedbackDTO> GetFeedbackByIdAsync(int feedId)
         {
             if (feedId <= 0)
                 throw new ArgumentOutOfRangeException(nameof(feedId), "ID must be greater than zero");

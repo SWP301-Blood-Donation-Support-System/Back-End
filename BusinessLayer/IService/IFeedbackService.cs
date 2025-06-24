@@ -32,7 +32,7 @@ namespace BusinessLayer.IService
         /// </summary>
         /// <param name="registrationId"> The ID of the registration.</param>
         /// <returns>A task representing the asynchronous operation, containing the feedback if found.</returns>
-        Task<Feedback?> GetFeedbackByRegistrationIdAsync(int registrationId);
+        Task<IEnumerable<FeedbackDTO>> GetFeedbackByRegistrationIdAsync(int registrationId);
         /// <summary>
         /// Soft delete the feedback.
         /// </summary>
