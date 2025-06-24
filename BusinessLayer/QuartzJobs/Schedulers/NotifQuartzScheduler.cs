@@ -49,12 +49,11 @@ namespace BusinessLayer.QuartzJobs.Schedulers
                 .UsingJobData("Recipients", recipientsString)
                 .Build();
 
-            // Create trigger to run the job immediately
+            // Create trigger to run the job immediately and then repeat every 2 minutes
             var trigger = TriggerBuilder.Create()
                 .WithIdentity($"notifyTrigger_{notifyID}", "notificationGroup")
-                .StartAt(DateBuilder.FutureDate(1,IntervalUnit.Minute))
-                .WithSimpleSchedule(action => action.WithIntervalInMinutes(1).RepeatForever())
                 .StartNow()
+                .WithSimpleSchedule(action => action.WithIntervalInMinutes(2).RepeatForever())
                 .Build();
 
             // Schedule the job

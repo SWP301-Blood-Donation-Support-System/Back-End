@@ -10,7 +10,9 @@ namespace BloodDonationSupportSystem.Mapper
         {
             // Map from Entity to DTO (only mapping ScheduleId and ScheduleDate)
             CreateMap<DonationSchedule, DonationScheduleDTO>();
-           
+            
+            // Map from DTO to Entity
+            CreateMap<DonationScheduleDTO, DonationSchedule>();
         }
     }
 }   

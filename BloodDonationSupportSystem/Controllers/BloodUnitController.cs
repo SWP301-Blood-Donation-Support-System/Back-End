@@ -94,19 +94,82 @@ namespace BloodDonationSupportSystem.Controllers
         public async Task<IActionResult> GetBloodUnitsByBloodType(int bloodTypeId)
         {
             var bloodUnits = await _bloodUnitService.GetBloodUnitsByBloodTypeAsync(bloodTypeId);
-            return Ok(bloodUnits);
+            
+            // Create anonymous object with donor information
+            var result = bloodUnits.Select(bu => new
+            {
+                bu.BloodUnitId,
+                bu.DonationRecordId,
+                bu.BloodTypeId,
+                BloodTypeName = bu.BloodType?.BloodTypeName,
+                bu.ComponentId,
+                ComponentName = bu.Component?.ComponentName,
+                bu.CollectedDateTime,
+                bu.ExpiryDateTime,
+                bu.Volume,
+                bu.BloodUnitStatusId,
+                StatusName = bu.BloodUnitStatus?.StatusName,
+                DonorId = bu.DonationRecord?.Registration?.DonorId,
+                DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                bu.CreatedAt,
+                bu.UpdatedAt
+            });
+            
+            return Ok(result);
         }
         [HttpGet("GetBloodUnitsByBloodComponent/{bloodComponentId}")]
         public async Task<IActionResult> GetBloodUnitsByBloodComponent(int bloodComponentId)
         {
             var bloodUnits = await _bloodUnitService.GetBloodUnitsByBloodComponentAsync(bloodComponentId);
-            return Ok(bloodUnits);
+            
+            // Create anonymous object with donor information
+            var result = bloodUnits.Select(bu => new
+            {
+                bu.BloodUnitId,
+                bu.DonationRecordId,
+                bu.BloodTypeId,
+                BloodTypeName = bu.BloodType?.BloodTypeName,
+                bu.ComponentId,
+                ComponentName = bu.Component?.ComponentName,
+                bu.CollectedDateTime,
+                bu.ExpiryDateTime,
+                bu.Volume,
+                bu.BloodUnitStatusId,
+                StatusName = bu.BloodUnitStatus?.StatusName,
+                DonorId = bu.DonationRecord?.Registration?.DonorId,
+                DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                bu.CreatedAt,
+                bu.UpdatedAt
+            });
+            
+            return Ok(result);
         }
         [HttpGet("GetBloodUnitsByStatus/{statusId}")]
         public async Task<IActionResult> GetBloodUnitsByStatus(int statusId)
         {
             var bloodUnits = await _bloodUnitService.GetBloodUnitsByStatusAsync(statusId);
-            return Ok(bloodUnits);
+            
+            // Create anonymous object with donor information
+            var result = bloodUnits.Select(bu => new
+            {
+                bu.BloodUnitId,
+                bu.DonationRecordId,
+                bu.BloodTypeId,
+                BloodTypeName = bu.BloodType?.BloodTypeName,
+                bu.ComponentId,
+                ComponentName = bu.Component?.ComponentName,
+                bu.CollectedDateTime,
+                bu.ExpiryDateTime,
+                bu.Volume,
+                bu.BloodUnitStatusId,
+                StatusName = bu.BloodUnitStatus?.StatusName,
+                DonorId = bu.DonationRecord?.Registration?.DonorId,
+                DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                bu.CreatedAt,
+                bu.UpdatedAt
+            });
+            
+            return Ok(result);
         }
         [HttpPut("UpdateBloodUnitStatus/{unitId}/{bloodUnitStatusId}")]
         public async Task<IActionResult> UpdateBloodUnitStatus(int unitId, int bloodUnitStatusId)
