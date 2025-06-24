@@ -181,7 +181,7 @@ namespace BloodDonationSupportSystem.Controllers
 
 
 
-        [HttpPost("check-in")]
+        [HttpPut("check-in")]
         public async Task<IActionResult> CheckIn([FromBody] CheckInDTO request)
         {
             // 2. Không cần check null/empty thủ công cho NationalId nữa
