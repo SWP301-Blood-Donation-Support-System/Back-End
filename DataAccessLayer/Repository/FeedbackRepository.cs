@@ -20,32 +20,32 @@ namespace DataAccessLayer.Repository
         {
             if (feedback == null)
                 throw new ArgumentNullException(nameof(feedback));
-            await _context.Feedback.AddAsync(feedback);
+            await _context.Feedbacks.AddAsync(feedback);
             return feedback;
         }
         public async Task<Feedback> GetFeedbackByIdAsync(int feedId)
         {
-            return await _context.Feedback.FindAsync(feedId);
+            return await _context.Feedbacks.FindAsync(feedId);
         }
         public async Task<IEnumerable<Feedback>> GetAllFeedbacksAsync()
         {
-            return await _context.Feedback.ToListAsync();
+            return await _context.Feedbacks.ToListAsync();
         }
-        public async Task<IEnumerable<Feedback>> GetFeedbackByDonorIdAsync(int donorId)
+        public async Task<IEnumerable<Feedback>> GetFeedbackByRegistrationIdAsync(int registrationId)
         {
-            return await _context.Feedback
-                .Where(f => f.DonorId == donorId)
+            return await _context.Feedbacks
+                .Where(f => f.RegistrationId == registrationId)
                 .ToListAsync();
         }
         public async Task<bool> SoftDeleteFeedbackAsync(int feedId)
         {
-            var feedback = await _context.Feedback.FindAsync(feedId);
+            var feedback = await _context.Feedbacks.FindAsync(feedId);
             if (feedback == null)
             {
                 return false; // Feedback not found
             }
             feedback.IsDeleted = true; // Soft delete
-            _context.Feedback.Update(feedback);
+            _context.Feedbacks.Update(feedback);
             return await _context.SaveChangesAsync() > 0; // Save changes
         }
     }

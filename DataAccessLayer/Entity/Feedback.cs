@@ -7,7 +7,7 @@ public partial class Feedback
 {
     public int FeedbackId { get; set; }
 
-    public int DonorId { get; set; }
+    public int RegistrationId { get; set; }
 
     public string FeedbackInfo { get; set; } = null!;
 
@@ -19,7 +19,7 @@ public partial class Feedback
 
     public string? UpdatedBy { get; set; }
 
-    public bool IsDeleted { get; set; }
+    public bool? IsDeleted { get; set; }
 
-    public virtual User Donor { get; set; } = null!;
+    public virtual DonationRegistration Registration { get; set; } = null!;
 }

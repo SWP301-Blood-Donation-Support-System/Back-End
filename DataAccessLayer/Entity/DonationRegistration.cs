@@ -29,6 +29,8 @@ public partial class DonationRegistration
 
     public virtual User Donor { get; set; } = null!;
 
+    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
+
     public virtual RegistrationStatus? RegistrationStatus { get; set; }
 
     public virtual DonationSchedule Schedule { get; set; } = null!;
