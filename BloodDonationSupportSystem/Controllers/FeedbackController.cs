@@ -22,16 +22,16 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(records);
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetFeedbackById(int id)
+        [HttpGet("{feedId:int}")]
+        public async Task<IActionResult> GetFeedbackById(int feedId)
         {
-            var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
+            var feedback = await _feedbackService.GetFeedbackByIdAsync(feedId);
             if (feedback == null)
                 return NotFound();
             return Ok(feedback);
         }
 
-        [HttpGet("donor/{donorId:int}")]
+        [HttpGet("registration/{registrationId:int}")]
         public async Task<IActionResult> GetFeedbackByRegistrationId(int registrationId)
         {
             var feedback = await _feedbackService.GetFeedbackByRegistrationIdAsync(registrationId);
@@ -52,10 +52,10 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(new { message = "Feedback added successfully." });
         }
 
-        [HttpPatch("{id:int}")]
-        public async Task<IActionResult> SoftDeleteFeedback(int id)
+        [HttpPatch("{feedId:int}")]
+        public async Task<IActionResult> SoftDeleteFeedback(int feedId)
         {
-            var result = await _feedbackService.SoftDeleteFeedbackAsync(id);
+            var result = await _feedbackService.SoftDeleteFeedbackAsync(feedId);
             if (!result)
                 return NotFound();
             return NoContent();
