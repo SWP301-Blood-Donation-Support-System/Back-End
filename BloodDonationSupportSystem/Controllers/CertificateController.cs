@@ -22,11 +22,11 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                var docxBytes = await _certificateService.GenerateCertificateAsync(registrationId);
+                var pdfBytes = await _certificateService.GenerateCertificateAsync(registrationId);
                 return File(
-                    docxBytes, 
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
-                    $"blood-donation-certificate.docx");
+                    pdfBytes, 
+                    "application/pdf", 
+                    $"giay-chung-nhan-hien-mau.pdf");
             }
             catch (KeyNotFoundException ex)
             {
@@ -39,31 +39,10 @@ namespace BloodDonationSupportSystem.Controllers
                 return StatusCode(500, new
                 {
                     message = $"An error occurred: {ex.Message}",
-                    innerException = innerMessage,
-                    stackTrace = ex.StackTrace
+                    innerException = innerMessage
                 });
             }
         }
 
-        //[HttpGet("by-id/{certificateId}")]
-        //public async Task<IActionResult> GetCertificateById(string certificateId)
-        //{
-        //    try
-        //    {
-        //        var docxBytes = await _certificateService.GetCertificateByIdAsync(certificateId);
-        //        return File(
-        //            docxBytes, 
-        //            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
-        //            $"blood-donation-certificate.docx");
-        //    }
-        //    catch (KeyNotFoundException ex)
-        //    {
-        //        return NotFound(new { message = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = ex.Message });
-        //    }
-        //}
     }
 }
