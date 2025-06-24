@@ -35,6 +35,8 @@ namespace BusinessLayer.Service
             
             // Set QuestPDF license - use community license for open-source projects
             QuestPDF.Settings.License = LicenseType.Community;
+
+            // Register Arial font
             if (File.Exists(ArialFontPath))
             {
                 FontManager.RegisterFont(File.OpenRead(ArialFontPath));

@@ -27,4 +27,10 @@
     <Folder Include="Utils\Font\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Utils\Font\arial.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
