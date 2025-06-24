@@ -75,6 +75,23 @@ public partial class BloodDonationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+        modelBuilder.Entity<BloodType>().HasQueryFilter(bt => !bt.IsDeleted);
+        modelBuilder.Entity<BloodComponent>().HasQueryFilter(bc => !bc.IsDeleted);
+        modelBuilder.Entity<BloodUnit>().HasQueryFilter(bu => !bu.IsDeleted);
+        modelBuilder.Entity<BloodRequest>().HasQueryFilter(br => !br.IsDeleted);
+        modelBuilder.Entity<BloodRequestStatus>().HasQueryFilter(brs => !brs.IsDeleted);
+        modelBuilder.Entity<BloodTestResult>().HasQueryFilter(btr => !btr.IsDeleted);
+        modelBuilder.Entity<BloodUnitStatus>().HasQueryFilter(bus => !bus.IsDeleted);
+        modelBuilder.Entity<DonationAvailability>().HasQueryFilter(da => !da.IsDeleted);
+        modelBuilder.Entity<DonationRecord>().HasQueryFilter(dr => !dr.IsDeleted);
+        modelBuilder.Entity<DonationRegistration>().HasQueryFilter(dr => !dr.IsDeleted);
+        modelBuilder.Entity<DonationSchedule>().HasQueryFilter(ds => !ds.IsDeleted);
+        modelBuilder.Entity<DonationType>().HasQueryFilter(dt => !dt.IsDeleted);
+        modelBuilder.Entity<DonationValidation>().HasQueryFilter(dv => !dv.IsDeleted);
+        modelBuilder.Entity<Feedback>().HasQueryFilter(f => !f.IsDeleted);
+        
+
         modelBuilder.Entity<Article>(entity =>
         {
             entity.HasKey(e => e.ArticleId).HasName("PK__Article__9C6270C82C047E32");

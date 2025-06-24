@@ -19,7 +19,7 @@ public partial class Feedback
 
     public string? UpdatedBy { get; set; }
 
-    public bool? IsDeleted { get; set; }
+    public bool IsDeleted { get; set; }
 
     public virtual DonationRegistration DonationRegistration { get; set; } = null!;
 }

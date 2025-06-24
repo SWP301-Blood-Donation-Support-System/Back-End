@@ -30,7 +30,7 @@ namespace DataAccessLayer.Repository
 
         public async Task<IEnumerable<User>> GetByRoleIdAsync(int roleId)
         {
-            return await _context.Users.Where(u => u.RoleId == roleId).ToListAsync();
+            return await _context.Users.Where(u => u.RoleId == roleId && !u.IsDeleted).ToListAsync();
         }
 
         public async Task<IEnumerable<User>> GetByBloodTypeIdAsync(int bloodTypeId)

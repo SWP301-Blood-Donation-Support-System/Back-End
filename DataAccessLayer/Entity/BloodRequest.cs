@@ -33,7 +33,7 @@ public partial class BloodRequest
 
     public string? UpdatedBy { get; set; }
 
-    public bool? IsDeleted { get; set; }
+    public bool IsDeleted { get; set; }
 
     public virtual BloodComponent? BloodComponent { get; set; }
 

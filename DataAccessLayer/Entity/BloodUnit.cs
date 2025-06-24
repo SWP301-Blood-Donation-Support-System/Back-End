@@ -29,7 +29,7 @@ public partial class BloodUnit
 
     public string? UpdatedBy { get; set; }
 
-    public bool? IsDeleted { get; set; }
+    public bool IsDeleted { get; set; }
 
     public virtual BloodType BloodType { get; set; } = null!;
 
