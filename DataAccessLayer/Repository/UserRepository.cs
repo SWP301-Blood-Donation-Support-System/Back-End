@@ -56,7 +56,7 @@ namespace DataAccessLayer.Repository
 
             user.LastDonationDate = donationDate;
             user.NextEligibleDonationDate = donationDate.AddMonths(3);
-            user.DonationCount++;
+            //user.DonationCount++;
             user.UpdatedAt = DateTime.UtcNow;
 
             // GHI CHÚ: Logic g?i UpdateUserDonationAvailabilityAsync nên ???c chuy?n lên Service Layer.

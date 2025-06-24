@@ -30,9 +30,10 @@ namespace BusinessLayer.Service
             await _feedbackRepository.AddAsync(entity);
             return await _feedbackRepository.SaveChangesAsync();
         }
-        public async Task<IEnumerable<Feedback>> GetAllFeedbacksAsync()
+        public async Task<IEnumerable<FeedbackDTO>> GetAllFeedbacksAsync()
         {
-            return await _feedbackRepository.GetAllFeedbacksAsync();
+            var entity = await _feedbackRepository.GetAllFeedbacksAsync();
+            return Mapper.Map<IEnumerable<FeedbackDTO>>(entity);
         }
         public async Task<Feedback> GetFeedbackByIdAsync(int feedId)
         {
@@ -40,14 +41,15 @@ namespace BusinessLayer.Service
                 throw new ArgumentOutOfRangeException(nameof(feedId), "ID must be greater than zero");
             return await _feedbackRepository.GetFeedbackByIdAsync(feedId);
         }
-        public async Task<Feedback?> GetFeedbackByRegistrationIdAsync(int registrationId)
+        public async Task<IEnumerable<FeedbackDTO>> GetFeedbackByRegistrationIdAsync(int registrationId)
         {
             if (registrationId <= 0)
                 throw new ArgumentOutOfRangeException(nameof(registrationId), "ID must be greater than zero");
 
             var feedbacks = await _feedbackRepository.GetFeedbackByRegistrationIdAsync(registrationId);
-            return feedbacks.FirstOrDefault(); // Return the first feedback or null if none exist
+            return Mapper.Map<IEnumerable<FeedbackDTO>>(feedbacks); // Map the feedbacks to FeedbackDTO
         }
+
 
         public async Task<bool> SoftDeleteFeedbackAsync(int feedId)
         {

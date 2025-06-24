@@ -453,7 +453,7 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.RegistrationId).HasColumnName("RegistrationID");
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
 
-            entity.HasOne(d => d.Registration).WithMany(p => p.Feedbacks)
+            entity.HasOne(d => d.DonationRegistration).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.RegistrationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Feedback_DonationRegistration");
