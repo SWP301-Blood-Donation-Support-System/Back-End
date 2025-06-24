@@ -3,6 +3,7 @@ using BusinessLayer.Utils;
 using DataAccessLayer.Entity;
 using DataAccessLayer.IRepository;
 using Microsoft.Extensions.Options;
+using QuestPDF.Drawing;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -16,6 +17,7 @@ namespace BusinessLayer.Service
     {
         private readonly IDonationRegistrationRepository _registrationRepository;
         private readonly CertificateSettings _certificateSettings;
+        private static readonly string ArialFontPath = Path.Combine("Utils", "Font", "arial.ttf");
 
         // The hex code for rgb(245, 245, 220) is #F5F5DC
         private static readonly string BeigeBgColor = "#F5F5DC";
@@ -33,6 +35,10 @@ namespace BusinessLayer.Service
             
             // Set QuestPDF license - use community license for open-source projects
             QuestPDF.Settings.License = LicenseType.Community;
+            if (File.Exists(ArialFontPath))
+            {
+                FontManager.RegisterFont(File.OpenRead(ArialFontPath));
+            }
         }
 
         public async Task<byte[]> GenerateCertificateAsync(int registrationId)
@@ -129,7 +135,7 @@ namespace BusinessLayer.Service
                     page.Size(PageSizes.A3.Landscape());
                     page.Margin(0);
                     page.PageColor(BeigeBgColor); // Light beige background
-                    
+                    page.DefaultTextStyle(x => x.FontFamily("Arial"));
                     // Main content container
                     page.Content()
                         .PaddingHorizontal(10)
@@ -281,7 +287,7 @@ namespace BusinessLayer.Service
                                         info.Item().PaddingTop(15).Text(text => 
                                         {
                                             text.Span("Số lượng: ").FontSize(18).FontColor(DarkRedColor);
-                                            text.Span($"250ml{vol250} 350ml{vol350} 450ml{vol450}").FontSize(18).FontColor(DarkRedColor);
+                                            text.Span($"250ml{vol250} 350ml{vol350} 450ml{vol450}").FontSize(18).FontColor(DarkRedColor).FontFamily("Arial");
                                         });
 
                                         // Thank you note
