@@ -40,12 +40,12 @@ namespace BusinessLayer.Service
                 throw new ArgumentOutOfRangeException(nameof(feedId), "ID must be greater than zero");
             return await _feedbackRepository.GetFeedbackByIdAsync(feedId);
         }
-        public async Task<Feedback?> GetFeedbackByDonorIdAsync(int donorId)
+        public async Task<Feedback?> GetFeedbackByRegistrationIdAsync(int registrationId)
         {
-            if (donorId <= 0)
-                throw new ArgumentOutOfRangeException(nameof(donorId), "ID must be greater than zero");
+            if (registrationId <= 0)
+                throw new ArgumentOutOfRangeException(nameof(registrationId), "ID must be greater than zero");
 
-            var feedbacks = await _feedbackRepository.GetFeedbackByDonorIdAsync(donorId);
+            var feedbacks = await _feedbackRepository.GetFeedbackByRegistrationIdAsync(registrationId);
             return feedbacks.FirstOrDefault(); // Return the first feedback or null if none exist
         }
 

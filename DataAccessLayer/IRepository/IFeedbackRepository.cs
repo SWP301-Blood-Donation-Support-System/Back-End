@@ -11,7 +11,7 @@ namespace DataAccessLayer.IRepository
     {
         Task<IEnumerable<Feedback>> GetAllFeedbacksAsync();
         Task<Feedback> GetFeedbackByIdAsync(int feedId);
-        Task<IEnumerable<Feedback>> GetFeedbackByDonorIdAsync(int donorId);
+        Task<IEnumerable<Feedback>> GetFeedbackByRegistrationIdAsync(int registrationId);
 
         Task<bool> SoftDeleteFeedbackAsync(int feedId);
     }

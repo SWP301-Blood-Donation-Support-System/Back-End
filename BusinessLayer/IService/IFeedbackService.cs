@@ -32,7 +32,7 @@ namespace BusinessLayer.IService
         /// </summary>
         /// <param name="donorId"> The ID of the donor.</param>
         /// <returns>A task representing the asynchronous operation, containing the feedback if found.</returns>
-        Task<Feedback?> GetFeedbackByDonorIdAsync(int donorId);
+        Task<Feedback?> GetFeedbackByRegistrationIdAsync(int registrationId);
         /// <summary>
         /// Soft delete the feedback.
         /// </summary>

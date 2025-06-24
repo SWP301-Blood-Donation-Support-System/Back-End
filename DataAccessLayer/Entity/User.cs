@@ -63,8 +63,6 @@ public partial class User
 
     public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
 
-    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
-
     public virtual Gender? Gender { get; set; }
 
     public virtual Occupation? Occupation { get; set; }
