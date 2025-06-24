@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
 
 namespace BusinessLayer.IService
@@ -14,7 +15,7 @@ namespace BusinessLayer.IService
         /// </summary>
         /// <param name="feedback">The feedback to add.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        Task<bool> AddAsync(Feedback feedback);
+        Task<bool> AddAsync(FeedbackDTO feedback);
         /// <summary>
         /// Gets all feedbacks.
         /// </summary>

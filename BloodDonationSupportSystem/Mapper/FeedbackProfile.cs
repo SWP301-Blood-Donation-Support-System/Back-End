@@ -10,7 +10,7 @@ namespace BloodDonationSupportSystem.Mapper
         {
             // Define your mappings here if needed
             // CreateMap<SourceType, DestinationType>();
-            CreateMap<Feedback, FeedbackDTO>();
+            CreateMap<Feedback, FeedbackDTO>().ReverseMap();
         }
     }
 
