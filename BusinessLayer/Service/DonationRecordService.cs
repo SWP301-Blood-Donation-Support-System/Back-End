@@ -214,7 +214,7 @@ namespace BusinessLayer.Service
                     DonationRecordId = recordId,
                     // Use donor's blood type if available and not unknown (1001)
                     BloodTypeId = record.Registration.Donor.BloodTypeId ?? 1001, // Default or use test result
-                    ComponentId = record.DonationTypeId, // Use donation type as component ID
+                    ComponentId = record.DonationTypeId ?? 1, // Use donation type as component ID
                     Volume = record.VolumeDonated, // Use the volume donated
                     CollectedDateTime=record.DonationDateTime,
                     BloodUnitStatusId = 1 // Default status for new blood units
