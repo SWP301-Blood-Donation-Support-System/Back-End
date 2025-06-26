@@ -29,7 +29,7 @@ public partial class Article
 
     public string? UpdatedBy { get; set; }
 
-    public bool? IsDeleted { get; set; }
+    public bool IsDeleted { get; set; }
 
     public virtual ArticleCategory ArticleCategory { get; set; } = null!;
 

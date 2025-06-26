@@ -35,6 +35,8 @@ public partial class BloodDonationDbContext : DbContext
 
     public virtual DbSet<BloodUnitStatus> BloodUnitStatuses { get; set; }
 
+    public virtual DbSet<Department> Departments { get; set; }
+
     public virtual DbSet<DonationAvailability> DonationAvailabilities { get; set; }
 
     public virtual DbSet<DonationRecord> DonationRecords { get; set; }
@@ -90,7 +92,13 @@ public partial class BloodDonationDbContext : DbContext
         modelBuilder.Entity<DonationType>().HasQueryFilter(dt => !dt.IsDeleted);
         modelBuilder.Entity<DonationValidation>().HasQueryFilter(dv => !dv.IsDeleted);
         modelBuilder.Entity<Feedback>().HasQueryFilter(f => !f.IsDeleted);
-        
+        modelBuilder.Entity<Department>().HasQueryFilter(f => !f.IsDeleted);
+        modelBuilder.Entity<Article>().HasQueryFilter(a => !a.IsDeleted);
+        modelBuilder.Entity<ArticleCategory>().HasQueryFilter(ac => !ac.IsDeleted);
+        modelBuilder.Entity<ArticleStatus>().HasQueryFilter(ast => !ast.IsDeleted);
+        modelBuilder.Entity<Notification>().HasQueryFilter(n => !n.IsDeleted);
+        modelBuilder.Entity<NotificationType>().HasQueryFilter(nt => !nt.IsDeleted);
+
 
         modelBuilder.Entity<Article>(entity =>
         {
@@ -104,7 +112,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.AuthorUserId).HasColumnName("AuthorUserID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.Picture).HasMaxLength(255);
             entity.Property(e => e.Title).HasMaxLength(200);
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
@@ -184,7 +191,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.Quantity).HasColumnType("decimal(6, 2)");
             entity.Property(e => e.RequestStatusId).HasColumnName("RequestStatusID");
             entity.Property(e => e.RequestingStaffId).HasColumnName("RequestingStaffID");
@@ -273,7 +279,7 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.DonationRecordId).HasColumnName("DonationRecordID");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+            entity.Property(e => e.RequestId).HasColumnName("RequestID");
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.Volume).HasColumnType("decimal(6, 2)");
 
@@ -288,12 +294,17 @@ public partial class BloodDonationDbContext : DbContext
 
             entity.HasOne(d => d.Component).WithMany(p => p.BloodUnits)
                 .HasForeignKey(d => d.ComponentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BloodUnit_Component");
 
             entity.HasOne(d => d.DonationRecord).WithMany(p => p.BloodUnits)
                 .HasForeignKey(d => d.DonationRecordId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BloodUnit_DonationRecord");
+
+            entity.HasOne(d => d.Request).WithMany(p => p.BloodUnits)
+                .HasForeignKey(d => d.RequestId)
+                .HasConstraintName("FK_BloodUnit_BloodRequest");
         });
 
         modelBuilder.Entity<BloodUnitStatus>(entity =>
@@ -310,6 +321,21 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.StatusName).HasMaxLength(50);
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasKey(e => e.DepartmentId).HasName("PK__Departme__B2079BCD66B989F0");
+
+            entity.ToTable("Department");
+
+            entity.HasIndex(e => e.DepartmentName, "UQ__Departme__D949CC34CFA2EE69").IsUnique();
+
+            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.DepartmentName).HasMaxLength(100);
+            entity.Property(e => e.IsDeleted).HasColumnName("isDeleted");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(256);
         });
 
         modelBuilder.Entity<DonationAvailability>(entity =>
@@ -346,7 +372,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.DonorBloodPressure).HasMaxLength(20);
             entity.Property(e => e.DonorTemperature).HasColumnType("decimal(4, 2)");
             entity.Property(e => e.DonorWeight).HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.RegistrationId).HasColumnName("RegistrationID");
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.VolumeDonated).HasColumnType("decimal(6, 2)");
@@ -377,7 +402,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
             entity.Property(e => e.DonorId).HasColumnName("DonorID");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.RegistrationStatusId).HasColumnName("RegistrationStatusID");
             entity.Property(e => e.ScheduleId).HasColumnName("ScheduleID");
             entity.Property(e => e.TimeSlotId).HasColumnName("TimeSlotID");
@@ -411,7 +435,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.ScheduleId).HasColumnName("ScheduleID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
@@ -466,11 +489,10 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.FeedbackId).HasColumnName("FeedbackID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.RegistrationId).HasColumnName("RegistrationID");
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
 
-            entity.HasOne(d => d.DonationRegistration).WithMany(p => p.Feedbacks)
+            entity.HasOne(d => d.Registration).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.RegistrationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Feedback_DonationRegistration");
@@ -626,15 +648,14 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
             entity.Property(e => e.DonationAvailabilityId)
                 .HasDefaultValue(1)
                 .HasColumnName("DonationAvailabilityID");
-            entity.Property(e => e.DonationCount).HasDefaultValue(0);
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.GenderId).HasColumnName("GenderID");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.NationalId)
                 .HasMaxLength(20)
                 .HasColumnName("NationalID");
@@ -649,6 +670,10 @@ public partial class BloodDonationDbContext : DbContext
             entity.HasOne(d => d.BloodType).WithMany(p => p.Users)
                 .HasForeignKey(d => d.BloodTypeId)
                 .HasConstraintName("FK_User_BloodType");
+
+            entity.HasOne(d => d.Department).WithMany(p => p.Users)
+                .HasForeignKey(d => d.DepartmentId)
+                .HasConstraintName("FK_User_Department");
 
             entity.HasOne(d => d.DonationAvailability).WithMany(p => p.Users)
                 .HasForeignKey(d => d.DonationAvailabilityId)

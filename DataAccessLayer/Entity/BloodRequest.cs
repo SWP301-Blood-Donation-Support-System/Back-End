@@ -39,6 +39,8 @@ public partial class BloodRequest
 
     public virtual BloodType BloodType { get; set; } = null!;
 
+    public virtual ICollection<BloodUnit> BloodUnits { get; set; } = new List<BloodUnit>();
+
     public virtual BloodRequestStatus? RequestStatus { get; set; }
 
     public virtual User RequestingStaff { get; set; } = null!;

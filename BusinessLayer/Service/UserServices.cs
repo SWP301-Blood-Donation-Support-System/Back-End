@@ -244,7 +244,6 @@ namespace BusinessLayer.Service
                         new Claim("BloodTypeID", user.BloodTypeId?.ToString() ?? ""),
                         new Claim("LastDonationDate", user.LastDonationDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""),
                         new Claim("NextEligibleDonationDate", user.NextEligibleDonationDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""),
-                        new Claim("DonationCount", user.DonationCount?.ToString() ?? "0"),
                         new Claim("DonationAvailabilityID", user.DonationAvailabilityId.ToString()),
                         new Claim("IsActive", user.IsActive.ToString())
                     }),

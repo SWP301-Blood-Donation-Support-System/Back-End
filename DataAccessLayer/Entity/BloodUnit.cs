@@ -11,7 +11,7 @@ public partial class BloodUnit
 
     public int BloodTypeId { get; set; }
 
-    public int? ComponentId { get; set; }
+    public int ComponentId { get; set; }
 
     public DateTime? CollectedDateTime { get; set; }
 
@@ -21,7 +21,9 @@ public partial class BloodUnit
 
     public int? BloodUnitStatusId { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public int? RequestId { get; set; }
+
+    public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
@@ -35,7 +37,9 @@ public partial class BloodUnit
 
     public virtual BloodUnitStatus? BloodUnitStatus { get; set; }
 
-    public virtual BloodComponent? Component { get; set; }
+    public virtual BloodComponent Component { get; set; } = null!;
 
     public virtual DonationRecord DonationRecord { get; set; } = null!;
+
+    public virtual BloodRequest? Request { get; set; }
 }

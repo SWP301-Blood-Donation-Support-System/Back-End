@@ -145,10 +145,8 @@ namespace BusinessLayer.Service
                     string month = donationRecord.DonationDateTime.Month.ToString().PadLeft(2, '0');
                     string donorIdPart = donor.UserId.ToString().PadLeft(5, '0');
 
-                    int donationCount = donor.DonationCount ?? 0;
-                    string counter = (donationCount + 1).ToString().PadLeft(3, '0');
 
-                    donationRecord.CertificateId = $"BDC-{donorIdPart}-{year}{month}-{counter}";
+                    donationRecord.CertificateId = $"BDC-{donorIdPart}-{year}{month}";
                     donationRecord.UpdatedAt = DateTime.UtcNow;
                 }
 
@@ -165,7 +163,6 @@ namespace BusinessLayer.Service
                     donor.NextEligibleDonationDate = donor.LastDonationDate.Value.AddDays(14);
                 }
                 
-                donor.DonationCount += 1;
                 donor.DonationAvailabilityId = 2;
             }
             
