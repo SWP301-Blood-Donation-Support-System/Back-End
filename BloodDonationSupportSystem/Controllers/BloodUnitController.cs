@@ -20,7 +20,6 @@ namespace BloodDonationSupportSystem.Controllers
         {
             var bloodUnits = await _bloodUnitService.GetAllBloodUnitsAsync();
             
-            // Create anonymous object with donor information
             var result = bloodUnits.Select(bu => new
             {
                 bu.BloodUnitId,
@@ -51,7 +50,6 @@ namespace BloodDonationSupportSystem.Controllers
                 return NotFound($"No blood unit found with ID {id}.");
             }
             
-            // Create anonymous object with donor information
             var result = new
             {
                 bloodUnit.BloodUnitId,

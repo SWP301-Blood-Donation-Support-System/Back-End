@@ -13,13 +13,13 @@ public partial class BloodRequest
 
     public int? BloodComponentId { get; set; }
 
-    public decimal Quantity { get; set; }
+    public decimal Volume { get; set; }
 
     public DateTime? RequestDateTime { get; set; }
 
     public DateTime? RequiredDateTime { get; set; }
 
-    public int? RequestStatusId { get; set; }
+    public int RequestStatusId { get; set; }
 
     public int? UrgencyId { get; set; }
 
