@@ -191,7 +191,7 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
-            entity.Property(e => e.Quantity).HasColumnType("decimal(6, 2)");
+            entity.Property(e => e.Volume).HasColumnType("decimal(6, 2)");
             entity.Property(e => e.RequestStatusId).HasColumnName("RequestStatusID");
             entity.Property(e => e.RequestingStaffId).HasColumnName("RequestingStaffID");
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
