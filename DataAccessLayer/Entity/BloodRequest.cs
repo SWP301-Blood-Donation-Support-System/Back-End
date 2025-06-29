@@ -19,7 +19,7 @@ public partial class BloodRequest
 
     public DateTime? RequiredDateTime { get; set; }
 
-    public int RequestStatusId { get; set; }
+    public int? RequestStatusId { get; set; }
 
     public int? UrgencyId { get; set; }
 
