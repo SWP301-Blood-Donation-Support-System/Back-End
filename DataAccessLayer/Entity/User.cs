@@ -25,6 +25,8 @@ public partial class User
 
     public int? DepartmentId { get; set; }
 
+    public int? HospitalId { get; set; }
+
     public string? NationalId { get; set; }
 
     public string? Address { get; set; }
@@ -51,9 +53,13 @@ public partial class User
 
     public string? UpdatedBy { get; set; }
 
+    public byte[]? UserImage { get; set; }
+
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 
-    public virtual ICollection<BloodRequest> BloodRequests { get; set; } = new List<BloodRequest>();
+    public virtual ICollection<BloodRequest> BloodRequestApprovedByUsers { get; set; } = new List<BloodRequest>();
+
+    public virtual ICollection<BloodRequest> BloodRequestRequestingStaffs { get; set; } = new List<BloodRequest>();
 
     public virtual BloodType? BloodType { get; set; }
 
@@ -66,6 +72,8 @@ public partial class User
     public virtual ICollection<DonationValidation> DonationValidations { get; set; } = new List<DonationValidation>();
 
     public virtual Gender? Gender { get; set; }
+
+    public virtual Hospital? Hospital { get; set; }
 
     public virtual Occupation? Occupation { get; set; }
 

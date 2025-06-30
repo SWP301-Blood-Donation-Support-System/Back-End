@@ -53,6 +53,8 @@ public partial class BloodDonationDbContext : DbContext
 
     public virtual DbSet<Gender> Genders { get; set; }
 
+    public virtual DbSet<Hospital> Hospitals { get; set; }
+
     public virtual DbSet<Notification> Notifications { get; set; }
 
     public virtual DbSet<NotificationType> NotificationTypes { get; set; }
@@ -73,7 +75,7 @@ public partial class BloodDonationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=database.purintech.id.vn;user=sa;password=<Hu@nH0aH0n9>;Database=BloodDonationDB;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=database.purintech.id.vn;Database=BloodDonationDB;TrustServerCertificate=true;user=sa;password=<Hu@nH0aH0n9>");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -187,6 +189,7 @@ public partial class BloodDonationDbContext : DbContext
             entity.ToTable("BloodRequest");
 
             entity.Property(e => e.RequestId).HasColumnName("RequestID");
+            entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
             entity.Property(e => e.BloodComponentId).HasColumnName("BloodComponentID");
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -196,9 +199,13 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.RequestingStaffId).HasColumnName("RequestingStaffID");
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.UrgencyId).HasColumnName("UrgencyID");
+            entity.Property(e => e.Volume).HasColumnType("decimal(6, 2)");
+
+            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.BloodRequestApprovedByUsers).HasForeignKey(d => d.ApprovedByUserId);
 
             entity.HasOne(d => d.BloodComponent).WithMany(p => p.BloodRequests)
                 .HasForeignKey(d => d.BloodComponentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BloodRequest_Component");
 
             entity.HasOne(d => d.BloodType).WithMany(p => p.BloodRequests)
@@ -210,7 +217,7 @@ public partial class BloodDonationDbContext : DbContext
                 .HasForeignKey(d => d.RequestStatusId)
                 .HasConstraintName("FK_BloodRequest_Status");
 
-            entity.HasOne(d => d.RequestingStaff).WithMany(p => p.BloodRequests)
+            entity.HasOne(d => d.RequestingStaff).WithMany(p => p.BloodRequestRequestingStaffs)
                 .HasForeignKey(d => d.RequestingStaffId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BloodRequest_Staff");
@@ -511,6 +518,20 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
         });
 
+        modelBuilder.Entity<Hospital>(entity =>
+        {
+            entity.ToTable("Hospital");
+
+            entity.HasIndex(e => e.HospitalName, "UQ_Hospital_HospitalName").IsUnique();
+
+            entity.Property(e => e.HospitalId).HasColumnName("HospitalID");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.HospitalAddress).HasMaxLength(255);
+            entity.Property(e => e.HospitalName).HasMaxLength(100);
+            entity.Property(e => e.IsDeleted).HasColumnName("isDeleted");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(256);
+        });
+
         modelBuilder.Entity<Notification>(entity =>
         {
             entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__20CF2E3263EC039C");
@@ -655,6 +676,7 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.GenderId).HasColumnName("GenderID");
+            entity.Property(e => e.HospitalId).HasColumnName("HospitalID");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.NationalId)
                 .HasMaxLength(20)
@@ -683,6 +705,10 @@ public partial class BloodDonationDbContext : DbContext
             entity.HasOne(d => d.Gender).WithMany(p => p.Users)
                 .HasForeignKey(d => d.GenderId)
                 .HasConstraintName("FK_User_Gender");
+
+            entity.HasOne(d => d.Hospital).WithMany(p => p.Users)
+                .HasForeignKey(d => d.HospitalId)
+                .HasConstraintName("FK_User_Hospital");
 
             entity.HasOne(d => d.Occupation).WithMany(p => p.Users)
                 .HasForeignKey(d => d.OccupationId)
