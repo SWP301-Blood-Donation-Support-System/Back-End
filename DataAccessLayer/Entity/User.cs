@@ -53,7 +53,9 @@ public partial class User
 
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 
-    public virtual ICollection<BloodRequest> BloodRequests { get; set; } = new List<BloodRequest>();
+    public virtual ICollection<BloodRequest> BloodRequestApprovedByUsers { get; set; } = new List<BloodRequest>();
+
+    public virtual ICollection<BloodRequest> BloodRequestRequestingStaffs { get; set; } = new List<BloodRequest>();
 
     public virtual BloodType? BloodType { get; set; }
 

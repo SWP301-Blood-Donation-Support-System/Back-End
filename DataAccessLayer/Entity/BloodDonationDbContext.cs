@@ -77,35 +77,35 @@ public partial class BloodDonationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+        modelBuilder.Entity<BloodType>().HasQueryFilter(bt => !bt.IsDeleted);
+        modelBuilder.Entity<BloodComponent>().HasQueryFilter(bc => !bc.IsDeleted);
+        modelBuilder.Entity<BloodUnit>().HasQueryFilter(bu => !bu.IsDeleted);
+        modelBuilder.Entity<BloodRequest>().HasQueryFilter(br => !br.IsDeleted);
+        modelBuilder.Entity<BloodRequestStatus>().HasQueryFilter(brs => !brs.IsDeleted);
+        modelBuilder.Entity<BloodTestResult>().HasQueryFilter(btr => !btr.IsDeleted);
+        modelBuilder.Entity<BloodUnitStatus>().HasQueryFilter(bus => !bus.IsDeleted);
+        modelBuilder.Entity<DonationAvailability>().HasQueryFilter(da => !da.IsDeleted);
+        modelBuilder.Entity<DonationRecord>().HasQueryFilter(dr => !dr.IsDeleted);
+        modelBuilder.Entity<DonationRegistration>().HasQueryFilter(dr => !dr.IsDeleted);
+        modelBuilder.Entity<DonationSchedule>().HasQueryFilter(ds => !ds.IsDeleted);
+        modelBuilder.Entity<DonationType>().HasQueryFilter(dt => !dt.IsDeleted);
+        modelBuilder.Entity<DonationValidation>().HasQueryFilter(dv => !dv.IsDeleted);
+        modelBuilder.Entity<Feedback>().HasQueryFilter(f => !f.IsDeleted);
+        modelBuilder.Entity<Article>().HasQueryFilter(a => !a.IsDeleted);
+        modelBuilder.Entity<ArticleCategory>().HasQueryFilter(ac => !ac.IsDeleted);
+        modelBuilder.Entity<ArticleStatus>().HasQueryFilter(ast => !ast.IsDeleted);
+        modelBuilder.Entity<Notification>().HasQueryFilter(n => !n.IsDeleted);
+        modelBuilder.Entity<NotificationType>().HasQueryFilter(nt => !nt.IsDeleted);
+        modelBuilder.Entity<Occupation>().HasQueryFilter(o => !o.IsDeleted);
+        modelBuilder.Entity<RegistrationStatus>().HasQueryFilter(rs => !rs.IsDeleted);
+        modelBuilder.Entity<Role>().HasQueryFilter(r => !r.IsDeleted);
+        modelBuilder.Entity<TimeSlot>().HasQueryFilter(ts => !ts.IsDeleted);
+        modelBuilder.Entity<Urgency>().HasQueryFilter(u => !u.IsDeleted);
+        modelBuilder.Entity<Hospital>().HasQueryFilter(h => !h.IsDeleted);
+
         modelBuilder.Entity<Article>(entity =>
         {
-            modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
-            modelBuilder.Entity<BloodType>().HasQueryFilter(bt => !bt.IsDeleted);
-            modelBuilder.Entity<BloodComponent>().HasQueryFilter(bc => !bc.IsDeleted);
-            modelBuilder.Entity<BloodUnit>().HasQueryFilter(bu => !bu.IsDeleted);
-            modelBuilder.Entity<BloodRequest>().HasQueryFilter(br => !br.IsDeleted);
-            modelBuilder.Entity<BloodRequestStatus>().HasQueryFilter(brs => !brs.IsDeleted);
-            modelBuilder.Entity<BloodTestResult>().HasQueryFilter(btr => !btr.IsDeleted);
-            modelBuilder.Entity<BloodUnitStatus>().HasQueryFilter(bus => !bus.IsDeleted);
-            modelBuilder.Entity<DonationAvailability>().HasQueryFilter(da => !da.IsDeleted);
-            modelBuilder.Entity<DonationRecord>().HasQueryFilter(dr => !dr.IsDeleted);
-            modelBuilder.Entity<DonationRegistration>().HasQueryFilter(dr => !dr.IsDeleted);
-            modelBuilder.Entity<DonationSchedule>().HasQueryFilter(ds => !ds.IsDeleted);
-            modelBuilder.Entity<DonationType>().HasQueryFilter(dt => !dt.IsDeleted);
-            modelBuilder.Entity<DonationValidation>().HasQueryFilter(dv => !dv.IsDeleted);
-            modelBuilder.Entity<Feedback>().HasQueryFilter(f => !f.IsDeleted);
-            modelBuilder.Entity<Article>().HasQueryFilter(a => !a.IsDeleted);
-            modelBuilder.Entity<ArticleCategory>().HasQueryFilter(ac => !ac.IsDeleted);
-            modelBuilder.Entity<ArticleStatus>().HasQueryFilter(ast => !ast.IsDeleted);
-            modelBuilder.Entity<Notification>().HasQueryFilter(n => !n.IsDeleted);
-            modelBuilder.Entity<NotificationType>().HasQueryFilter(nt => !nt.IsDeleted);
-            modelBuilder.Entity<Occupation>().HasQueryFilter(o => !o.IsDeleted);
-            modelBuilder.Entity<RegistrationStatus>().HasQueryFilter(rs => !rs.IsDeleted);
-            modelBuilder.Entity<Role>().HasQueryFilter(r => !r.IsDeleted);
-            modelBuilder.Entity<TimeSlot>().HasQueryFilter(ts => !ts.IsDeleted);
-            modelBuilder.Entity<Urgency>().HasQueryFilter(u => !u.IsDeleted);
-            modelBuilder.Entity<Hospital>().HasQueryFilter(h => !h.IsDeleted);
-
             entity.HasKey(e => e.ArticleId).HasName("PK__Article__9C6270C82C047E32");
 
             entity.ToTable("Article");
@@ -191,6 +191,7 @@ public partial class BloodDonationDbContext : DbContext
             entity.ToTable("BloodRequest");
 
             entity.Property(e => e.RequestId).HasColumnName("RequestID");
+            entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
             entity.Property(e => e.BloodComponentId).HasColumnName("BloodComponentID");
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -201,8 +202,11 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.UrgencyId).HasColumnName("UrgencyID");
             entity.Property(e => e.Volume).HasColumnType("decimal(6, 2)");
 
+            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.BloodRequestApprovedByUsers).HasForeignKey(d => d.ApprovedByUserId);
+
             entity.HasOne(d => d.BloodComponent).WithMany(p => p.BloodRequests)
                 .HasForeignKey(d => d.BloodComponentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BloodRequest_Component");
 
             entity.HasOne(d => d.BloodType).WithMany(p => p.BloodRequests)
@@ -214,7 +218,7 @@ public partial class BloodDonationDbContext : DbContext
                 .HasForeignKey(d => d.RequestStatusId)
                 .HasConstraintName("FK_BloodRequest_Status");
 
-            entity.HasOne(d => d.RequestingStaff).WithMany(p => p.BloodRequests)
+            entity.HasOne(d => d.RequestingStaff).WithMany(p => p.BloodRequestRequestingStaffs)
                 .HasForeignKey(d => d.RequestingStaffId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BloodRequest_Staff");
@@ -502,8 +506,6 @@ public partial class BloodDonationDbContext : DbContext
 
         modelBuilder.Entity<Hospital>(entity =>
         {
-            entity.HasKey(e => e.HospitalId).HasName("PK_Hospital");
-
             entity.ToTable("Hospital");
 
             entity.HasIndex(e => e.HospitalName, "UQ_Hospital_HospitalName").IsUnique();
