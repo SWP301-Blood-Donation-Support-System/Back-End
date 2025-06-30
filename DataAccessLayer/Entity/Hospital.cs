@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Entity;
 
-public partial class Department
+public partial class Hospital
 {
-    public int DepartmentId { get; set; }
+    public int HospitalId { get; set; }
 
-    public string DepartmentName { get; set; } = null!;
+    public string HospitalName { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
 
@@ -16,6 +16,8 @@ public partial class Department
     public string? UpdatedBy { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public string? HospitalAddress { get; set; }
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

@@ -11,7 +11,7 @@ public partial class BloodRequest
 
     public int BloodTypeId { get; set; }
 
-    public int? BloodComponentId { get; set; }
+    public int BloodComponentId { get; set; }
 
     public decimal Volume { get; set; }
 
@@ -19,11 +19,13 @@ public partial class BloodRequest
 
     public DateTime? RequiredDateTime { get; set; }
 
-    public int RequestStatusId { get; set; }
+    public int? RequestStatusId { get; set; }
 
     public int? UrgencyId { get; set; }
 
     public string? Note { get; set; }
+
+    public int? ApprovedByUserId { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
@@ -35,7 +37,9 @@ public partial class BloodRequest
 
     public bool IsDeleted { get; set; }
 
-    public virtual BloodComponent? BloodComponent { get; set; }
+    public virtual User? ApprovedByUser { get; set; }
+
+    public virtual BloodComponent BloodComponent { get; set; } = null!;
 
     public virtual BloodType BloodType { get; set; } = null!;
 
