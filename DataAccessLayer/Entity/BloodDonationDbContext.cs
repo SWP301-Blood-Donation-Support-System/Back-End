@@ -73,7 +73,7 @@ public partial class BloodDonationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=database.purintech.id.vn;user=sa;password=<Hu@nH0aH0n9>;Database=BloodDonationDB;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=database.purintech.id.vn;Database=BloodDonationDB;TrustServerCertificate=true;user=sa;password=<Hu@nH0aH0n9>");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -157,6 +157,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
 app.UseCors("AllowAllOrigins");
 app.UseCors("AllowCors");
 app.UseCors("AllowReact");
