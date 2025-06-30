@@ -25,8 +25,6 @@ public partial class User
 
     public int? HospitalId { get; set; }
 
-    public int? HospitalId { get; set; }
-
     public string? NationalId { get; set; }
 
     public string? Address { get; set; }
@@ -52,8 +50,6 @@ public partial class User
     public DateTime? UpdatedAt { get; set; }
 
     public string? UpdatedBy { get; set; }
-
-    public byte[]? UserImage { get; set; }
 
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 
