@@ -151,6 +151,40 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Staff registered successfully.");
         }
+        [HttpPost("register-admin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] StaffRegisterDTO adminRegisterDTO)
+        {
+            try
+            {
+                await _userServices.RegisterAdminAsync(adminRegisterDTO);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
+            return Ok("Admin registered successfully.");
+        }
+        [HttpPut("switch-role")]
+        public async Task<IActionResult> SwitchRole([FromBody] UserSwitchRoleDTO user)
+        {
+            if (user == null || user.UserId <= 0)
+            {
+                return BadRequest("Invalid user data.");
+            }
+            try
+            {
+                var updatedUser = await _userServices.UpdateUserRoleAsync(user.UserId, user.RoleId);
+                return Ok(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+        }
 
         [HttpPost("google")]
         public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
@@ -229,6 +263,5 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return NoContent();
         }
-
     }
 }
