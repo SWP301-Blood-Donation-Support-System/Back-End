@@ -17,7 +17,6 @@ namespace DataAccessLayer.Repository
             _context = context;
         }
 
-        // Ghi chú: T?t c? các b? l?c `IsDeleted` và `IsActive` ?ã ???c xóa nh? Global Filter.
         public async Task<User> GetByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -94,6 +93,16 @@ namespace DataAccessLayer.Repository
             user.UpdatedAt = DateTime.UtcNow;
             _context.Users.Update(user);
             return true;
+        }
+
+        public async Task<User> GetByNationalIdAsync(string nationalId)
+        {
+           return await _context.Users.FirstOrDefaultAsync(u => u.NationalId == nationalId);
+        }
+
+        public async Task<User> GetByPhoneNumberAsync(string phoneNumber)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
         }
     }
 }
