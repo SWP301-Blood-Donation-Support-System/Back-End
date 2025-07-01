@@ -51,8 +51,6 @@ public partial class User
 
     public string? UpdatedBy { get; set; }
 
-    public byte[]? UserImage { get; set; }
-
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 
     public virtual ICollection<BloodRequest> BloodRequestApprovedByUsers { get; set; } = new List<BloodRequest>();

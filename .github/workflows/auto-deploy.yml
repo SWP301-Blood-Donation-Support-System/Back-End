@@ -48,6 +48,10 @@ jobs:
         run: |
           docker build -t $IMAGE_NAME:v1 .
 
+      - name: Clean build cache
+        run: |
+          docker builder prune
+
       - name: Stop and Remove Old Container (if exists)
         run: |
           docker stop $IMAGE_NAME || true

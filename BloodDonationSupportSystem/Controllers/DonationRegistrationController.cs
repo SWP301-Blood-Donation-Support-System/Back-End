@@ -250,8 +250,8 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
-        [HttpPost("soft-delete")]
-        [ProducesResponseType(204)] // No Content
+        [HttpDelete]
+        //[ProducesResponseType(204)] // No Content
         public async Task<IActionResult> SoftDeleteRegistration([FromBody] SoftDeleteRegistrationDTO request)
         {
             var success = await _donationRegistrationService.SoftDeleteRegistrationAsync(request.RegistrationId);
