@@ -37,7 +37,6 @@ namespace BusinessLayer.Service
             }
 
         }
-
         public async Task<IEnumerable<BloodRequest>> GetAllBloodRequestsAsync()
         {
            try
@@ -125,6 +124,67 @@ namespace BusinessLayer.Service
             catch (Exception ex)
             {
                 Console.WriteLine("Error retrieving blood requests by urgency ID", ex);
+                throw;
+            }
+        }
+        public async Task<bool> ApproveBloodRequestAsync(int requestId, int approvedByUserId)
+        {
+            try
+            {
+                var bloodRequest = await _bloodRequestRepository.GetByIdAsync(requestId);
+                if (bloodRequest == null)
+                {
+                    throw new KeyNotFoundException("Blood request not found");
+                }
+                
+                bloodRequest.ApprovedByUserId = approvedByUserId;
+                bloodRequest.RequestStatusId = 2; // Approved status
+                bloodRequest.UpdatedAt = DateTime.UtcNow;
+                await _bloodRequestRepository.UpdateAsync(bloodRequest);
+                await _bloodRequestRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error approving blood request", ex);
+                throw;
+            }
+        }
+
+        public async Task<bool> RejectBloodRequestAsync(int requestId, int rejectedByUserId, string? rejectReason)
+        {
+            try
+            {
+                var bloodRequest = await _bloodRequestRepository.GetByIdAsync(requestId);
+                if (bloodRequest == null)
+                {
+                    throw new KeyNotFoundException("Blood request not found");
+                }
+
+                bloodRequest.ApprovedByUserId = rejectedByUserId;
+                bloodRequest.RequestStatusId = 3;
+
+                var currentNote = bloodRequest.Note ?? string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(rejectReason))
+                {
+                    if (!string.IsNullOrWhiteSpace(currentNote))
+                    {
+                        currentNote += "\n---"; // Clear separator
+                    }
+                    currentNote += $"\nĐã bị từ chối vì: \n{rejectReason}";
+                }
+                bloodRequest.Note = currentNote; 
+                bloodRequest.UpdatedAt = DateTime.UtcNow;
+
+                await _bloodRequestRepository.UpdateAsync(bloodRequest);
+                await _bloodRequestRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Improved logging for better debugging
+                Console.WriteLine($"Error rejecting blood request ID {requestId}: {ex.Message}", ex);
                 throw;
             }
         }

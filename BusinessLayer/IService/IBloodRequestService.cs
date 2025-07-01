@@ -18,7 +18,9 @@ namespace BusinessLayer.IService
         Task<IEnumerable<BloodRequest>> GetBloodRequestsByComponentIdAsync(int componentId);
         Task<IEnumerable<BloodRequest>> GetBloodRequestsByStatusIdAsync(int statusId);
         Task<IEnumerable<BloodRequest>> GetBloodRequestsByUrgencyIdAsync(int urgencyId);
-        Task<IEnumerable<BloodRequest>> GetBloodRequestsByStaffIdAsync(int staffId);    
+        Task<IEnumerable<BloodRequest>> GetBloodRequestsByStaffIdAsync(int staffId);   
+        Task<bool> ApproveBloodRequestAsync(int requestId, int approvedByUserId);
+        Task<bool> RejectBloodRequestAsync(int requestId, int rejectedByUserId, string? rejectReason);
         Task<bool> SoftDeleteBloodRequestAsync(int requestId);
     }
 }

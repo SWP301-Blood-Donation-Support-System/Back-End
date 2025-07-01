@@ -55,6 +55,34 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood request status updated successfully.");
         }
+        [HttpPatch("{requestId}/approve")]
+        public async Task<IActionResult> ApproveBloodRequestAsync(int requestId, [FromBody] int approvedByUserId)
+        {
+            if (requestId <= 0 || approvedByUserId <= 0)
+            {
+                return BadRequest("Invalid request or user ID.");
+            }
+            var result = await _bloodRequestService.ApproveBloodRequestAsync(requestId, approvedByUserId);
+            if (!result)
+            {
+                return NotFound("Blood request not found or approval failed.");
+            }
+            return Ok("Blood request approved successfully.");
+        }
+        [HttpPatch("{requestId}/reject")]
+        public async Task<IActionResult> RejectBloodRequestAsync(int requestId, [FromBody] BloodRequestRejectDTO rejectDTO)
+        {
+            if (requestId <= 0 )
+            {
+                return BadRequest("Invalid request.");
+            }
+            var result = await _bloodRequestService.RejectBloodRequestAsync(requestId, rejectDTO.UserId,rejectDTO.Reason );
+            if (!result)
+            {
+                return NotFound("Blood request not found or rejection failed.");
+            }
+            return Ok("Blood request rejected successfully.");
+        }
 
     }
 }

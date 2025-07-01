@@ -100,6 +100,11 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException("Email already exists");
                 }
+                existingUser = await _userRepository.GetByUsernameAsync(donor.Username);
+                if (existingUser != null)
+                {
+                    throw new InvalidOperationException("Username already exists");
+                }
                 User EntityUser = _mapper.Map<User>(donor);
 
                 // Remove image processing - set UserImage to null
@@ -130,6 +135,11 @@ namespace BusinessLayer.Service
                 if (existingUser != null)
                 {
                     throw new InvalidOperationException("Email already exists");
+                }
+                existingUser = await _userRepository.GetByUsernameAsync(staff.Username);
+                if (existingUser != null)
+                {
+                    throw new InvalidOperationException("Username already exists");
                 }
                 User EntityUser = _mapper.Map<User>(staff);
 
@@ -190,8 +200,16 @@ namespace BusinessLayer.Service
             {
                 throw new ArgumentNullException(nameof(user), "User cannot be null");
             }
-
-            // Update the timestamp
+            var existingUser = await _userRepository.GetByPhoneNumberAsync(user.PhoneNumber);
+            if (existingUser != null && existingUser.UserId != user.UserId)
+            {
+                throw new InvalidOperationException("Phone number already exists for another user");
+            }
+            existingUser = await _userRepository.GetByNationalIdAsync(user.NationalId);
+            if (existingUser != null && existingUser.UserId != user.UserId)
+            {
+                throw new InvalidOperationException("National ID already exists for another user");
+            }
             user.UpdatedAt = DateTime.UtcNow;
 
             await _userRepository.UpdateAsync(user);
@@ -625,7 +643,7 @@ namespace BusinessLayer.Service
             sb.AppendLine("        <div class='content'>");
             sb.AppendLine($"            <h2>Kính chào {displayName}!</h2>");
             sb.AppendLine("            <p>Cảm ơn bạn đã đăng ký hiến máu tình nguyện tại Hệ thống Hỗ trợ Hiến máu. Đây là một hành động vô cùng ý nghĩa và cao đẹp!</p>");
-            
+
             // Registration confirmation info
             sb.AppendLine("            <div class='registration-info'>");
             sb.AppendLine("                <h3>📋 Thông tin đăng ký</h3>");
@@ -634,17 +652,17 @@ namespace BusinessLayer.Service
             sb.AppendLine($"                    <tr><td class='label'>Ngày đăng ký:</td><td>{registrationInfo.RegistrationDate.ToString("dd/MM/yyyy HH:mm")}</td></tr>");
             sb.AppendLine($"                    <tr><td class='label'>Họ tên:</td><td>{registrationInfo.DonorName ?? displayName}</td></tr>");
             sb.AppendLine($"                    <tr><td class='label'>Email:</td><td>{registrationInfo.DonorEmail ?? userEmail}</td></tr>");
-            
+
             if (!string.IsNullOrEmpty(registrationInfo.DonorPhone))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Số điện thoại:</td><td>{registrationInfo.DonorPhone}</td></tr>");
             }
-            
+
             if (!string.IsNullOrEmpty(registrationInfo.BloodType))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td class='important'>{registrationInfo.BloodType}</td></tr>");
             }
-            
+
             sb.AppendLine("                </table>");
             sb.AppendLine("            </div>");
 
@@ -653,32 +671,32 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <h3>📅 Thông tin lịch hiến máu</h3>");
             sb.AppendLine("                <table>");
             sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{registrationInfo.ScheduleDate.ToString("dddd, dd/MM/yyyy")}</td></tr>");
-            
+
             if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Khung giờ:</td><td>{registrationInfo.TimeSlotName}</td></tr>");
             }
-            
+
             if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
             }
-            
+
             if (!string.IsNullOrEmpty(registrationInfo.ScheduleLocation))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Địa điểm:</td><td>{registrationInfo.ScheduleLocation}</td></tr>");
             }
-            
+
             if (!string.IsNullOrEmpty(registrationInfo.HospitalName))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Bệnh viện:</td><td>{registrationInfo.HospitalName}</td></tr>");
             }
-            
+
             if (!string.IsNullOrEmpty(registrationInfo.HospitalAddress))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Địa chỉ bệnh viện:</td><td>{registrationInfo.HospitalAddress}</td></tr>");
             }
-            
+
             sb.AppendLine("                </table>");
             sb.AppendLine("            </div>");
 

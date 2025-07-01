@@ -18,8 +18,6 @@ namespace DataAccessLayer.DTO
 
         public DateTime RequiredDateTime { get; set; }
 
-        public int RequestStatusId { get; set; }
-
         public int UrgencyId { get; set; }
 
         public string Note { get; set; }
