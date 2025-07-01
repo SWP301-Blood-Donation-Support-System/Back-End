@@ -16,10 +16,5 @@ namespace DataAccessLayer.DTO
         public string PasswordHash { get; set; } = null!;
         [Required(ErrorMessage = "Username is required.")]
         public string Username { get; set; } = null!;
-        public IFormFile? UserImage { get; set; }
-        public string? FullName { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? NationalId { get; set; }
-        public DateOnly? DateOfBirth { get; set; }
     }
 }

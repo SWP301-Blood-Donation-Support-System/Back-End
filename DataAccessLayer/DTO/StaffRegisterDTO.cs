@@ -15,6 +15,5 @@ namespace DataAccessLayer.DTO
         public string PasswordHash { get; set; } = null!;
         public string? FullName { get; set; }
         public string StaffCode { get; set; } = null!;
-        public IFormFile? UserImage { get; set; }
     }
 }
