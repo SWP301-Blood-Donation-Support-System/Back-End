@@ -116,6 +116,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService > ();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistrationRepository>();
@@ -125,6 +126,7 @@ builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleReposito
 builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
 builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();
