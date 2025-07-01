@@ -632,7 +632,8 @@ public partial class BloodDonationDbContext : DbContext
             entity.HasKey(e => e.UserId).HasName("PK__User__1788CCACAB5F17E7");
 
             entity.ToTable("User");
-
+            entity.HasIndex(e => e.UserImage, "IX_User_ProfilePicture")
+                .HasFilter("([ProfilePicture] IS NOT NULL)");
             entity.HasIndex(e => e.Email, "UQ_User_Email")
                 .IsUnique()
                 .HasFilter("([Email] IS NOT NULL)");

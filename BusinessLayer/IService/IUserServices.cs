@@ -28,5 +28,9 @@ namespace BusinessLayer.IService
         Task<string> GenerateToken(LoginDTO login);
         Task<string> ValidateGoogleToken(TokenRequest token);
         void SendMail(string mailSubject, string mailBody, string receiver);
+        void SendWelcomeEmail(string userEmail, string userName = "");
+        void SendDonationRegistrationThankYouEmail(string userEmail, string userName, DonationRegistrationEmailInfoDTO registrationInfo);
+        Task<byte[]> GetUserImageAsync(int userId);
+        Task<bool> DeleteUserImageAsync(int userId);
     }
 }

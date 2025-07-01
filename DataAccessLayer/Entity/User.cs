@@ -9,6 +9,7 @@ public partial class User
 
     public string? Username { get; set; }
 
+    public byte[]? UserImage { get; set; }
     public string PasswordHash { get; set; } = null!;
 
     public string Email { get; set; } = null!;

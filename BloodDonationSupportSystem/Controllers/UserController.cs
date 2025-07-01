@@ -115,7 +115,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
         [HttpPost("register-donor")]
-        public async Task<IActionResult> RegisterDonor([FromBody] RegisterDTO registerDTO)
+        public async Task<IActionResult> RegisterDonor([FromForm] RegisterDTO registerDTO)
         {
             try
             {
@@ -134,7 +134,7 @@ namespace BloodDonationSupportSystem.Controllers
 
         }
         [HttpPost("register-staff")]
-        public async Task<IActionResult> RegisterStaff([FromBody] StaffRegisterDTO staffRegisterDTO)
+        public async Task<IActionResult> RegisterStaff([FromForm] StaffRegisterDTO staffRegisterDTO)
         {
             try
             {
@@ -201,7 +201,7 @@ namespace BloodDonationSupportSystem.Controllers
             return NotFound(new { status = "failed", message = "Invalid" });
         }
         [HttpPut("donor/{donorId}")]
-        public async Task<IActionResult> UpdateDonor(int donorId, [FromBody] DonorDTO donorDTO)
+        public async Task<IActionResult> UpdateDonor(int donorId, [FromForm] DonorDTO donorDTO)
         {
             if (donorDTO == null || donorId <= 0) 
             {
@@ -253,7 +253,75 @@ namespace BloodDonationSupportSystem.Controllers
         //    }
         //}
 
-       
+        [HttpPost("send-welcome-email")]
+        public IActionResult SendWelcomeEmail([FromBody] WelcomeEmailRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.Email))
+                {
+                    return BadRequest(new { status = "failed", message = "Email is required" });
+                }
+
+                _userServices.SendWelcomeEmail(request.Email, request.UserName);
+                return Ok(new { status = "success", message = "Welcome email sent successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { status = "failed", message = "Error sending welcome email", error = ex.Message });
+            }
+        }
+
+        [HttpGet("{userId}/image")]
+        public async Task<IActionResult> GetUserImage(int userId)
+        {
+            if (userId <= 0)
+            {
+                return BadRequest(new { status = "failed", message = "Invalid user ID" });
+            }
+
+            try
+            {
+                var imageData = await _userServices.GetUserImageAsync(userId);
+                
+                if (imageData == null || imageData.Length == 0)
+                {
+                    return NotFound(new { status = "failed", message = "User image not found" });
+                }
+
+                return File(imageData, "image/jpeg"); // Default to JPEG, could be enhanced to detect actual format
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { status = "failed", message = "Error retrieving user image", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("{userId}/image")]
+        public async Task<IActionResult> DeleteUserImage(int userId)
+        {
+            if (userId <= 0)
+            {
+                return BadRequest(new { status = "failed", message = "Invalid user ID" });
+            }
+
+            try
+            {
+                var result = await _userServices.DeleteUserImageAsync(userId);
+                
+                if (!result)
+                {
+                    return NotFound(new { status = "failed", message = "User not found or image already deleted" });
+                }
+
+                return Ok(new { status = "success", message = "User image deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { status = "failed", message = "Error deleting user image", error = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
