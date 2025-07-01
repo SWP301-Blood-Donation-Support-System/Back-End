@@ -201,7 +201,7 @@ namespace BloodDonationSupportSystem.Controllers
             return NotFound(new { status = "failed", message = "Invalid" });
         }
         [HttpPut("donor/{donorId}")]
-        public async Task<IActionResult> UpdateDonor(int donorId, [FromForm] DonorDTO donorDTO)
+        public async Task<IActionResult> UpdateDonor(int donorId, [FromBody] DonorDTO donorDTO)
         {
             if (donorDTO == null || donorId <= 0) 
             {

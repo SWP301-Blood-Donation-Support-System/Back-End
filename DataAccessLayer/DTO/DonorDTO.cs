@@ -26,6 +26,5 @@ namespace DataAccessLayer.DTO
 
         public int? BloodTypeId { get; set; }
         
-        public IFormFile? UserImage { get; set; }
     }
 }
