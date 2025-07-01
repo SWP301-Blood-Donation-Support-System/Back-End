@@ -3,12 +3,14 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Entity;
 
-public partial class Department
+public partial class Hospital
 {
-    public int DepartmentId { get; set; }
+    public int HospitalId { get; set; }
 
-    public string DepartmentName { get; set; } = null!;
-
+    public string HospitalName { get; set; } = null!;
+    
+    public string? HospitalAddress { get; set; }
+    
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
