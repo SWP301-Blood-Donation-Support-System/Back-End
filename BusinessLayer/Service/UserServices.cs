@@ -105,11 +105,7 @@ namespace BusinessLayer.Service
                 // Convert IFormFile to byte array if UserImage is provided
                 if (donor.UserImage != null && donor.UserImage.Length > 0)
                 {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await donor.UserImage.CopyToAsync(memoryStream);
-                        EntityUser.UserImage = memoryStream.ToArray();
-                    }
+                    EntityUser.UserImage = await ProcessImageFileAsync(donor.UserImage);
                 }
                 else
                 {
@@ -143,24 +139,20 @@ namespace BusinessLayer.Service
                     throw new InvalidOperationException("Email already exists");
                 }
                 User EntityUser = _mapper.Map<User>(staff);
-                
+
                 // Convert IFormFile to byte array if UserImage is provided
                 if (staff.UserImage != null && staff.UserImage.Length > 0)
                 {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await staff.UserImage.CopyToAsync(memoryStream);
-                        EntityUser.UserImage = memoryStream.ToArray();
-                    }
+                    EntityUser.UserImage = await ProcessImageFileAsync(staff.UserImage);
                 }
                 else
                 {
                     EntityUser.UserImage = null;
                 }
-                
+
                 EntityUser.PasswordHash = EncryptPassword(staff.PasswordHash);
                 EntityUser.IsActive = true;
-                EntityUser.RoleId = 2; // 2 is the role ID for staff
+                EntityUser.RoleId = 2; // Assuming 2 is the role ID for staff
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
@@ -185,36 +177,56 @@ namespace BusinessLayer.Service
                     throw new InvalidOperationException("Email already exists");
                 }
                 User EntityUser = _mapper.Map<User>(admin);
+
+                // Convert IFormFile to byte array if UserImage is provided
+                if (admin.UserImage != null && admin.UserImage.Length > 0)
+                {
+                    EntityUser.UserImage = await ProcessImageFileAsync(admin.UserImage);
+                }
+                else
+                {
+                    EntityUser.UserImage = null;
+                }
+
                 EntityUser.PasswordHash = EncryptPassword(admin.PasswordHash);
                 EntityUser.IsActive = true;
-                EntityUser.RoleId = 1; // 1 is the role ID for admin
+                EntityUser.RoleId = 1; // Assuming 1 is the role ID for admin
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
+
+                // Send welcome email after successful registration
+                SendWelcomeEmail(admin.Email, admin.Username);
             }
             catch (Exception ex)
             {
+                // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding admin: {ex.Message}");
                 throw; // Re-throw the exception to be handled by the caller
             }
         }
-        public async Task<bool> UpdateUserRoleAsync(int userId, int roleId)
+
+        private async Task<byte[]> ProcessImageFileAsync(IFormFile imageFile)
         {
-            if (userId <= 0)
+            // Validate image file type
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(fileExtension))
             {
-                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+                throw new InvalidOperationException("Only image files (JPG, JPEG, PNG, GIF) are allowed");
             }
-            if (roleId <= 0)
+
+            // Validate file size (e.g., max 5MB)
+            if (imageFile.Length > 5 * 1024 * 1024)
             {
-                throw new ArgumentOutOfRangeException(nameof(roleId), "Role ID must be greater than zero");
+                throw new InvalidOperationException("Image file size cannot exceed 5MB");
             }
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
+
+            using (var memoryStream = new MemoryStream())
             {
-                return false;
+                await imageFile.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
             }
-            user.RoleId = roleId;
-            await _userRepository.UpdateAsync(user);
-            return await _userRepository.SaveChangesAsync();
         }
 
         public async Task<User> UpdateUserAsync(User user)
@@ -230,6 +242,32 @@ namespace BusinessLayer.Service
             await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangesAsync();
             return user;
+        }
+
+        public async Task<User> UpdateDonorAsync(int donorId, DonorDTO donor)
+        {
+            if (donor == null || donorId <= 0)
+            {
+                throw new ArgumentNullException(nameof(donor), "Donor data cannot be null or empty");
+            }
+
+            var existingUser = await _userRepository.GetByIdAsync(donorId);
+
+            if (existingUser == null)
+            {
+                throw new KeyNotFoundException($"Donor with ID {donorId} not found");
+            }
+
+            _mapper.Map(donor, existingUser);
+
+            // Set updated timestamp
+            existingUser.UpdatedAt = DateTime.UtcNow;
+
+            // Save changes
+            await _userRepository.UpdateAsync(existingUser);
+            await _userRepository.SaveChangesAsync();
+
+            return existingUser;
         }
 
         public async Task<bool> DeleteUserAsync(int userId)
@@ -281,6 +319,57 @@ namespace BusinessLayer.Service
                 await _userRepository.SaveChangesAsync();
             }
             return result;
+        }
+
+        public async Task<bool> UpdateUserRoleAsync(int userId, int roleId)
+        {
+            if (userId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+            }
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.RoleId = roleId;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user);
+            return await _userRepository.SaveChangesAsync();
+        }
+
+        public async Task<byte[]> GetUserImageAsync(int userId)
+        {
+            if (userId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+            }
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            return user?.UserImage;
+        }
+
+        public async Task<bool> DeleteUserImageAsync(int userId)
+        {
+            if (userId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+            }
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.UserImage = null;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user);
+            return await _userRepository.SaveChangesAsync();
         }
 
         public async Task<bool> SaveChangesAsync()
@@ -429,10 +518,10 @@ namespace BusinessLayer.Service
                     user = (await _userRepository.GetAllAsync()).FirstOrDefault(p => p.Email == email);
                     LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
                     await _userRepository.SaveChangesAsync();
-                    
+
                     // Send welcome email for new Google user
                     SendWelcomeEmail(payload.Email, payload.Name ?? payload.Email);
-                    
+
                     return await GenerateToken(userLogin);
                 }
                 else
@@ -462,9 +551,9 @@ namespace BusinessLayer.Service
         {
             try
             {
-                var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
+                var subject = "Chào mừng bạn đến với Hệ thống Hỗ trợ Hiến máu!";
                 var htmlBody = GenerateWelcomeEmailTemplate(userName, userEmail);
-                
+
                 var message = new Message(
                     to: new string[] { userEmail },
                     subject: subject,
@@ -478,128 +567,200 @@ namespace BusinessLayer.Service
             }
         }
 
+        public void SendDonationRegistrationThankYouEmail(string userEmail, string userName, DonationRegistrationEmailInfoDTO registrationInfo)
+        {
+            try
+            {
+                var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
+                var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(userName, userEmail, registrationInfo);
+
+                var message = new Message(
+                    to: new string[] { userEmail },
+                    subject: subject,
+                    content: htmlBody);
+
+                _emailService.SendEmail(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending donation registration thank you email to {userEmail}: {ex.Message}");
+            }
+        }
+
         private string GenerateWelcomeEmailTemplate(string userName, string userEmail)
         {
             var displayName = !string.IsNullOrEmpty(userName) ? userName : userEmail;
             var currentDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html lang='vi'>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("    <meta charset='UTF-8'>");
+            sb.AppendLine("    <title>Chào mừng</title>");
+            sb.AppendLine("    <style>");
+            sb.AppendLine("        body { font-family: Arial, sans-serif; background-color: #f4f4f4; }");
+            sb.AppendLine("        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; }");
+            sb.AppendLine("        .header { background-color: #B22222; color: white; padding: 20px; text-align: center; }");
+            sb.AppendLine("        .content { padding: 20px 0; }");
+            sb.AppendLine("        .highlight { background-color: #f8f9fa; padding: 15px; border-left: 4px solid #B22222; }");
+            sb.AppendLine("    </style>");
+            sb.AppendLine("</head>");
+            sb.AppendLine("<body>");
+            sb.AppendLine("    <div class='container'>");
+            sb.AppendLine("        <div class='header'>");
+            sb.AppendLine("            <h1>Chào mừng đến với Blood Donation Support System!</h1>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='content'>");
+            sb.AppendLine($"            <h2>Xin chào {displayName}!</h2>");
+            sb.AppendLine("            <p>Cảm ơn bạn đã đăng ký tài khoản tại Hệ thống Hỗ trợ Hiến máu.</p>");
+            sb.AppendLine("            <div class='highlight'>");
+            sb.AppendLine("                <h3>Tại đây bạn có thể:</h3>");
+            sb.AppendLine("                <ul>");
+            sb.AppendLine("                    <li>Đăng ký lịch hiến máu tình nguyện</li>");
+            sb.AppendLine("                    <li>Theo dõi lịch sử hiến máu</li>");
+            sb.AppendLine("                    <li>Nhận giấy chứng nhận hiến máu</li>");
+            sb.AppendLine("                </ul>");
+            sb.AppendLine("            </div>");
+            sb.AppendLine("            <p><strong>Thông tin tài khoản:</strong></p>");
+            sb.AppendLine("            <ul>");
+            sb.AppendLine($"                <li>Email: {userEmail}</li>");
+            sb.AppendLine($"                <li>Ngày đăng ký: {currentDate}</li>");
+            sb.AppendLine("            </ul>");
+            sb.AppendLine("            <p style='text-align: center;'><em>Hiến máu cứu người - Một nghĩa cử cao đẹp</em></p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("    </div>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            return sb.ToString();
+        }
+
+        private string GenerateDonationRegistrationThankYouEmailTemplate(string userName, string userEmail, DonationRegistrationEmailInfoDTO registrationInfo)
+        {
+            var displayName = !string.IsNullOrEmpty(userName) ? userName : registrationInfo.DonorName ?? userEmail;
+            var currentDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html lang='vi'>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("    <meta charset='UTF-8'>");
+            sb.AppendLine("    <title>Xác nhận đăng ký hiến máu</title>");
+            sb.AppendLine("    <style>");
+            sb.AppendLine("        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }");
+            sb.AppendLine("        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }");
+            sb.AppendLine("        .header { background-color: #B22222; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }");
+            sb.AppendLine("        .content { padding: 20px 0; }");
+            sb.AppendLine("        .highlight { background-color: #f8f9fa; padding: 15px; border-left: 4px solid #B22222; margin: 15px 0; border-radius: 4px; }");
+            sb.AppendLine("        .registration-info { background-color: #fff3cd; padding: 15px; border: 1px solid #ffeaa7; border-radius: 4px; margin: 15px 0; }");
+            sb.AppendLine("        .schedule-info { background-color: #d1ecf1; padding: 15px; border: 1px solid #bee5eb; border-radius: 4px; margin: 15px 0; }");
+            sb.AppendLine("        .important { color: #B22222; font-weight: bold; }");
+            sb.AppendLine("        .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }");
+            sb.AppendLine("        table { width: 100%; border-collapse: collapse; margin: 10px 0; }");
+            sb.AppendLine("        td { padding: 8px; border-bottom: 1px solid #eee; }");
+            sb.AppendLine("        .label { font-weight: bold; width: 40%; }");
+            sb.AppendLine("    </style>");
+            sb.AppendLine("</head>");
+            sb.AppendLine("<body>");
+            sb.AppendLine("    <div class='container'>");
+            sb.AppendLine("        <div class='header'>");
+            sb.AppendLine("            <h1>🩸 Xác nhận đăng ký hiến máu thành công!</h1>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='content'>");
+            sb.AppendLine($"            <h2>Kính chào {displayName}!</h2>");
+            sb.AppendLine("            <p>Cảm ơn bạn đã đăng ký hiến máu tình nguyện tại Hệ thống Hỗ trợ Hiến máu. Đây là một hành động vô cùng ý nghĩa và cao đẹp!</p>");
             
-            return "<!DOCTYPE html>" +
-                   "<html lang='vi'>" +
-                   "<head>" +
-                   "<meta charset='UTF-8'>" +
-                   "<title>Cảm ơn bạn đã đăng ký hiến máu</title>" +
-                   "<style>" +
-                   "body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }" +
-                   ".container { max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; }" +
-                   ".header { background-color: #B22222; color: white; padding: 30px 20px; text-align: center; }" +
-                   ".content { padding: 30px 20px; }" +
-                   ".greeting { font-size: 24px; color: #B22222; margin-bottom: 20px; font-weight: bold; }" +
-                   ".highlight-box { background-color: #f8f9fa; padding: 25px; border-left: 5px solid #B22222; margin: 25px 0; }" +
-                   ".footer { background-color: #333; color: white; text-align: center; padding: 20px; }" +
-                   "</style>" +
-                   "</head>" +
-                   "<body>" +
-                   "<div class='container'>" +
-                   "<div class='header'>" +
-                   "<h1>🩸 HIẾN MÁU CỨU NGƯỜI 🩸</h1>" +
-                   "<p>Hệ thống Hỗ trợ Hiến máu Tình nguyện</p>" +
-                   "</div>" +
-                   "<div class='content'>" +
-                   $"<div class='greeting'>Xin chào {displayName}!</div>" +
-                   "<p>Trước tiên, chúng tôi xin gửi lời cảm ơn chân thành nhất đến bạn vì đã đăng ký trở thành người hiến máu tình nguyện.</p>" +
-                   "<div class='highlight-box'>" +
-                   "<h3>🎯 Thông tin đăng ký của bạn:</h3>" +
-                   $"<p><strong>Email:</strong> {userEmail}</p>" +
-                   $"<p><strong>Thời gian đăng ký:</strong> {currentDate}</p>" +
-                   "<p><strong>Trạng thái:</strong> Đã đăng ký thành công</p>" +
-                   "</div>" +
-                   "<div class='highlight-box'>" +
-                   "<h3>💝 Những lợi ích khi hiến máu:</h3>" +
-                   "<ul>" +
-                   "<li>Cứu sống tới 3 người bệnh chỉ với một lần hiến máu</li>" +
-                   "<li>Kiểm tra sức khỏe miễn phí trước khi hiến máu</li>" +
-                   "<li>Nhận giấy chứng nhận hiến máu tình nguyện</li>" +
-                   "<li>Góp phần vào công tác xã hội ý nghĩa</li>" +
-                   "</ul>" +
-                   "</div>" +
-                   "<p style='text-align: center; font-style: italic; color: #B22222;'>\"Hiến máu cứu người - Một nghĩa cử cao đẹp\"</p>" +
-                   "<p>Một lần nữa, chúng tôi xin cảm ơn bạn vì tấm lòng nhân ái và sự đóng góp ý nghĩa này.</p>" +
-                   "</div>" +
-                   "<div class='footer'>" +
-                   "<p>© 2024 Hệ thống Hỗ trợ Hiến máu Tình nguyện</p>" +
-                   "<p>Email này được gửi tự động, vui lòng không phản hồi</p>" +
-                   "</div>" +
-                   "</div>" +
-                   "</body>" +
-                   "</html>";
-        }
-
-        public async Task<User> UpdateDonorAsync(int donorId, DonorDTO donor)
-        {
-            if (donor == null || donorId <= 0)
+            // Registration confirmation info
+            sb.AppendLine("            <div class='registration-info'>");
+            sb.AppendLine("                <h3>📋 Thông tin đăng ký</h3>");
+            sb.AppendLine("                <table>");
+            sb.AppendLine($"                    <tr><td class='label'>Mã đăng ký:</td><td class='important'>{registrationInfo.RegistrationCode ?? registrationInfo.RegistrationId.ToString()}</td></tr>");
+            sb.AppendLine($"                    <tr><td class='label'>Ngày đăng ký:</td><td>{registrationInfo.RegistrationDate.ToString("dd/MM/yyyy HH:mm")}</td></tr>");
+            sb.AppendLine($"                    <tr><td class='label'>Họ tên:</td><td>{registrationInfo.DonorName ?? displayName}</td></tr>");
+            sb.AppendLine($"                    <tr><td class='label'>Email:</td><td>{registrationInfo.DonorEmail ?? userEmail}</td></tr>");
+            
+            if (!string.IsNullOrEmpty(registrationInfo.DonorPhone))
             {
-                throw new ArgumentNullException(nameof(donor), "Donor data cannot be null or empty");
+                sb.AppendLine($"                    <tr><td class='label'>Số điện thoại:</td><td>{registrationInfo.DonorPhone}</td></tr>");
             }
-
-            var existingUser = await _userRepository.GetByIdAsync(donorId);
-
-            if (existingUser == null)
+            
+            if (!string.IsNullOrEmpty(registrationInfo.BloodType))
             {
-                throw new KeyNotFoundException($"Donor with ID {donorId} not found");
+                sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td class='important'>{registrationInfo.BloodType}</td></tr>");
             }
+            
+            sb.AppendLine("                </table>");
+            sb.AppendLine("            </div>");
 
-            _mapper.Map(donor, existingUser);
-
-            // Handle image update if provided
-            if (donor.UserImage != null && donor.UserImage.Length > 0)
+            // Schedule information
+            sb.AppendLine("            <div class='schedule-info'>");
+            sb.AppendLine("                <h3>📅 Thông tin lịch hiến máu</h3>");
+            sb.AppendLine("                <table>");
+            sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{registrationInfo.ScheduleDate.ToString("dddd, dd/MM/yyyy")}</td></tr>");
+            
+            if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName))
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await donor.UserImage.CopyToAsync(memoryStream);
-                    existingUser.UserImage = memoryStream.ToArray();
-                }
+                sb.AppendLine($"                    <tr><td class='label'>Khung giờ:</td><td>{registrationInfo.TimeSlotName}</td></tr>");
             }
-            // Note: If no image is provided, the existing image is preserved
-
-            // Set updated timestamp
-            existingUser.UpdatedAt = DateTime.UtcNow;
-
-            // Save changes
-            await _userRepository.UpdateAsync(existingUser);
-            await _userRepository.SaveChangesAsync();
-
-            return existingUser;
-        }
-
-        public async Task<byte[]> GetUserImageAsync(int userId)
-        {
-            if (userId <= 0)
+            
+            if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
             {
-                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
             }
-
-            var user = await _userRepository.GetByIdAsync(userId);
-            return user?.UserImage;
-        }
-
-        public async Task<bool> DeleteUserImageAsync(int userId)
-        {
-            if (userId <= 0)
+            
+            if (!string.IsNullOrEmpty(registrationInfo.ScheduleLocation))
             {
-                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+                sb.AppendLine($"                    <tr><td class='label'>Địa điểm:</td><td>{registrationInfo.ScheduleLocation}</td></tr>");
             }
-
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
+            
+            if (!string.IsNullOrEmpty(registrationInfo.HospitalName))
             {
-                return false;
+                sb.AppendLine($"                    <tr><td class='label'>Bệnh viện:</td><td>{registrationInfo.HospitalName}</td></tr>");
             }
+            
+            if (!string.IsNullOrEmpty(registrationInfo.HospitalAddress))
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Địa chỉ bệnh viện:</td><td>{registrationInfo.HospitalAddress}</td></tr>");
+            }
+            
+            sb.AppendLine("                </table>");
+            sb.AppendLine("            </div>");
 
-            user.UserImage = null;
-            user.UpdatedAt = DateTime.UtcNow;
+            // Important notes
+            sb.AppendLine("            <div class='highlight'>");
+            sb.AppendLine("                <h3>⚠️ Lưu ý quan trọng</h3>");
+            sb.AppendLine("                <ul>");
+            sb.AppendLine("                    <li>Vui lòng có mặt <strong>đúng giờ</strong> theo lịch đã đăng ký</li>");
+            sb.AppendLine("                    <li>Mang theo <strong>CCCD/CMND</strong> để xác nhận danh tính</li>");
+            sb.AppendLine("                    <li>Không uống rượu bia trong 24h trước khi hiến máu</li>");
+            sb.AppendLine("                    <li>Ăn no trước khi hiến máu 3-4 tiếng và uống đủ nước</li>");
+            sb.AppendLine("                    <li>Ngủ đủ giấc và không căng thẳng</li>");
+            sb.AppendLine("                    <li>Nếu có thay đổi, vui lòng liên hệ trước ít nhất 1 ngày</li>");
+            sb.AppendLine("                </ul>");
+            sb.AppendLine("            </div>");
 
-            await _userRepository.UpdateAsync(user);
-            return await _userRepository.SaveChangesAsync();
+            // Call to action
+            sb.AppendLine("            <div class='highlight'>");
+            sb.AppendLine("                <h3>📞 Liên hệ hỗ trợ</h3>");
+            sb.AppendLine("                <p>Nếu bạn có bất kỳ thắc mắc nào hoặc cần thay đổi lịch hẹn, vui lòng liên hệ:</p>");
+            sb.AppendLine("                <ul>");
+            sb.AppendLine("                    <li>Email: support@blooddonation.vn</li>");
+            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX</li>");
+            sb.AppendLine("                </ul>");
+            sb.AppendLine("            </div>");
+
+            sb.AppendLine("            <div class='footer'>");
+            sb.AppendLine("                <p><em style='color: #B22222; font-size: 18px;'>\"Hiến máu cứu người - Một nghĩa cử cao đẹp\"</em></p>");
+            sb.AppendLine("                <p>Cảm ơn bạn đã đồng hành cùng chúng tôi trong công tác hiến máu nhân đạo!</p>");
+            sb.AppendLine($"                <p style='font-size: 12px; color: #999;'>Email được gửi lúc: {currentDate}</p>");
+            sb.AppendLine("            </div>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("    </div>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            return sb.ToString();
         }
     }
 }
