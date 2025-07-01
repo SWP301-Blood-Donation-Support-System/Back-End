@@ -160,7 +160,7 @@ namespace BusinessLayer.Service
                 
                 EntityUser.PasswordHash = EncryptPassword(staff.PasswordHash);
                 EntityUser.IsActive = true;
-                EntityUser.RoleId = 2; // Assuming 2 is the role ID for staff
+                EntityUser.RoleId = 2; // 2 is the role ID for staff
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
@@ -173,6 +173,49 @@ namespace BusinessLayer.Service
                 Console.WriteLine($"Error adding staff: {ex.Message}");
                 throw; // Re-throw the exception to be handled by the caller
             }
+        }
+
+
+        public async Task RegisterAdminAsync(StaffRegisterDTO admin)
+        {
+            try
+            {
+                var existingUser = await _userRepository.GetByEmailAsync(admin.Email);
+                if (existingUser != null)
+                {
+                    throw new InvalidOperationException("Email already exists");
+                }
+                User EntityUser = _mapper.Map<User>(admin);
+                EntityUser.PasswordHash = EncryptPassword(admin.PasswordHash);
+                EntityUser.IsActive = true;
+                EntityUser.RoleId = 1; // 1 is the role ID for admin
+                await _userRepository.AddAsync(EntityUser);
+                await _userRepository.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding admin: {ex.Message}");
+                throw; // Re-throw the exception to be handled by the caller
+            }
+        }
+        public async Task<bool> UpdateUserRoleAsync(int userId, int roleId)
+        {
+            if (userId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+            }
+            if (roleId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(roleId), "Role ID must be greater than zero");
+            }
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+            user.RoleId = roleId;
+            await _userRepository.UpdateAsync(user);
+            return await _userRepository.SaveChangesAsync();
         }
 
         public async Task<User> UpdateUserAsync(User user)

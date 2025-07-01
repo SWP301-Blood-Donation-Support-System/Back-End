@@ -116,6 +116,11 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService > ();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ICertificateService, CertificateService>();
+builder.Services.AddScoped<IBloodRequestService, BloodRequestService>();
+builder.Services.AddScoped<IHospitalService, HospitalService>();
+
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDonationRegistrationRepository, DonationRegistrationRepository>();
@@ -125,6 +130,9 @@ builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleReposito
 builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
 builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IBloodRequestRepository,BloodRequestRepository>();
+builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
 
 // Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();
@@ -154,7 +162,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();
 app.UseCors("AllowAllOrigins");
 app.UseCors("AllowCors");
 app.UseCors("AllowReact");

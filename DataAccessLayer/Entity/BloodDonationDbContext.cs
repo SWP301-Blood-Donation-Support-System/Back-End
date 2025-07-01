@@ -92,13 +92,17 @@ public partial class BloodDonationDbContext : DbContext
         modelBuilder.Entity<DonationType>().HasQueryFilter(dt => !dt.IsDeleted);
         modelBuilder.Entity<DonationValidation>().HasQueryFilter(dv => !dv.IsDeleted);
         modelBuilder.Entity<Feedback>().HasQueryFilter(f => !f.IsDeleted);
-        modelBuilder.Entity<Department>().HasQueryFilter(f => !f.IsDeleted);
         modelBuilder.Entity<Article>().HasQueryFilter(a => !a.IsDeleted);
         modelBuilder.Entity<ArticleCategory>().HasQueryFilter(ac => !ac.IsDeleted);
         modelBuilder.Entity<ArticleStatus>().HasQueryFilter(ast => !ast.IsDeleted);
         modelBuilder.Entity<Notification>().HasQueryFilter(n => !n.IsDeleted);
         modelBuilder.Entity<NotificationType>().HasQueryFilter(nt => !nt.IsDeleted);
-
+        modelBuilder.Entity<Occupation>().HasQueryFilter(o => !o.IsDeleted);
+        modelBuilder.Entity<RegistrationStatus>().HasQueryFilter(rs => !rs.IsDeleted);
+        modelBuilder.Entity<Role>().HasQueryFilter(r => !r.IsDeleted);
+        modelBuilder.Entity<TimeSlot>().HasQueryFilter(ts => !ts.IsDeleted);
+        modelBuilder.Entity<Urgency>().HasQueryFilter(u => !u.IsDeleted);
+        modelBuilder.Entity<Hospital>().HasQueryFilter(h => !h.IsDeleted);
 
         modelBuilder.Entity<Article>(entity =>
         {

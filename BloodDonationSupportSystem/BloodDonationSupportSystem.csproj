@@ -27,8 +27,5 @@
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NewFolder\" />
-  </ItemGroup>
 
 </Project>
