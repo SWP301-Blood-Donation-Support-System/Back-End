@@ -168,16 +168,16 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Admin registered successfully.");
         }
-        [HttpPut("switch-role")]
-        public async Task<IActionResult> SwitchRole([FromBody] UserSwitchRoleDTO user)
+        [HttpPatch("{userId}/role")]
+        public async Task<IActionResult> SwitchRole(int userId,[FromBody] int roleId)
         {
-            if (user == null || user.UserId <= 0)
+            if (userId <= 0)
             {
                 return BadRequest("Invalid user data.");
             }
             try
             {
-                var updatedUser = await _userServices.UpdateUserRoleAsync(user.UserId, user.RoleId);
+                var updatedUser = await _userServices.UpdateUserRoleAsync(userId, roleId);
                 return Ok(updatedUser);
             }
             catch (Exception ex)

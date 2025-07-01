@@ -169,8 +169,8 @@ namespace BloodDonationSupportSystem.Controllers
             
             return Ok(result);
         }
-        [HttpPost("update-status")]
-        public async Task<IActionResult> UpdateBloodUnitStatus([FromBody] UpdateBloodUnitStatusDTO request)
+        [HttpPatch("{unitId}/status")]
+        public async Task<IActionResult> UpdateBloodUnitStatus(int unitId,[FromBody] int statusId)
         {
             // 2. Validation tự động: 
             // Nhờ [ApiController] và các DataAnnotations ([Required], [Range]) trong model,
@@ -178,11 +178,11 @@ namespace BloodDonationSupportSystem.Controllers
             // Anh không cần viết code "if (id <= 0)" nữa.
 
             // 3. Lấy dữ liệu từ request body
-            var result = await _bloodUnitService.UpdateBloodUnitStatusAsync(request.unitId, request.bloodUnitStatusId);
+            var result = await _bloodUnitService.UpdateBloodUnitStatusAsync(unitId, statusId);
 
             if (!result)
             {
-                return NotFound($"No blood unit found with ID {request.unitId}.");
+                return NotFound($"No blood unit found with ID {unitId}.");
             }
 
             return Ok("Blood unit status updated successfully.");

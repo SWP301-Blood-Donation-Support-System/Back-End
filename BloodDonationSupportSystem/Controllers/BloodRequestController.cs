@@ -41,14 +41,14 @@ namespace BloodDonationSupportSystem.Controllers
             await _bloodRequestService.AddBloodRequestAsync(bloodRequest);
             return Ok(bloodRequest);
         }
-        [HttpPut("status")]
-        public async Task<IActionResult> UpdateBloodRequestStatusAsync([FromBody] UpdateBloodRequestStatusDTO bloodRequest)
+        [HttpPatch("{requestId}/status")]
+        public async Task<IActionResult> UpdateBloodRequestStatusAsync(int requestId, [FromBody] int statusId)
         {
-            if (bloodRequest == null || bloodRequest.RequestStatusId <= 0)
+            if (requestId<=0 || statusId <= 0)
             {
                 return BadRequest("Invalid request data.");
             }
-            var result = await _bloodRequestService.UpdateBloodRequestStatusAsync(bloodRequest.RequestId, bloodRequest.RequestStatusId);
+            var result = await _bloodRequestService.UpdateBloodRequestStatusAsync(requestId, statusId);
             if (!result)
             {
                 return NotFound("Blood request not found or status update failed.");
