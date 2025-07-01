@@ -115,7 +115,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
         [HttpPost("register-donor")]
-        public async Task<IActionResult> RegisterDonor([FromForm] RegisterDTO registerDTO)
+        public async Task<IActionResult> RegisterDonor([FromBody] RegisterDTO registerDTO)
         {
             try
             {
@@ -134,7 +134,7 @@ namespace BloodDonationSupportSystem.Controllers
 
         }
         [HttpPost("register-staff")]
-        public async Task<IActionResult> RegisterStaff([FromForm] StaffRegisterDTO staffRegisterDTO)
+        public async Task<IActionResult> RegisterStaff([FromBody] StaffRegisterDTO staffRegisterDTO)
         {
             try
             {
