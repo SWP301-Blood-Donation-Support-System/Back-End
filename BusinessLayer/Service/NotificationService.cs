@@ -29,6 +29,7 @@ namespace BusinessLayer.Service
             }
             var entity = Mapper.Map<Notification>(notification);
             var result = await _notificationRepository.AddAsync(entity);
+            await _notificationRepository.SaveChangesAsync();
         }
         public async Task<IEnumerable<Notification>> GetAllNotificationsAsync()
         {
