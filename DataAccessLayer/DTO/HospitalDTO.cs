@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.DTO
 {
-    public class UpdateRecordStatusDTO
+     public class HospitalDTO
     {
-        public int RecordId {  get; set; }
-        public int StatusId { get; set; }
+        public string HospitalName { get; set; }
+        public string HospitalAddress { get; set; }
     }
 }

@@ -131,19 +131,19 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
-        [HttpPut("record-status")]
-        public async Task<IActionResult> UpdateRecordStatus([FromBody] UpdateRecordStatusDTO updateRecordStatusDTO)
+        [HttpPatch("{recordId}/status")]
+        public async Task<IActionResult> UpdateRecordStatus(int recordId,[FromBody] int statusId)
         {
-            if(updateRecordStatusDTO == null)
+            if(recordId<0)
             {
-                return BadRequest("Update data cannot be null");
+                return BadRequest("Id is invalid");
             }
             try
             {
-                var result = await _donationRecordService.UpdateRecordsStatusAsync(updateRecordStatusDTO.RecordId,updateRecordStatusDTO.StatusId);
+                var result = await _donationRecordService.UpdateRecordsStatusAsync(recordId,statusId);
                 if (!result)
                 {
-                    return NotFound($"Donation record with ID {updateRecordStatusDTO.RecordId} not found.");
+                    return NotFound($"Donation record with ID {recordId} not found.");
                 }
                 return Ok(new { status = "success", message = "Record updated successfully" });
             }
