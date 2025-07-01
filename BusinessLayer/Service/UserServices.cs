@@ -102,15 +102,8 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(donor);
 
-                // Convert IFormFile to byte array if UserImage is provided
-                if (donor.UserImage != null && donor.UserImage.Length > 0)
-                {
-                    EntityUser.UserImage = await ProcessImageFileAsync(donor.UserImage);
-                }
-                else
-                {
-                    EntityUser.UserImage = null;
-                }
+                // Remove image processing - set UserImage to null
+                EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword(donor.PasswordHash);
                 EntityUser.IsActive = true;
@@ -140,15 +133,8 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(staff);
 
-                // Convert IFormFile to byte array if UserImage is provided
-                if (staff.UserImage != null && staff.UserImage.Length > 0)
-                {
-                    EntityUser.UserImage = await ProcessImageFileAsync(staff.UserImage);
-                }
-                else
-                {
-                    EntityUser.UserImage = null;
-                }
+                // Remove image processing - set UserImage to null
+                EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword(staff.PasswordHash);
                 EntityUser.IsActive = true;
@@ -178,15 +164,8 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(admin);
 
-                // Convert IFormFile to byte array if UserImage is provided
-                if (admin.UserImage != null && admin.UserImage.Length > 0)
-                {
-                    EntityUser.UserImage = await ProcessImageFileAsync(admin.UserImage);
-                }
-                else
-                {
-                    EntityUser.UserImage = null;
-                }
+                // Remove image processing - set UserImage to null
+                EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword(admin.PasswordHash);
                 EntityUser.IsActive = true;
@@ -202,30 +181,6 @@ namespace BusinessLayer.Service
                 // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding admin: {ex.Message}");
                 throw; // Re-throw the exception to be handled by the caller
-            }
-        }
-
-        private async Task<byte[]> ProcessImageFileAsync(IFormFile imageFile)
-        {
-            // Validate image file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-            var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-
-            if (!allowedExtensions.Contains(fileExtension))
-            {
-                throw new InvalidOperationException("Only image files (JPG, JPEG, PNG, GIF) are allowed");
-            }
-
-            // Validate file size (e.g., max 5MB)
-            if (imageFile.Length > 5 * 1024 * 1024)
-            {
-                throw new InvalidOperationException("Image file size cannot exceed 5MB");
-            }
-
-            using (var memoryStream = new MemoryStream())
-            {
-                await imageFile.CopyToAsync(memoryStream);
-                return memoryStream.ToArray();
             }
         }
 
