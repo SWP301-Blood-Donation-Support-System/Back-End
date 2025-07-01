@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace DataAccessLayer.DTO
 {
@@ -14,5 +15,6 @@ namespace DataAccessLayer.DTO
         public string PasswordHash { get; set; } = null!;
         public string? FullName { get; set; }
         public string StaffCode { get; set; } = null!;
+        public IFormFile? UserImage { get; set; }
     }
 }

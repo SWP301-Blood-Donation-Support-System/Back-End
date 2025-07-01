@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace DataAccessLayer.DTO
 {
@@ -24,5 +25,7 @@ namespace DataAccessLayer.DTO
         public int? OccupationId { get; set; }
 
         public int? BloodTypeId { get; set; }
+        
+        public IFormFile? UserImage { get; set; }
     }
 }

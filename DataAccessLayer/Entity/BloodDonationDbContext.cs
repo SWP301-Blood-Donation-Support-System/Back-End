@@ -35,8 +35,6 @@ public partial class BloodDonationDbContext : DbContext
 
     public virtual DbSet<BloodUnitStatus> BloodUnitStatuses { get; set; }
 
-    public virtual DbSet<Department> Departments { get; set; }
-
     public virtual DbSet<DonationAvailability> DonationAvailabilities { get; set; }
 
     public virtual DbSet<DonationRecord> DonationRecords { get; set; }
@@ -75,7 +73,7 @@ public partial class BloodDonationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=database.purintech.id.vn;Database=BloodDonationDB;TrustServerCertificate=true;user=sa;password=<Hu@nH0aH0n9>");
+        => optionsBuilder.UseSqlServer("Server=database.purintech.id.vn;user=sa;password=<Hu@nH0aH0n9>;Database=BloodDonationDB;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -194,7 +192,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.CreatedBy).HasMaxLength(100);
-            entity.Property(e => e.Quantity).HasColumnType("decimal(6, 2)");
             entity.Property(e => e.RequestStatusId).HasColumnName("RequestStatusID");
             entity.Property(e => e.RequestingStaffId).HasColumnName("RequestingStaffID");
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
@@ -328,21 +325,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.StatusName).HasMaxLength(50);
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-        });
-
-        modelBuilder.Entity<Department>(entity =>
-        {
-            entity.HasKey(e => e.DepartmentId).HasName("PK__Departme__B2079BCD66B989F0");
-
-            entity.ToTable("Department");
-
-            entity.HasIndex(e => e.DepartmentName, "UQ__Departme__D949CC34CFA2EE69").IsUnique();
-
-            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.DepartmentName).HasMaxLength(100);
-            entity.Property(e => e.IsDeleted).HasColumnName("isDeleted");
-            entity.Property(e => e.UpdatedBy).HasMaxLength(256);
         });
 
         modelBuilder.Entity<DonationAvailability>(entity =>
@@ -669,7 +651,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
             entity.Property(e => e.DonationAvailabilityId)
                 .HasDefaultValue(1)
                 .HasColumnName("DonationAvailabilityID");
@@ -692,10 +673,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.HasOne(d => d.BloodType).WithMany(p => p.Users)
                 .HasForeignKey(d => d.BloodTypeId)
                 .HasConstraintName("FK_User_BloodType");
-
-            entity.HasOne(d => d.Department).WithMany(p => p.Users)
-                .HasForeignKey(d => d.DepartmentId)
-                .HasConstraintName("FK_User_Department");
 
             entity.HasOne(d => d.DonationAvailability).WithMany(p => p.Users)
                 .HasForeignKey(d => d.DonationAvailabilityId)

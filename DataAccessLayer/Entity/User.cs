@@ -23,8 +23,6 @@ public partial class User
 
     public string? StaffCode { get; set; }
 
-    public int? DepartmentId { get; set; }
-
     public int? HospitalId { get; set; }
 
     public string? NationalId { get; set; }
@@ -62,8 +60,6 @@ public partial class User
     public virtual ICollection<BloodRequest> BloodRequestRequestingStaffs { get; set; } = new List<BloodRequest>();
 
     public virtual BloodType? BloodType { get; set; }
-
-    public virtual Department? Department { get; set; }
 
     public virtual DonationAvailability DonationAvailability { get; set; } = null!;
 

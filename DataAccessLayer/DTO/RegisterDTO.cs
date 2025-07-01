@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace DataAccessLayer.DTO
         [Required(ErrorMessage = "Username is required.")]
         //[StringLength(16, ErrorMessage = "Username cannot be longer than 16 characters.", MinimumLength = 4)]
         public string Username { get; set; }
+        public IFormFile? UserImage { get; set; }
         //[Required(ErrorMessage = "Full Name is required.")]
         //public string? FullName { get; set; }
         //[Required(ErrorMessage = "Phone Number is required.")]
