@@ -14,4 +14,11 @@ namespace DataAccessLayer.DTO
         [Required(ErrorMessage = "Password is required.")]
         public string PasswordHash { get; set; }
     }
+
+    public class WelcomeEmailRequest
+    {
+        [Required(ErrorMessage = "Email is required.")]
+        public string Email { get; set; }
+        public string? UserName { get; set; }
+    }
 }

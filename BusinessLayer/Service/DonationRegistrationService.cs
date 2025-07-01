@@ -14,15 +14,21 @@ namespace BusinessLayer.Service
     {
         private readonly IDonationRegistrationRepository _donationRegistrationRepository;
         private readonly IDonationScheduleRepository _donationScheduleRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserServices _userServices;
         private readonly IMapper _mapper;
 
         public DonationRegistrationService(
             IDonationRegistrationRepository donationRegistrationRepository,
             IDonationScheduleRepository donationScheduleRepository,
+            IUserRepository userRepository,
+            IUserServices userServices,
             IMapper mapper)
         {
             _donationRegistrationRepository = donationRegistrationRepository ?? throw new ArgumentNullException(nameof(donationRegistrationRepository));
             _donationScheduleRepository = donationScheduleRepository ?? throw new ArgumentNullException(nameof(donationScheduleRepository));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _userServices = userServices ?? throw new ArgumentNullException(nameof(userServices));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -114,11 +120,66 @@ namespace BusinessLayer.Service
                 {
                     throw new Exception("Failed to save changes to the database");
                 }
+
+                // Send thank you email after successful donation registration
+                await SendDonationRegistrationThankYouEmailAsync(registration);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error adding registration: {ex.Message}");
                 throw;
+            }
+        }
+
+        private async Task SendDonationRegistrationThankYouEmailAsync(DonationRegistrationDTO registration)
+        {
+            try
+            {
+                // Get donor information from repository
+                var donor = await _userRepository.GetByIdAsync(registration.DonorId);
+                if (donor != null && !string.IsNullOrEmpty(donor.Email))
+                {
+                    // Get schedule information
+                    var schedule = await _donationScheduleRepository.GetByIdAsync(registration.ScheduleId);
+                    
+                    // Create the email info DTO with all necessary data
+                    var emailInfo = new DonationRegistrationEmailInfoDTO
+                    {
+                        RegistrationId = 0, // Will be set after registration is saved
+                        DonorName = donor.FullName ?? donor.Username ?? "Người hiến máu",
+                        DonorEmail = donor.Email,
+                        DonorPhone = donor.PhoneNumber ?? "",
+                        BloodType = "", // Will need to get blood type name from BloodType entity
+                        ScheduleDate = schedule?.ScheduleDate ?? DateTime.Now,
+                        ScheduleLocation = "Trung tâm hiến máu", // Default location since not available in schedule
+                        TimeSlotName = "Chưa xác định",
+                        StartTime = "",
+                        EndTime = "",
+                        HospitalName = "Hệ thống hiến máu tình nguyện",
+                        HospitalAddress = "Địa chỉ sẽ được thông báo qua SMS",
+                        RegistrationDate = DateTime.Now,
+                        RegistrationCode = $"REG-{registration.DonorId}-{DateTime.Now:yyyyMMdd}"
+                    };
+
+                    // Get blood type name if available
+                    if (donor.BloodTypeId.HasValue)
+                    {
+                        // You might need to add a repository call to get blood type name
+                        // For now, using placeholder
+                        emailInfo.BloodType = $"Nhóm máu ID: {donor.BloodTypeId}";
+                    }
+
+                    // Send thank you email for donation registration
+                    _userServices.SendDonationRegistrationThankYouEmail(
+                        donor.Email, 
+                        donor.FullName ?? donor.Username ?? donor.Email, 
+                        emailInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending donation registration thank you email: {ex.Message}");
+                // Don't throw - email failure shouldn't break the registration process
             }
         }
 

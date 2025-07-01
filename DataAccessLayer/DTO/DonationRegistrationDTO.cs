@@ -30,6 +30,25 @@ namespace DataAccessLayer.DTO
         public TimeSlotDTO TimeSlot { get; set; }
         public RegistrationStatusDTO Status { get; set; }
     }
+
+    // DTO for donation registration thank you email
+    public class DonationRegistrationEmailInfoDTO
+    {
+        public int RegistrationId { get; set; }
+        public string DonorName { get; set; }
+        public string DonorEmail { get; set; }
+        public string DonorPhone { get; set; }
+        public string BloodType { get; set; }
+        public DateTime ScheduleDate { get; set; }
+        public string ScheduleLocation { get; set; }
+        public string TimeSlotName { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+        public string HospitalName { get; set; }
+        public string HospitalAddress { get; set; }
+        public DateTime RegistrationDate { get; set; }
+        public string RegistrationCode { get; set; }
+    }
     
     public class DonorBasicInfoDTO
     {
