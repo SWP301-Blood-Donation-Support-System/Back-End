@@ -739,16 +739,23 @@ namespace BusinessLayer.Service
         {
             var user = await _userRepository.GetByEmailAsync(email);
             if (user == null)
+                // Không tìm thấy user. Trả về true để tránh lộ thông tin email nào đã đăng ký.
+                // Việc gửi mail sẽ không diễn ra.
                 return true;
 
+            // 1. Tạo một token ngẫu nhiên và an toàn
             var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
 
+            // 2. Cập nhật token và thời gian hết hạn cho user
             user.PasswordResetToken = token;
             user.ResetTokenExpires = DateTime.UtcNow.AddHours(1);
 
             await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangesAsync();
 
+
+            // 3. Gửi email chứa link reset
+            // **QUAN TRỌNG**: Link này phải trỏ đến trang reset password trên Frontend của bạn
             var resetLink = $"http://localhost:3000/reset-password?token={token}";
 
             var subject = "Yêu cầu đặt lại mật khẩu";
@@ -767,11 +774,13 @@ namespace BusinessLayer.Service
         {
             var user = await _userRepository.GetByPasswordResetToken(token);
 
+            // Kiểm tra xem token có hợp lệ và còn hạn không
             if (user == null || user.ResetTokenExpires < DateTime.UtcNow)
             {
                 return false; // Invalid token or token expired
             }
 
+            // Cập nhật mật khẩu mới (nhớ mã hóa)
             user.PasswordHash = EncryptPassword(newPassword);
 
             user.PasswordResetToken = null; // Clear the token after successful reset
