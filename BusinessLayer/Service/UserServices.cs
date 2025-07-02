@@ -735,5 +735,61 @@ namespace BusinessLayer.Service
 
             return sb.ToString();
         }
+        public async Task<bool> ForgotPasswordAsync(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null)
+                // Không tìm thấy user. Trả về true để tránh lộ thông tin email nào đã đăng ký.
+                // Việc gửi mail sẽ không diễn ra.
+                return true;
+
+            // 1. Tạo một token ngẫu nhiên và an toàn
+            var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+
+            // 2. Cập nhật token và thời gian hết hạn cho user
+            user.PasswordResetToken = token;
+            user.ResetTokenExpires = DateTime.UtcNow.AddHours(1);
+
+            await _userRepository.UpdateAsync(user);
+            await _userRepository.SaveChangesAsync();
+
+
+            // 3. Gửi email chứa link reset
+            // **QUAN TRỌNG**: Link này phải trỏ đến trang reset password trên Frontend của bạn
+            var resetLink = $"http://localhost:3000/reset-password?token={token}";
+
+            var subject = "Yêu cầu đặt lại mật khẩu";
+            var body = $"<p>Xin chào {user.FullName ?? user.Username},</p>" +
+               "<p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>" +
+               $"<p>Vui lòng nhấp vào đường link sau để đặt lại mật khẩu. Đường link này sẽ hết hạn sau 1 giờ:</p>" +
+               $"<p><a href='{resetLink}'>Đặt lại mật khẩu</a></p>" +
+               "<p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>" +
+               "<p>Trân trọng,<br/>Đội ngũ Blood Donation Support System</p>";
+
+            SendMail(subject, body, user.Email);
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            var user = await _userRepository.GetByPasswordResetToken(token);
+
+            // Kiểm tra xem token có hợp lệ và còn hạn không
+            if (user == null || user.ResetTokenExpires < DateTime.UtcNow)
+            {
+                return false; // Invalid token or token expired
+            }
+
+            // Cập nhật mật khẩu mới (nhớ mã hóa)
+            user.PasswordHash = EncryptPassword(newPassword);
+
+            user.PasswordResetToken = null; // Clear the token after successful reset
+            user.ResetTokenExpires = null;
+
+            await _userRepository.UpdateAsync(user);
+            await _userRepository.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

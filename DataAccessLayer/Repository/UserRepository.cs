@@ -97,12 +97,17 @@ namespace DataAccessLayer.Repository
 
         public async Task<User> GetByNationalIdAsync(string nationalId)
         {
-           return await _context.Users.FirstOrDefaultAsync(u => u.NationalId == nationalId);
+            return await _context.Users.FirstOrDefaultAsync(u => u.NationalId == nationalId);
         }
 
         public async Task<User> GetByPhoneNumberAsync(string phoneNumber)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
+        }
+        public async Task<User> GetByPasswordResetToken(string token)
+        {
+            // Gi? s? User có tr??ng PasswordResetToken
+            return await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == token);
         }
     }
 }

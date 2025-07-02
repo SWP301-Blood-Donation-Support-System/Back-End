@@ -75,4 +75,6 @@ public partial class User
     public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<UserNotification> UserNotifications { get; set; } = new List<UserNotification>();
+    public string? PasswordResetToken { get; set; }
+    public DateTime? ResetTokenExpires { get; set; }
 }
