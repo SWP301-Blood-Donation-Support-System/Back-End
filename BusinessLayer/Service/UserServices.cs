@@ -735,5 +735,52 @@ namespace BusinessLayer.Service
 
             return sb.ToString();
         }
+        public async Task<bool> ForgotPasswordAsync(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null)
+                return true;
+
+            var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+
+            user.PasswordResetToken = token;
+            user.ResetTokenExpires = DateTime.UtcNow.AddHours(1);
+
+            await _userRepository.UpdateAsync(user);
+            await _userRepository.SaveChangesAsync();
+
+            var resetLink = $"http://localhost:3000/reset-password?token={token}";
+
+            var subject = "Yêu cầu đặt lại mật khẩu";
+            var body = $"<p>Xin chào {user.FullName ?? user.Username},</p>" +
+               "<p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>" +
+               $"<p>Vui lòng nhấp vào đường link sau để đặt lại mật khẩu. Đường link này sẽ hết hạn sau 1 giờ:</p>" +
+               $"<p><a href='{resetLink}'>Đặt lại mật khẩu</a></p>" +
+               "<p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>" +
+               "<p>Trân trọng,<br/>Đội ngũ Blood Donation Support System</p>";
+
+            SendMail(subject, body, user.Email);
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            var user = await _userRepository.GetByPasswordResetToken(token);
+
+            if (user == null || user.ResetTokenExpires < DateTime.UtcNow)
+            {
+                return false; // Invalid token or token expired
+            }
+
+            user.PasswordHash = EncryptPassword(newPassword);
+
+            user.PasswordResetToken = null; // Clear the token after successful reset
+            user.ResetTokenExpires = null;
+
+            await _userRepository.UpdateAsync(user);
+            await _userRepository.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

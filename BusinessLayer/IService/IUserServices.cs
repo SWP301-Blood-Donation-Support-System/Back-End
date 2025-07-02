@@ -32,5 +32,7 @@ namespace BusinessLayer.IService
         void SendDonationRegistrationThankYouEmail(string userEmail, string userName, DonationRegistrationEmailInfoDTO registrationInfo);
         Task<byte[]> GetUserImageAsync(int userId);
         Task<bool> DeleteUserImageAsync(int userId);
+        Task<bool> ForgotPasswordAsync(string email);
+        Task<bool> ResetPasswordAsync(string token, string newPassword);
     }
 }

@@ -169,7 +169,7 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok("Admin registered successfully.");
         }
         [HttpPatch("{userId}/role")]
-        public async Task<IActionResult> SwitchRole(int userId,[FromBody] int roleId)
+        public async Task<IActionResult> SwitchRole(int userId, [FromBody] int roleId)
         {
             if (userId <= 0)
             {
@@ -189,7 +189,7 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpPost("google")]
         public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
         {
-            
+
             var token = await _userServices.ValidateGoogleToken(request);
             if (!string.IsNullOrEmpty(token))
             {
@@ -203,7 +203,7 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpPut("donor/{donorId}")]
         public async Task<IActionResult> UpdateDonor(int donorId, [FromBody] DonorDTO donorDTO)
         {
-            if (donorDTO == null || donorId <= 0) 
+            if (donorDTO == null || donorId <= 0)
             {
                 return BadRequest("Invalid donor data.");
             }
@@ -217,7 +217,7 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest(new { status = "failed", message = ex.Message });
             }
         }
-        
+
         //[HttpPut("donation-date/{userId}")]
         //public async Task<IActionResult> UpdateDonationInfo(int userId, [FromBody] DateTime donationDate)
         //{
@@ -283,7 +283,7 @@ namespace BloodDonationSupportSystem.Controllers
             try
             {
                 var imageData = await _userServices.GetUserImageAsync(userId);
-                
+
                 if (imageData == null || imageData.Length == 0)
                 {
                     return NotFound(new { status = "failed", message = "User image not found" });
@@ -308,7 +308,7 @@ namespace BloodDonationSupportSystem.Controllers
             try
             {
                 var result = await _userServices.DeleteUserImageAsync(userId);
-                
+
                 if (!result)
                 {
                     return NotFound(new { status = "failed", message = "User not found or image already deleted" });
@@ -330,6 +330,34 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest("Invalid ID.");
             }
             return NoContent();
+        }
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgetPasswordDTO request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _userServices.ForgotPasswordAsync(request.Email);
+            return Ok(new { message = "Nếu tài khoản của bạn tồn tại, một email hướng dẫn đặt lại mật khẩu đã được gửi." });
+        }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _userServices.ResetPasswordAsync(request.Token, request.NewPassword);
+
+            if (!result)
+            {
+                return BadRequest(new { message = "Token không hợp lệ hoặc đã hết hạn." });
+            }
+
+            return Ok(new { message = "Mật khẩu của bạn đã được đặt lại thành công." });
         }
     }
 }

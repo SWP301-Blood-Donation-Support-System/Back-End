@@ -17,5 +17,6 @@ namespace DataAccessLayer.IRepository
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);
         Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabilityId );
         Task<bool> UpdateUserRoleAsync(int userId, int roleId);
+        Task<User> GetByPasswordResetToken(string token);
     }
 }
