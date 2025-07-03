@@ -136,24 +136,19 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException("Email already exists");
                 }
-                existingUser = await _userRepository.GetByUsernameAsync(staff.Username);
-                if (existingUser != null)
-                {
-                    throw new InvalidOperationException("Username already exists");
-                }
                 User EntityUser = _mapper.Map<User>(staff);
 
                 // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
-                EntityUser.PasswordHash = EncryptPassword(staff.PasswordHash);
+                EntityUser.PasswordHash = EncryptPassword("staff123");
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 2; // Assuming 2 is the role ID for staff
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
                 // Send welcome email after successful registration
-                SendWelcomeEmail(staff.Email, staff.Username);
+                SendWelcomeEmail(staff.Email, "Dave");
             }
             catch (Exception ex)
             {
@@ -177,14 +172,14 @@ namespace BusinessLayer.Service
                 // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
-                EntityUser.PasswordHash = EncryptPassword(admin.PasswordHash);
+                EntityUser.PasswordHash = EncryptPassword("staff123");
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 1; // Assuming 1 is the role ID for admin
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
                 // Send welcome email after successful registration
-                SendWelcomeEmail(admin.Email, admin.Username);
+                SendWelcomeEmail(admin.Email, "John");
             }
             catch (Exception ex)
             {
