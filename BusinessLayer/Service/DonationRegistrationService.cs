@@ -135,12 +135,19 @@ namespace BusinessLayer.Service
         {
             try
             {
+                Console.WriteLine($"=== ATTEMPTING TO SEND DONATION REGISTRATION EMAIL ===");
+                Console.WriteLine($"Registration DonorId: {registration.DonorId}");
+                Console.WriteLine($"Registration ScheduleId: {registration.ScheduleId}");
+                
                 // Get donor information from repository
                 var donor = await _userRepository.GetByIdAsync(registration.DonorId);
                 if (donor != null && !string.IsNullOrEmpty(donor.Email))
                 {
+                    Console.WriteLine($"Donor found - Email: {donor.Email}, FullName: {donor.FullName}");
+                    
                     // Get schedule information
                     var schedule = await _donationScheduleRepository.GetByIdAsync(registration.ScheduleId);
+                    Console.WriteLine($"Schedule found: {schedule != null}");
                     
                     // Create the email info DTO with all necessary data
                     var emailInfo = new DonationRegistrationEmailInfoDTO
@@ -169,16 +176,33 @@ namespace BusinessLayer.Service
                         emailInfo.BloodType = $"Nhóm máu ID: {donor.BloodTypeId}";
                     }
 
+                    Console.WriteLine($"Calling UserServices.SendDonationRegistrationThankYouEmail...");
+                    
                     // Send thank you email for donation registration
                     _userServices.SendDonationRegistrationThankYouEmail(
                         donor.Email, 
                         donor.FullName ?? donor.Username ?? donor.Email, 
                         emailInfo);
+                        
+                    Console.WriteLine($"=== DONATION REGISTRATION EMAIL SENT SUCCESSFULLY ===");
+                }
+                else
+                {
+                    Console.WriteLine($"Donor not found or no email - DonorId: {registration.DonorId}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending donation registration thank you email: {ex.Message}");
+                Console.WriteLine($"=== ERROR SENDING DONATION REGISTRATION EMAIL ===");
+                Console.WriteLine($"DonorId: {registration.DonorId}");
+                Console.WriteLine($"Error message: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"=== END ERROR LOG ===");
+                
                 // Don't throw - email failure shouldn't break the registration process
             }
         }
