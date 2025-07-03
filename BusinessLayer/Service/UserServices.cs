@@ -613,6 +613,12 @@ namespace BusinessLayer.Service
         {
             try
             {
+                Console.WriteLine($"=== ATTEMPTING TO SEND DONATION REGISTRATION THANK YOU EMAIL ===");
+                Console.WriteLine($"Email service is null: {_emailService == null}");
+                Console.WriteLine($"Target email: {userEmail}");
+                Console.WriteLine($"User name: {userName}");
+                Console.WriteLine($"Registration code: {registrationInfo.RegistrationCode}");
+                
                 var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
                 var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(userName, userEmail, registrationInfo);
 
@@ -621,11 +627,23 @@ namespace BusinessLayer.Service
                     subject: subject,
                     content: htmlBody);
 
+                Console.WriteLine($"Created donation registration email message successfully");
+                
                 _emailService.SendEmail(message);
+                
+                Console.WriteLine($"=== DONATION REGISTRATION EMAIL SENT SUCCESSFULLY to {userEmail} ===");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending donation registration thank you email to {userEmail}: {ex.Message}");
+                Console.WriteLine($"=== ERROR SENDING DONATION REGISTRATION THANK YOU EMAIL ===");
+                Console.WriteLine($"Target email: {userEmail}");
+                Console.WriteLine($"Error message: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"=== END ERROR LOG ===");
             }
         }
 
@@ -774,14 +792,12 @@ namespace BusinessLayer.Service
             await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangesAsync();
 
-
             // 3. Gửi email chứa link reset
             // **QUAN TRỌNG**: Link này phải trỏ đến trang reset password trên Frontend của bạn
             var resetLink = $"http://localhost:3000/reset-password?token={token}";
 
             var subject = "Yêu cầu đặt lại mật khẩu";
             var body = GeneratePasswordResetEmailTemplate(user.FullName ?? user.Username, resetLink);
-
 
             SendMail(subject, body, user.Email);
             return true;
