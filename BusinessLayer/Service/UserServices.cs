@@ -524,6 +524,12 @@ namespace BusinessLayer.Service
         {
             try
             {
+                // Add debug logging
+                Console.WriteLine($"=== ATTEMPTING TO SEND WELCOME EMAIL ===");
+                Console.WriteLine($"Email service is null: {_emailService == null}");
+                Console.WriteLine($"Target email: {userEmail}");
+                Console.WriteLine($"User name: {userName}");
+                
                 var subject = "Chào mừng bạn đến với Hệ thống Hỗ trợ Hiến máu!";
                 var htmlBody = GenerateWelcomeEmailTemplate(userName, userEmail);
 
@@ -532,31 +538,25 @@ namespace BusinessLayer.Service
                     subject: subject,
                     content: htmlBody);
 
+                Console.WriteLine($"Created email message successfully");
+                
                 _emailService.SendEmail(message);
+                
+                Console.WriteLine($"=== EMAIL SENT SUCCESSFULLY to {userEmail} ===");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending welcome email to {userEmail}: {ex.Message}");
-            }
-        }
-
-        public void SendDonationRegistrationThankYouEmail(string userEmail, string userName, DonationRegistrationEmailInfoDTO registrationInfo)
-        {
-            try
-            {
-                var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
-                var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(userName, userEmail, registrationInfo);
-
-                var message = new Message(
-                    to: new string[] { userEmail },
-                    subject: subject,
-                    content: htmlBody);
-
-                _emailService.SendEmail(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending donation registration thank you email to {userEmail}: {ex.Message}");
+                Console.WriteLine($"=== ERROR SENDING WELCOME EMAIL ===");
+                Console.WriteLine($"Target email: {userEmail}");
+                Console.WriteLine($"Error message: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"=== END ERROR LOG ===");
+                
+                // Don't throw - email failure shouldn't break registration
             }
         }
 
@@ -607,6 +607,26 @@ namespace BusinessLayer.Service
             sb.AppendLine("</html>");
 
             return sb.ToString();
+        }
+
+        public void SendDonationRegistrationThankYouEmail(string userEmail, string userName, DonationRegistrationEmailInfoDTO registrationInfo)
+        {
+            try
+            {
+                var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
+                var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(userName, userEmail, registrationInfo);
+
+                var message = new Message(
+                    to: new string[] { userEmail },
+                    subject: subject,
+                    content: htmlBody);
+
+                _emailService.SendEmail(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending donation registration thank you email to {userEmail}: {ex.Message}");
+            }
         }
 
         private string GenerateDonationRegistrationThankYouEmailTemplate(string userName, string userEmail, DonationRegistrationEmailInfoDTO registrationInfo)
@@ -735,6 +755,7 @@ namespace BusinessLayer.Service
 
             return sb.ToString();
         }
+
         public async Task<bool> ForgotPasswordAsync(string email)
         {
             var user = await _userRepository.GetByEmailAsync(email);
