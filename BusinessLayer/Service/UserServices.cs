@@ -759,12 +759,8 @@ namespace BusinessLayer.Service
             var resetLink = $"http://localhost:3000/reset-password?token={token}";
 
             var subject = "Yêu cầu đặt lại mật khẩu";
-            var body = $"<p>Xin chào {user.FullName ?? user.Username},</p>" +
-               "<p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>" +
-               $"<p>Vui lòng nhấp vào đường link sau để đặt lại mật khẩu. Đường link này sẽ hết hạn sau 1 giờ:</p>" +
-               $"<p><a href='{resetLink}'>Đặt lại mật khẩu</a></p>" +
-               "<p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>" +
-               "<p>Trân trọng,<br/>Đội ngũ Blood Donation Support System</p>";
+            var body = GeneratePasswordResetEmailTemplate(user.FullName ?? user.Username, resetLink);
+
 
             SendMail(subject, body, user.Email);
             return true;
@@ -790,6 +786,66 @@ namespace BusinessLayer.Service
             await _userRepository.SaveChangesAsync();
 
             return true;
+        }
+
+        private string GeneratePasswordResetEmailTemplate(string userName, string resetLink)
+        {
+            var emailTemplate = $@"
+<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Yêu cầu Đặt lại Mật khẩu</title>
+</head>
+<body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;'>
+    <table align='center' border='0' cellpadding='0' cellspacing='0' width='600' style='border-collapse: collapse; margin-top: 30px; margin-bottom: 30px; border: 1px solid #cccccc;'>
+        <tr>
+            <td align='center' bgcolor='#B22222' style='padding: 30px 0; color: #ffffff; font-size: 28px; font-weight: bold;'>
+                Hệ thống Hỗ trợ Hiến máu
+            </td>
+        </tr>
+        <tr>
+            <td bgcolor='#ffffff' style='padding: 40px 30px;'>
+                <h1 style='font-size: 24px; color: #333333;'>Yêu cầu Đặt lại Mật khẩu</h1>
+                <p style='margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;'>
+                    Xin chào {userName},
+                </p>
+                <p style='margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;'>
+                    Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng nhấp vào nút bên dưới để tiến hành.
+                </p>
+                <table border='0' cellpadding='0' cellspacing='0' width='100%'>
+                    <tr>
+                        <td align='center' style='padding: 20px 0;'>
+                            <a href='{resetLink}' style='background-color: #dc3545; color: #ffffff; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; display: inline-block;'>
+                                Đặt lại Mật khẩu
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+                <p style='margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;'>
+                    Đường link này sẽ hết hạn sau <strong>1 giờ</strong>.
+                </p>
+                <p style='margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;'>
+                    Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td bgcolor='#f4f4f4' style='padding: 20px 30px; text-align: center;'>
+                <p style='margin: 0; font-size: 14px; color: #888888;'>
+                    Bạn nhận được email này vì đã đăng ký tài khoản tại Blood Donation Support System.
+                </p>
+                <p style='margin: 10px 0 0; font-size: 14px; color: #888888;'>
+                    &copy; {DateTime.Now.Year} Blood Donation Support System. All rights reserved.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>";
+
+            return emailTemplate;
         }
     }
 }
