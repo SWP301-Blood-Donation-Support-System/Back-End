@@ -51,7 +51,7 @@ namespace BE_Homnayangi.Ultils.EmailServices
                 {
                     client.Connect(_emailConfig.SmtpServer, _emailConfig.Port, true);
                     client.AuthenticationMechanisms.Remove("XOAUTH2");
-                    client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
+                    client.Authenticate(_emailConfig.Username, _emailConfig.Password); // Changed from UserName to Username
 
                     client.Send(mailMessage);
                 }
@@ -76,7 +76,7 @@ namespace BE_Homnayangi.Ultils.EmailServices
                 {
                     await client.ConnectAsync(_emailConfig.SmtpServer, _emailConfig.Port, true);
                     client.AuthenticationMechanisms.Remove("XOAUTH2");
-                    await client.AuthenticateAsync(_emailConfig.UserName, _emailConfig.Password);
+                    await client.AuthenticateAsync(_emailConfig.Username, _emailConfig.Password); // Changed from UserName to Username
 
                     await client.SendAsync(mailMessage);
                 }
