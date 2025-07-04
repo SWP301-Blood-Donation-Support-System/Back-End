@@ -17,19 +17,25 @@ namespace BusinessLayer.Service
         private readonly IUserRepository _userRepository;
         private readonly IUserServices _userServices;
         private readonly IMapper _mapper;
+        private readonly IGenericRepository<BloodType> _bloodTypeRepository;
+        private readonly ITimeSlotRepository _timeSlotRepository;
 
         public DonationRegistrationService(
             IDonationRegistrationRepository donationRegistrationRepository,
             IDonationScheduleRepository donationScheduleRepository,
             IUserRepository userRepository,
             IUserServices userServices,
-            IMapper mapper)
+            IMapper mapper,
+            IGenericRepository<BloodType> bloodTypeRepository,
+            ITimeSlotRepository timeSlotRepository)
         {
             _donationRegistrationRepository = donationRegistrationRepository ?? throw new ArgumentNullException(nameof(donationRegistrationRepository));
             _donationScheduleRepository = donationScheduleRepository ?? throw new ArgumentNullException(nameof(donationScheduleRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _userServices = userServices ?? throw new ArgumentNullException(nameof(userServices));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _bloodTypeRepository = bloodTypeRepository ?? throw new ArgumentNullException(nameof(bloodTypeRepository));
+            _timeSlotRepository = timeSlotRepository ?? throw new ArgumentNullException(nameof(timeSlotRepository));
         }
 
         public async Task<DonationRegistration> GetRegistrationByIdAsync(int registrationId)
@@ -135,28 +141,34 @@ namespace BusinessLayer.Service
         {
             try
             {
+                Console.WriteLine($"=== ATTEMPTING TO SEND DONATION REGISTRATION EMAIL ===");
+                Console.WriteLine($"Registration DonorId: {registration.DonorId}");
+                Console.WriteLine($"Registration ScheduleId: {registration.ScheduleId}");
+                Console.WriteLine($"Registration TimeSlotId: {registration.TimeSlotId}");
+                
                 // Get donor information from repository
                 var donor = await _userRepository.GetByIdAsync(registration.DonorId);
                 if (donor != null && !string.IsNullOrEmpty(donor.Email))
                 {
+                    Console.WriteLine($"Donor found - Email: {donor.Email}, FullName: {donor.FullName}");
+                    
                     // Get schedule information
                     var schedule = await _donationScheduleRepository.GetByIdAsync(registration.ScheduleId);
+                    Console.WriteLine($"Schedule found: {schedule != null}");
                     
-                    // Create the email info DTO with all necessary data
+                    // Initialize email info DTO
                     var emailInfo = new DonationRegistrationEmailInfoDTO
                     {
                         RegistrationId = 0, // Will be set after registration is saved
                         DonorName = donor.FullName ?? donor.Username ?? "Người hiến máu",
                         DonorEmail = donor.Email,
                         DonorPhone = donor.PhoneNumber ?? "",
-                        BloodType = "", // Will need to get blood type name from BloodType entity
+                        BloodType = "Sẽ được xác định tại điểm hiến máu",
                         ScheduleDate = schedule?.ScheduleDate ?? DateTime.Now,
-                        ScheduleLocation = "Trung tâm hiến máu", // Default location since not available in schedule
+                        ScheduleLocation = "Trung tâm hiến máu", // Default location since DonationSchedule doesn't have Location property
                         TimeSlotName = "Chưa xác định",
                         StartTime = "",
                         EndTime = "",
-                        HospitalName = "Hệ thống hiến máu tình nguyện",
-                        HospitalAddress = "Địa chỉ sẽ được thông báo qua SMS",
                         RegistrationDate = DateTime.Now,
                         RegistrationCode = $"REG-{registration.DonorId}-{DateTime.Now:yyyyMMdd}"
                     };
@@ -164,21 +176,84 @@ namespace BusinessLayer.Service
                     // Get blood type name if available
                     if (donor.BloodTypeId.HasValue)
                     {
-                        // You might need to add a repository call to get blood type name
-                        // For now, using placeholder
-                        emailInfo.BloodType = $"Nhóm máu ID: {donor.BloodTypeId}";
+                        try
+                        {
+                            var bloodType = await _bloodTypeRepository.GetByIdAsync(donor.BloodTypeId.Value);
+                            if (bloodType != null)
+                            {
+                                emailInfo.BloodType = bloodType.BloodTypeName;
+                                Console.WriteLine($"Blood type found: {emailInfo.BloodType}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Blood type not found for ID: {donor.BloodTypeId}");
+                            }
+                        }
+                        catch (Exception btEx)
+                        {
+                            Console.WriteLine($"Error loading blood type: {btEx.Message}");
+                        }
                     }
 
+                    // Get time slot information if available
+                    if (registration.TimeSlotId > 0)
+                    {
+                        try
+                        {
+                            var timeSlot = await _timeSlotRepository.GetByIdAsync(registration.TimeSlotId);
+                            if (timeSlot != null)
+                            {
+                                emailInfo.TimeSlotName = timeSlot.TimeSlotName ?? "Ca hiến máu";
+                                emailInfo.StartTime = timeSlot.StartTime.ToString(@"HH\:mm");
+                                emailInfo.EndTime = timeSlot.EndTime.ToString(@"HH\:mm");
+                                Console.WriteLine($"Time slot found: {emailInfo.TimeSlotName} ({emailInfo.StartTime} - {emailInfo.EndTime})");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Time slot not found for ID: {registration.TimeSlotId}");
+                                emailInfo.TimeSlotName = "Theo lịch đã đăng ký";
+                                emailInfo.StartTime = "Sẽ được thông báo";
+                                emailInfo.EndTime = "qua email/SMS";
+                            }
+                        }
+                        catch (Exception tsEx)
+                        {
+                            Console.WriteLine($"Error loading time slot: {tsEx.Message}");
+                            emailInfo.TimeSlotName = "Theo lịch đã đăng ký";
+                            emailInfo.StartTime = "Sẽ được thông báo";
+                            emailInfo.EndTime = "qua email/SMS";
+                        }
+                    }
+
+                    Console.WriteLine($"Calling UserServices.SendDonationRegistrationThankYouEmail...");
+                    Console.WriteLine($"Blood type in email: {emailInfo.BloodType}");
+                    Console.WriteLine($"Time slot in email: {emailInfo.TimeSlotName} ({emailInfo.StartTime} - {emailInfo.EndTime})");
+                    
                     // Send thank you email for donation registration
                     _userServices.SendDonationRegistrationThankYouEmail(
                         donor.Email, 
                         donor.FullName ?? donor.Username ?? donor.Email, 
                         emailInfo);
+                        
+                    Console.WriteLine($"=== DONATION REGISTRATION EMAIL SENT SUCCESSFULLY ===");
+                }
+                else
+                {
+                    Console.WriteLine($"Donor not found or no email - DonorId: {registration.DonorId}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending donation registration thank you email: {ex.Message}");
+                Console.WriteLine($"=== ERROR SENDING DONATION REGISTRATION EMAIL ===");
+                Console.WriteLine($"DonorId: {registration.DonorId}");
+                Console.WriteLine($"Error message: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"=== END ERROR LOG ===");
+                
                 // Don't throw - email failure shouldn't break the registration process
             }
         }

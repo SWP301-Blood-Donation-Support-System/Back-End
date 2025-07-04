@@ -18,11 +18,35 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // ====================== CONFIGURATION ====================== //
+// Add User Secrets for development environment
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
 builder.Services.Configure<AppSetting>(builder.Configuration.GetSection("AppSetting"));
-//new
+
+// Load and validate EmailConfiguration
 var emailConfig = builder.Configuration
     .GetSection("EmailConfiguration")
     .Get<EmailConfiguration>();
+
+// Validate EmailConfiguration
+if (emailConfig == null)
+{
+    throw new InvalidOperationException("EmailConfiguration is not properly configured in appsettings.json or User Secrets.");
+}
+
+if (string.IsNullOrEmpty(emailConfig.From) || 
+    string.IsNullOrEmpty(emailConfig.SmtpServer) || 
+    string.IsNullOrEmpty(emailConfig.Username) || // Changed from UserName to Username
+    string.IsNullOrEmpty(emailConfig.Password))
+{
+    throw new InvalidOperationException("EmailConfiguration is missing required fields (From, SmtpServer, Username, Password).");
+}
+
+Console.WriteLine($"Email configuration loaded successfully - From: {emailConfig.From}, SMTP: {emailConfig.SmtpServer}:{emailConfig.Port}");
+
 builder.Services.AddSingleton(emailConfig);
 
 builder.Services.Configure<CertificateSettings>(
@@ -108,10 +132,8 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
 builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
-
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IDonationScheduleService, DonationScheduleService>();
-
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
@@ -120,6 +142,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<IBloodRequestService, BloodRequestService>();
 builder.Services.AddScoped<IHospitalService, HospitalService>();
+builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -133,6 +156,7 @@ builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IBloodRequestRepository,BloodRequestRepository>();
 builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
+builder.Services.AddScoped<IBloodCompatibilityRepository, BloodCompatibilityRepository>();
 
 // Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();

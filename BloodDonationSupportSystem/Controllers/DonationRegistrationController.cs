@@ -219,7 +219,7 @@ namespace BloodDonationSupportSystem.Controllers
                     return Ok(new
                     {
                         status = "warning",
-                        message = "Người dùng đã điểm danh (check-in) trong hôm nay rồi.",
+                        message = "Người dùng đã điểm danh trong hôm nay rồi.",
                         registration = checkedInRegistration
                     });
                 }

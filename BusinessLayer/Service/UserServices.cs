@@ -136,24 +136,19 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException("Email already exists");
                 }
-                existingUser = await _userRepository.GetByUsernameAsync(staff.Username);
-                if (existingUser != null)
-                {
-                    throw new InvalidOperationException("Username already exists");
-                }
                 User EntityUser = _mapper.Map<User>(staff);
 
                 // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
-                EntityUser.PasswordHash = EncryptPassword(staff.PasswordHash);
+                EntityUser.PasswordHash = EncryptPassword("staff123");
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 2; // Assuming 2 is the role ID for staff
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
                 // Send welcome email after successful registration
-                SendWelcomeEmail(staff.Email, staff.Username);
+                SendWelcomeEmail(staff.Email, "Dave");
             }
             catch (Exception ex)
             {
@@ -177,14 +172,14 @@ namespace BusinessLayer.Service
                 // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
-                EntityUser.PasswordHash = EncryptPassword(admin.PasswordHash);
+                EntityUser.PasswordHash = EncryptPassword("staff123");
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 1; // Assuming 1 is the role ID for admin
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
                 // Send welcome email after successful registration
-                SendWelcomeEmail(admin.Email, admin.Username);
+                SendWelcomeEmail(admin.Email, "John");
             }
             catch (Exception ex)
             {
@@ -524,6 +519,12 @@ namespace BusinessLayer.Service
         {
             try
             {
+                // Add debug logging
+                Console.WriteLine($"=== ATTEMPTING TO SEND WELCOME EMAIL ===");
+                Console.WriteLine($"Email service is null: {_emailService == null}");
+                Console.WriteLine($"Target email: {userEmail}");
+                Console.WriteLine($"User name: {userName}");
+                
                 var subject = "Chào mừng bạn đến với Hệ thống Hỗ trợ Hiến máu!";
                 var htmlBody = GenerateWelcomeEmailTemplate(userName, userEmail);
 
@@ -532,31 +533,25 @@ namespace BusinessLayer.Service
                     subject: subject,
                     content: htmlBody);
 
+                Console.WriteLine($"Created email message successfully");
+                
                 _emailService.SendEmail(message);
+                
+                Console.WriteLine($"=== EMAIL SENT SUCCESSFULLY to {userEmail} ===");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending welcome email to {userEmail}: {ex.Message}");
-            }
-        }
-
-        public void SendDonationRegistrationThankYouEmail(string userEmail, string userName, DonationRegistrationEmailInfoDTO registrationInfo)
-        {
-            try
-            {
-                var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
-                var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(userName, userEmail, registrationInfo);
-
-                var message = new Message(
-                    to: new string[] { userEmail },
-                    subject: subject,
-                    content: htmlBody);
-
-                _emailService.SendEmail(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending donation registration thank you email to {userEmail}: {ex.Message}");
+                Console.WriteLine($"=== ERROR SENDING WELCOME EMAIL ===");
+                Console.WriteLine($"Target email: {userEmail}");
+                Console.WriteLine($"Error message: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"=== END ERROR LOG ===");
+                
+                // Don't throw - email failure shouldn't break registration
             }
         }
 
@@ -609,6 +604,44 @@ namespace BusinessLayer.Service
             return sb.ToString();
         }
 
+        public void SendDonationRegistrationThankYouEmail(string userEmail, string userName, DonationRegistrationEmailInfoDTO registrationInfo)
+        {
+            try
+            {
+                Console.WriteLine($"=== ATTEMPTING TO SEND DONATION REGISTRATION THANK YOU EMAIL ===");
+                Console.WriteLine($"Email service is null: {_emailService == null}");
+                Console.WriteLine($"Target email: {userEmail}");
+                Console.WriteLine($"User name: {userName}");
+                Console.WriteLine($"Registration code: {registrationInfo.RegistrationCode}");
+                
+                var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
+                var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(userName, userEmail, registrationInfo);
+
+                var message = new Message(
+                    to: new string[] { userEmail },
+                    subject: subject,
+                    content: htmlBody);
+
+                Console.WriteLine($"Created donation registration email message successfully");
+                
+                _emailService.SendEmail(message);
+                
+                Console.WriteLine($"=== DONATION REGISTRATION EMAIL SENT SUCCESSFULLY to {userEmail} ===");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"=== ERROR SENDING DONATION REGISTRATION THANK YOU EMAIL ===");
+                Console.WriteLine($"Target email: {userEmail}");
+                Console.WriteLine($"Error message: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"=== END ERROR LOG ===");
+            }
+        }
+
         private string GenerateDonationRegistrationThankYouEmailTemplate(string userName, string userEmail, DonationRegistrationEmailInfoDTO registrationInfo)
         {
             var displayName = !string.IsNullOrEmpty(userName) ? userName : registrationInfo.DonorName ?? userEmail;
@@ -658,9 +691,14 @@ namespace BusinessLayer.Service
                 sb.AppendLine($"                    <tr><td class='label'>Số điện thoại:</td><td>{registrationInfo.DonorPhone}</td></tr>");
             }
 
+            // Better blood type handling
             if (!string.IsNullOrEmpty(registrationInfo.BloodType))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td class='important'>{registrationInfo.BloodType}</td></tr>");
+            }
+            else
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td>Sẽ được xác định tại điểm hiến máu</td></tr>");
             }
 
             sb.AppendLine("                </table>");
@@ -672,29 +710,24 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <table>");
             sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{registrationInfo.ScheduleDate.ToString("dddd, dd/MM/yyyy")}</td></tr>");
 
-            if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName))
+            // Better time slot handling
+            if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName) && registrationInfo.TimeSlotName != "Chưa xác định")
             {
                 sb.AppendLine($"                    <tr><td class='label'>Khung giờ:</td><td>{registrationInfo.TimeSlotName}</td></tr>");
             }
 
             if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
             {
-                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
+                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td class='important'>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
+            }
+            else
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>Sẽ được thông báo qua email/SMS</td></tr>");
             }
 
             if (!string.IsNullOrEmpty(registrationInfo.ScheduleLocation))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Địa điểm:</td><td>{registrationInfo.ScheduleLocation}</td></tr>");
-            }
-
-            if (!string.IsNullOrEmpty(registrationInfo.HospitalName))
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Bệnh viện:</td><td>{registrationInfo.HospitalName}</td></tr>");
-            }
-
-            if (!string.IsNullOrEmpty(registrationInfo.HospitalAddress))
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Địa chỉ bệnh viện:</td><td>{registrationInfo.HospitalAddress}</td></tr>");
             }
 
             sb.AppendLine("                </table>");
@@ -718,8 +751,8 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <h3>📞 Liên hệ hỗ trợ</h3>");
             sb.AppendLine("                <p>Nếu bạn có bất kỳ thắc mắc nào hoặc cần thay đổi lịch hẹn, vui lòng liên hệ:</p>");
             sb.AppendLine("                <ul>");
-            sb.AppendLine("                    <li>Email: support@blooddonation.vn</li>");
-            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX</li>");
+            sb.AppendLine("                    <li>Email: giotmaunghiatinh@gmail.com</li>");
+            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX (8:00 - 17:00, Thứ 2 - Chủ nhật)</li>");
             sb.AppendLine("                </ul>");
             sb.AppendLine("            </div>");
 
@@ -735,6 +768,7 @@ namespace BusinessLayer.Service
 
             return sb.ToString();
         }
+
         public async Task<bool> ForgotPasswordAsync(string email)
         {
             var user = await _userRepository.GetByEmailAsync(email);
@@ -753,14 +787,12 @@ namespace BusinessLayer.Service
             await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangesAsync();
 
-
             // 3. Gửi email chứa link reset
             // **QUAN TRỌNG**: Link này phải trỏ đến trang reset password trên Frontend của bạn
             var resetLink = $"http://localhost:3000/reset-password?token={token}";
 
             var subject = "Yêu cầu đặt lại mật khẩu";
             var body = GeneratePasswordResetEmailTemplate(user.FullName ?? user.Username, resetLink);
-
 
             SendMail(subject, body, user.Email);
             return true;

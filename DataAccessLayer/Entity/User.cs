@@ -9,7 +9,6 @@ public partial class User
 
     public string? Username { get; set; }
 
-    public byte[]? UserImage { get; set; }
     public string PasswordHash { get; set; } = null!;
 
     public string Email { get; set; } = null!;
@@ -52,6 +51,12 @@ public partial class User
 
     public string? UpdatedBy { get; set; }
 
+    public byte[]? UserImage { get; set; }
+
+    public string? PasswordResetToken { get; set; }
+
+    public DateTime? ResetTokenExpires { get; set; }
+
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 
     public virtual ICollection<BloodRequest> BloodRequestApprovedByUsers { get; set; } = new List<BloodRequest>();
@@ -75,6 +80,4 @@ public partial class User
     public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<UserNotification> UserNotifications { get; set; } = new List<UserNotification>();
-    public string? PasswordResetToken { get; set; }
-    public DateTime? ResetTokenExpires { get; set; }
 }

@@ -11,7 +11,7 @@ namespace BuisinessLayer.Utils.EmailConfiguration
         public string From { get; set; } 
         public string SmtpServer { get; set; }
         public int Port { get; set; }
-        public string UserName { get; set; }
+        public string Username { get; set; }  // Changed from UserName to Username to match secrets.json
         public string Password { get; set; }
     }
 }
