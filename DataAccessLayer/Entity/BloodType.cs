@@ -21,6 +21,10 @@ public partial class BloodType
 
     public bool IsDeleted { get; set; }
 
+    public virtual ICollection<BloodCompatibility> BloodCompatibilityDonorBloodTypes { get; set; } = new List<BloodCompatibility>();
+
+    public virtual ICollection<BloodCompatibility> BloodCompatibilityRecipientBloodTypes { get; set; } = new List<BloodCompatibility>();
+
     public virtual ICollection<BloodRequest> BloodRequests { get; set; } = new List<BloodRequest>();
 
     public virtual ICollection<BloodUnit> BloodUnits { get; set; } = new List<BloodUnit>();

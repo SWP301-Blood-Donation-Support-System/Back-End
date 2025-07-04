@@ -132,10 +132,8 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
 builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
-
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IDonationScheduleService, DonationScheduleService>();
-
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
@@ -144,6 +142,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<IBloodRequestService, BloodRequestService>();
 builder.Services.AddScoped<IHospitalService, HospitalService>();
+builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -157,6 +156,7 @@ builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IBloodRequestRepository,BloodRequestRepository>();
 builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
+builder.Services.AddScoped<IBloodCompatibilityRepository, BloodCompatibilityRepository>();
 
 // Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();
