@@ -715,14 +715,6 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <table>");
             sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{registrationInfo.ScheduleDate.ToString("dddd, dd/MM/yyyy")}</td></tr>");
 
-            if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td class='important'>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
-            }
-            else
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>Sẽ được thông báo qua email/SMS</td></tr>");
-            }
             if (!string.IsNullOrEmpty(registrationInfo.ScheduleLocation))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Địa điểm:</td><td>{registrationInfo.ScheduleLocation}</td></tr>");
