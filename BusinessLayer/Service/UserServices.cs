@@ -691,6 +691,11 @@ namespace BusinessLayer.Service
                 sb.AppendLine($"                    <tr><td class='label'>Số điện thoại:</td><td>{registrationInfo.DonorPhone}</td></tr>");
             }
 
+            if (!string.IsNullOrEmpty(registrationInfo.DonorNationalId))
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Căn cước công dân:</td><td class='important'>{registrationInfo.DonorNationalId}</td></tr>");
+            }
+
             // Better blood type handling
             if (!string.IsNullOrEmpty(registrationInfo.BloodType))
             {
@@ -709,21 +714,6 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <h3>📅 Thông tin lịch hiến máu</h3>");
             sb.AppendLine("                <table>");
             sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{registrationInfo.ScheduleDate.ToString("dddd, dd/MM/yyyy")}</td></tr>");
-
-            // Better time slot handling
-            if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName) && registrationInfo.TimeSlotName != "Chưa xác định")
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Khung giờ:</td><td>{registrationInfo.TimeSlotName}</td></tr>");
-            }
-
-            if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td class='important'>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
-            }
-            else
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>Sẽ được thông báo qua email/SMS</td></tr>");
-            }
 
             if (!string.IsNullOrEmpty(registrationInfo.ScheduleLocation))
             {

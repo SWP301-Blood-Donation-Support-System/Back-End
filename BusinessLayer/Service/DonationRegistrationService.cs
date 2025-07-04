@@ -163,6 +163,7 @@ namespace BusinessLayer.Service
                         DonorName = donor.FullName ?? donor.Username ?? "Người hiến máu",
                         DonorEmail = donor.Email,
                         DonorPhone = donor.PhoneNumber ?? "",
+                        DonorNationalId = donor.NationalId ?? "",
                         BloodType = "Sẽ được xác định tại điểm hiến máu",
                         ScheduleDate = schedule?.ScheduleDate ?? DateTime.Now,
                         ScheduleLocation = "Trung tâm hiến máu", // Default location since DonationSchedule doesn't have Location property

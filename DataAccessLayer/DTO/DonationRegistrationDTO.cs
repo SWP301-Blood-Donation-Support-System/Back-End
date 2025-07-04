@@ -38,6 +38,7 @@ namespace DataAccessLayer.DTO
         public string DonorName { get; set; }
         public string DonorEmail { get; set; }
         public string DonorPhone { get; set; }
+        public string DonorNationalId { get; set; }
         public string BloodType { get; set; }
         public DateTime ScheduleDate { get; set; }
         public string ScheduleLocation { get; set; }
