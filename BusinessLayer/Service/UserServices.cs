@@ -869,5 +869,31 @@ namespace BusinessLayer.Service
 
             return emailTemplate;
         }
+        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            // 1. Lấy thông tin người dùng từ DB
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return false; // Không tìm thấy người dùng
+            }
+
+            // 2. Mã hóa mật khẩu hiện tại mà người dùng nhập và so sánh với mật khẩu trong DB
+            var hashedCurrentPassword = EncryptPassword(currentPassword);
+            if (user.PasswordHash != hashedCurrentPassword)
+            {
+                // Ném ra lỗi để Controller có thể bắt và thông báo cụ thể cho người dùng
+                throw new InvalidOperationException("Mật khẩu hiện tại không chính xác.");
+            }
+
+            // 3. Nếu mật khẩu hiện tại đúng, cập nhật mật khẩu mới (đã được mã hóa)
+            user.PasswordHash = EncryptPassword(newPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user);
+            await _userRepository.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

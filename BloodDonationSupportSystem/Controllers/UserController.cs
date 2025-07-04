@@ -2,6 +2,7 @@
 using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -360,6 +361,45 @@ namespace BloodDonationSupportSystem.Controllers
             }
 
             return Ok(new { message = "Mật khẩu của bạn đã được đặt lại thành công." });
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO request)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Lấy UserID từ claims của JWT token
+            var userIdString = User.FindFirst("UserId")?.Value;
+            if(string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
+            {
+                return Unauthorized(new { message = "Không thể xác định người dùng." });
+            }
+            try
+            {
+                var result = await _userServices.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
+
+                if (result)
+                {
+                    return Ok(new { message = "Đổi mật khẩu thành công." });
+                }
+
+                // Trường hợp này hiếm khi xảy ra nếu logic ở trên đúng
+                return BadRequest(new { message = "Không thể đổi mật khẩu." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Bắt lỗi cụ thể từ Service để trả về thông báo rõ ràng
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Các lỗi không mong muốn khác
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra.", error = ex.Message });
+            }
         }
     }
 }

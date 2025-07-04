@@ -34,5 +34,6 @@ namespace BusinessLayer.IService
         Task<bool> DeleteUserImageAsync(int userId);
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ResetPasswordAsync(string token, string newPassword);
+        Task<bool> ChangePasswordAsync(int userId,string currentPassword, string newPassword);
     }
 }
