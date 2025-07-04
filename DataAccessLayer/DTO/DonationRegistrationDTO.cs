@@ -10,7 +10,7 @@ namespace DataAccessLayer.DTO
     {
         public int DonorId { get; set; }
         public int ScheduleId { get; set; }
-        public int TimeSlotId { get; set; }
+        public int? TimeSlotId { get; set; }
     }
 
     public class DonationRegistrationResponseDTO
@@ -18,7 +18,7 @@ namespace DataAccessLayer.DTO
         public int RegistrationId { get; set; }
         public int DonorId { get; set; }
         public int ScheduleId { get; set; }
-        public int TimeSlotId { get; set; }
+        public int? TimeSlotId { get; set; }
         public int RegistrationStatusId { get; set; }
         public DateTime RegistrationDate { get; set; }
         public string Notes { get; set; }

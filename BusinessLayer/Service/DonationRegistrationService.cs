@@ -197,13 +197,18 @@ namespace BusinessLayer.Service
                     }
 
                     // Get time slot information if available
-                    if (registration.TimeSlotId > 0)
+                    Console.WriteLine($"DEBUG: registration.TimeSlotId = {registration.TimeSlotId}");
+                    
+                    if (registration.TimeSlotId.HasValue && registration.TimeSlotId.Value > 0)
                     {
                         try
                         {
-                            var timeSlot = await _timeSlotRepository.GetByIdAsync(registration.TimeSlotId);
+                            Console.WriteLine($"DEBUG: Attempting to get TimeSlot with ID: {registration.TimeSlotId.Value}");
+                            var timeSlot = await _timeSlotRepository.GetByIdAsync(registration.TimeSlotId.Value);
+                            
                             if (timeSlot != null)
                             {
+                                Console.WriteLine($"DEBUG: TimeSlot found - Name: {timeSlot.TimeSlotName}, StartTime: {timeSlot.StartTime}, EndTime: {timeSlot.EndTime}");
                                 emailInfo.TimeSlotName = timeSlot.TimeSlotName ?? "Ca hiến máu";
                                 emailInfo.StartTime = timeSlot.StartTime.ToString(@"HH\:mm");
                                 emailInfo.EndTime = timeSlot.EndTime.ToString(@"HH\:mm");
@@ -211,7 +216,9 @@ namespace BusinessLayer.Service
                             }
                             else
                             {
-                                Console.WriteLine($"Time slot not found for ID: {registration.TimeSlotId}");
+                                Console.WriteLine($"DEBUG: TimeSlot is NULL for ID: {registration.TimeSlotId.Value}");
+                                Console.WriteLine($"DEBUG: This could be because the TimeSlot is soft-deleted (IsDeleted = true)");
+                                Console.WriteLine($"Time slot not found for ID: {registration.TimeSlotId.Value}");
                                 emailInfo.TimeSlotName = "Theo lịch đã đăng ký";
                                 emailInfo.StartTime = "Sẽ được thông báo";
                                 emailInfo.EndTime = "qua email/SMS";
@@ -219,11 +226,21 @@ namespace BusinessLayer.Service
                         }
                         catch (Exception tsEx)
                         {
+                            Console.WriteLine($"DEBUG: Exception when loading time slot: {tsEx.Message}");
+                            Console.WriteLine($"DEBUG: Exception stack trace: {tsEx.StackTrace}");
                             Console.WriteLine($"Error loading time slot: {tsEx.Message}");
                             emailInfo.TimeSlotName = "Theo lịch đã đăng ký";
                             emailInfo.StartTime = "Sẽ được thông báo";
                             emailInfo.EndTime = "qua email/SMS";
                         }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"DEBUG: TimeSlotId is null or <= 0, using default values");
+                        Console.WriteLine($"DEBUG: This is normal if no specific time slot was selected");
+                        emailInfo.TimeSlotName = "Theo lịch đã đăng ký";
+                        emailInfo.StartTime = "Sẽ được thông báo";
+                        emailInfo.EndTime = "qua email/SMS";
                     }
 
                     Console.WriteLine($"Calling UserServices.SendDonationRegistrationThankYouEmail...");
