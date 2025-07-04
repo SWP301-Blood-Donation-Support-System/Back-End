@@ -696,9 +696,14 @@ namespace BusinessLayer.Service
                 sb.AppendLine($"                    <tr><td class='label'>Số điện thoại:</td><td>{registrationInfo.DonorPhone}</td></tr>");
             }
 
+            // Better blood type handling
             if (!string.IsNullOrEmpty(registrationInfo.BloodType))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td class='important'>{registrationInfo.BloodType}</td></tr>");
+            }
+            else
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td>Sẽ được xác định tại điểm hiến máu</td></tr>");
             }
 
             sb.AppendLine("                </table>");
@@ -710,29 +715,24 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <table>");
             sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{registrationInfo.ScheduleDate.ToString("dddd, dd/MM/yyyy")}</td></tr>");
 
-            if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName))
+            // Better time slot handling
+            if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName) && registrationInfo.TimeSlotName != "Chưa xác định")
             {
                 sb.AppendLine($"                    <tr><td class='label'>Khung giờ:</td><td>{registrationInfo.TimeSlotName}</td></tr>");
             }
 
             if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
             {
-                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
+                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td class='important'>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
+            }
+            else
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>Sẽ được thông báo qua email/SMS</td></tr>");
             }
 
             if (!string.IsNullOrEmpty(registrationInfo.ScheduleLocation))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Địa điểm:</td><td>{registrationInfo.ScheduleLocation}</td></tr>");
-            }
-
-            if (!string.IsNullOrEmpty(registrationInfo.HospitalName))
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Bệnh viện:</td><td>{registrationInfo.HospitalName}</td></tr>");
-            }
-
-            if (!string.IsNullOrEmpty(registrationInfo.HospitalAddress))
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Địa chỉ bệnh viện:</td><td>{registrationInfo.HospitalAddress}</td></tr>");
             }
 
             sb.AppendLine("                </table>");
@@ -756,8 +756,8 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <h3>📞 Liên hệ hỗ trợ</h3>");
             sb.AppendLine("                <p>Nếu bạn có bất kỳ thắc mắc nào hoặc cần thay đổi lịch hẹn, vui lòng liên hệ:</p>");
             sb.AppendLine("                <ul>");
-            sb.AppendLine("                    <li>Email: support@blooddonation.vn</li>");
-            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX</li>");
+            sb.AppendLine("                    <li>Email: giotmaunghiatinh@gmail.com</li>");
+            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX (8:00 - 17:00, Thứ 2 - Chủ nhật)</li>");
             sb.AppendLine("                </ul>");
             sb.AppendLine("            </div>");
 
