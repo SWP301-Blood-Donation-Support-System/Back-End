@@ -103,6 +103,7 @@ public partial class BloodDonationDbContext : DbContext
         modelBuilder.Entity<TimeSlot>().HasQueryFilter(ts => !ts.IsDeleted);
         modelBuilder.Entity<Urgency>().HasQueryFilter(u => !u.IsDeleted);
         modelBuilder.Entity<Hospital>().HasQueryFilter(h => !h.IsDeleted);
+        modelBuilder.Entity<UserNotification>().HasQueryFilter(un => !un.IsDeleted);
 
         modelBuilder.Entity<Article>(entity =>
         {
