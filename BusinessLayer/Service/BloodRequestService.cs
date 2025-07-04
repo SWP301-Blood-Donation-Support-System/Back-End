@@ -226,8 +226,11 @@ namespace BusinessLayer.Service
             }
         }
 
-        // Auto-assigns blood units to a blood request based on blood type ID prioritization and volume requirements
-        public async Task<bool> AutoAssignBloodUnitsToRequestAsync(int requestId)
+        /// <summary>
+        /// Finds blood units that can be assigned to a blood request based on blood type ID prioritization and volume requirements
+        /// </summary>
+        /// <returns>A list of blood units that could be assigned to the request</returns>
+        public async Task<IEnumerable<BloodUnitDTO>> AutoAssignBloodUnitsToRequestAsync(int requestId)
         {
             try
             {
@@ -235,14 +238,14 @@ namespace BusinessLayer.Service
                 var bloodRequest = await _bloodRequestRepository.GetByIdAsync(requestId);
                 if (bloodRequest == null || bloodRequest.RequestStatusId != 2) // Only process approved requests
                 {
-                    return false;
+                    return new List<BloodUnitDTO>();
                 }
 
                 // Get compatible blood type IDs based on the recipient blood type ID
                 var compatibleBloodTypeIds = await _bloodCompatibilityService.GetAllCompatibleDonorBloodTypeIdsAsync(bloodRequest.BloodTypeId);
                 if (!compatibleBloodTypeIds.Any())
                 {
-                    return false;
+                    return new List<BloodUnitDTO>();
                 }
 
                 // Get prioritized blood type IDs based on recipient blood type ID
@@ -279,7 +282,7 @@ namespace BusinessLayer.Service
 
                 if (!availableUnits.Any())
                 {
-                    return false;
+                    return new List<BloodUnitDTO>();
                 }
 
                 // Group units by blood type ID and volume for prioritization
@@ -312,7 +315,7 @@ namespace BusinessLayer.Service
                 }
 
                 decimal remainingVolume = bloodRequest.Volume;
-                var assignedUnits = new List<BloodUnit>();
+                var suggestedUnits = new List<BloodUnitDTO>();
 
                 // Try each blood type in priority order
                 foreach (var bloodTypeId in prioritizedBloodTypeIds)
@@ -372,77 +375,31 @@ namespace BusinessLayer.Service
                             break;
                         }
 
-                        // Assign the unit to the request
-                        selectedUnit.RequestId = requestId;
-                        selectedUnit.BloodUnitStatusId = 2; // Assuming 2 = "Assigned" status
-                        selectedUnit.UpdatedAt = DateTime.UtcNow;
-
-                        assignedUnits.Add(selectedUnit);
+                        // Add to suggested units instead of assigning
+                        suggestedUnits.Add(_mapper.Map<BloodUnitDTO>(selectedUnit));
                         remainingVolume -= selectedUnit.Volume ?? 0;
-
-                        // Update the unit in repository
-                        await _bloodUnitRepository.UpdateAsync(selectedUnit);
                     }
 
                     // If volume satisfied, break the loop
                     if (remainingVolume <= 0)
                         break;
                 }
-
-                // Save all changes
-                await _bloodUnitRepository.SaveChangesAsync();
-
-                // Update the request status if units were assigned
-                if (assignedUnits.Any())
+                if (remainingVolume > 0)
                 {
-                    // Calculate total assigned volume
-                    decimal assignedVolume = assignedUnits.Sum(u => u.Volume ?? 0);
-
-                    // Update request
-                    bloodRequest.Volume -= assignedVolume;
-                    bloodRequest.UpdatedAt = DateTime.UtcNow;
-
-                    // If the request is fully satisfied, update its status
-                    if (bloodRequest.Volume <= 0)
-                    {
-                        bloodRequest.RequestStatusId = 4; // Assuming 4 = "Fulfilled" status
-                        bloodRequest.Volume = 0; // Set to exactly 0 if fully satisfied
-                    }
-
-                    await _bloodRequestRepository.UpdateAsync(bloodRequest);
-                    await _bloodRequestRepository.SaveChangesAsync();
+                    // Calculate actual fulfilled volume for the error message
+                    decimal fulfilledVolume = bloodRequest.Volume - remainingVolume;
+                    // Throw InvalidOperationException if the request cannot be fully fulfilled
+                    throw new InvalidOperationException(
+                        $"Could not fulfill the entire blood request for ID {requestId}. " +
+                        $"Requested: {bloodRequest.Volume}ml, Fulfilled: {fulfilledVolume}ml, Remaining: {remainingVolume}ml still needed."
+                    );
                 }
-
-                return assignedUnits.Any();
+                return suggestedUnits; 
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error auto-assigning blood units: {ex.Message}");
+                Console.WriteLine($"Error finding blood units for assignment: {ex.Message}");
                 throw;
-            }
-        }
-        private List<int> GetPrioritizedBloodTypeIds(int recipientBloodTypeId)
-        {
-            switch (recipientBloodTypeId)
-            {
-                case 8: // O-
-                    return new List<int> { 8 };
-                case 7: // O+
-                    return new List<int> { 7, 8 };
-                case 2: // A-
-                    return new List<int> { 2, 8 };
-                case 1: // A+
-                    return new List<int> { 1, 7, 2, 8 };
-                case 4: // B-
-                    return new List<int> { 4, 8 };
-                case 3: // B+
-                    return new List<int> { 3, 7, 4, 8 };
-                case 6: // AB-
-                    return new List<int> { 6, 2, 4, 8 };
-                case 5: // AB+
-                    return new List<int> { 5, 1, 3, 7, 6, 2, 4, 8 };
-                default:
-                    return new List<int> { 8 }; // Default to universal donor (O-) if ID unknown
             }
         }
 
@@ -474,7 +431,7 @@ namespace BusinessLayer.Service
                 foreach (var request in orderedRequests)
                 {
                     var assigned = await AutoAssignBloodUnitsToRequestAsync(request.RequestId);
-                    if (assigned)
+                    if (assigned.Any())
                     {
                         anyAssigned = true;
                     }
@@ -486,6 +443,31 @@ namespace BusinessLayer.Service
             {
                 Console.WriteLine($"Error auto-assigning blood units to all pending requests: {ex.Message}");
                 throw;
+            }
+        }
+
+        private List<int> GetPrioritizedBloodTypeIds(int recipientBloodTypeId)
+        {
+            switch (recipientBloodTypeId)
+            {
+                case 8: // O-
+                    return new List<int> { 8 };
+                case 7: // O+
+                    return new List<int> { 7, 8 };
+                case 2: // A-
+                    return new List<int> { 2, 8 };
+                case 1: // A+
+                    return new List<int> { 1, 7, 2, 8 };
+                case 4: // B-
+                    return new List<int> { 4, 8 };
+                case 3: // B+
+                    return new List<int> { 3, 7, 4, 8 };
+                case 6: // AB-
+                    return new List<int> { 6, 2, 4, 8 };
+                case 5: // AB+
+                    return new List<int> { 5, 1, 3, 7, 6, 2, 4, 8 };
+                default:
+                    return new List<int> { 8 }; // Default to universal donor (O-) if ID unknown
             }
         }
     }

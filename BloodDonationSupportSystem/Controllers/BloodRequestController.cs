@@ -44,7 +44,7 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpPatch("{requestId}/status")]
         public async Task<IActionResult> UpdateBloodRequestStatusAsync(int requestId, [FromBody] int statusId)
         {
-            if (requestId<=0 || statusId <= 0)
+            if (requestId <= 0 || statusId <= 0)
             {
                 return BadRequest("Invalid request data.");
             }
@@ -72,17 +72,42 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpPatch("{requestId}/reject")]
         public async Task<IActionResult> RejectBloodRequestAsync(int requestId, [FromBody] BloodRequestRejectDTO rejectDTO)
         {
-            if (requestId <= 0 )
+            if (requestId <= 0)
             {
                 return BadRequest("Invalid request.");
             }
-            var result = await _bloodRequestService.RejectBloodRequestAsync(requestId, rejectDTO.UserId,rejectDTO.Reason );
+            var result = await _bloodRequestService.RejectBloodRequestAsync(requestId, rejectDTO.UserId, rejectDTO.Reason);
             if (!result)
             {
                 return NotFound("Blood request not found or rejection failed.");
             }
             return Ok("Blood request rejected successfully.");
         }
+        [HttpGet("{requestId}/suggested-blood-unit-list")]
+        public async Task<IActionResult> AutoAssignBloodUnitsToRequests(int requestId)
+        {
+            try
+            {
+                if (requestId <= 0)
+                {
+                    return BadRequest("Invalid request ID.");
+                }
+                var result = await _bloodRequestService.AutoAssignBloodUnitsToRequestAsync(requestId);
+                if (result == null)
+                {
+                    return NotFound("Blood request not found or auto-assignment failed.");
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
 
+        }
     }
 }
