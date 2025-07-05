@@ -732,10 +732,6 @@ namespace BusinessLayer.Service
             // SỬ DỤNG CHUỖI ĐÃ ĐỊNH DẠNG TIẾNG VIỆT
             sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{scheduleDateVietnamese}</td></tr>");
 
-            if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName))
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Khung giờ:</td><td>{registrationInfo.TimeSlotName}</td></tr>");
-            }
 
             if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
             {
