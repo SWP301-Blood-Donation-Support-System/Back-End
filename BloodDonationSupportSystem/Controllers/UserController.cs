@@ -339,10 +339,12 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var result = await _userServices.ForgotPasswordAsync(request.Email);
+            if (!result)
+            {
+                return BadRequest(new { message = "Email sai hoặc không tồn tại" });
+            }
 
-            // **Bảo mật**: Luôn trả về thông báo thành công chung chung để tránh kẻ tấn công
-            // biết được email nào tồn tại trong hệ thống.
-            await _userServices.ForgotPasswordAsync(request.Email);
             return Ok(new { message = "Nếu tài khoản của bạn tồn tại, một email hướng dẫn đặt lại mật khẩu đã được gửi." });
         }
         [HttpPost("reset-password")]

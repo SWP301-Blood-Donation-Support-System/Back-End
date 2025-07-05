@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
@@ -41,6 +42,26 @@ namespace BusinessLayer.Service
             _emailService = emailService;
         }
 
+        private DateTime GetVietnamTime()
+        {
+            try
+            {
+                // Thử tìm múi giờ cho Windows
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                // Fallback cho Linux/macOS
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh");
+                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+            }
+            catch (Exception)
+            {
+                // Nếu không tìm thấy, trả về giờ UTC + 7
+                return DateTime.UtcNow.AddHours(7);
+            }
+        }
         public async Task<User> GetUserByIdAsync(int userId)
         {
             if (userId <= 0)
@@ -558,7 +579,7 @@ namespace BusinessLayer.Service
         private string GenerateWelcomeEmailTemplate(string userName, string userEmail)
         {
             var displayName = !string.IsNullOrEmpty(userName) ? userName : userEmail;
-            var currentDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+            var currentDate = GetVietnamTime().ToString("dd/MM/yyyy HH:mm");
 
             var sb = new StringBuilder();
             sb.AppendLine("<!DOCTYPE html>");
@@ -645,7 +666,14 @@ namespace BusinessLayer.Service
         private string GenerateDonationRegistrationThankYouEmailTemplate(string userName, string userEmail, DonationRegistrationEmailInfoDTO registrationInfo)
         {
             var displayName = !string.IsNullOrEmpty(userName) ? userName : registrationInfo.DonorName ?? userEmail;
-            var currentDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+            var currentDate = GetVietnamTime().ToString("dd/MM/yyyy HH:mm");
+
+            // Tạo đối tượng CultureInfo cho tiếng Việt
+            var vietnameseCulture = new CultureInfo("vi-VN");
+
+            // Định dạng ngày hiến máu sang tiếng Việt
+            var scheduleDateVietnamese = registrationInfo.ScheduleDate.ToString("dddd, 'ngày' dd/MM/yyyy", vietnameseCulture);
+
 
             var sb = new StringBuilder();
             sb.AppendLine("<!DOCTYPE html>");
@@ -677,7 +705,6 @@ namespace BusinessLayer.Service
             sb.AppendLine($"            <h2>Kính chào {displayName}!</h2>");
             sb.AppendLine("            <p>Cảm ơn bạn đã đăng ký hiến máu tình nguyện tại Hệ thống Hỗ trợ Hiến máu. Đây là một hành động vô cùng ý nghĩa và cao đẹp!</p>");
 
-            // Registration confirmation info
             sb.AppendLine("            <div class='registration-info'>");
             sb.AppendLine("                <h3>📋 Thông tin đăng ký</h3>");
             sb.AppendLine("                <table>");
@@ -691,47 +718,48 @@ namespace BusinessLayer.Service
                 sb.AppendLine($"                    <tr><td class='label'>Số điện thoại:</td><td>{registrationInfo.DonorPhone}</td></tr>");
             }
 
-            if (!string.IsNullOrEmpty(registrationInfo.DonorNationalId))
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Căn cước công dân:</td><td class='important'>{registrationInfo.DonorNationalId}</td></tr>");
-            }
-
-            // Better blood type handling
             if (!string.IsNullOrEmpty(registrationInfo.BloodType))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td class='important'>{registrationInfo.BloodType}</td></tr>");
-            }
-            else
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td>Sẽ được xác định tại điểm hiến máu</td></tr>");
             }
 
             sb.AppendLine("                </table>");
             sb.AppendLine("            </div>");
 
-            // Schedule information
             sb.AppendLine("            <div class='schedule-info'>");
             sb.AppendLine("                <h3>📅 Thông tin lịch hiến máu</h3>");
             sb.AppendLine("                <table>");
-            sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{registrationInfo.ScheduleDate.ToString("dddd, dd/MM/yyyy")}</td></tr>");
+            // SỬ DỤNG CHUỖI ĐÃ ĐỊNH DẠNG TIẾNG VIỆT
+            sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{scheduleDateVietnamese}</td></tr>");
+
+            if (!string.IsNullOrEmpty(registrationInfo.TimeSlotName))
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Khung giờ:</td><td>{registrationInfo.TimeSlotName}</td></tr>");
+            }
 
             if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
             {
-                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td class='important'>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
+                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
             }
-            else
-            {
-                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>Sẽ được thông báo qua email/SMS</td></tr>");
-            }
+
             if (!string.IsNullOrEmpty(registrationInfo.ScheduleLocation))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Địa điểm:</td><td>{registrationInfo.ScheduleLocation}</td></tr>");
             }
 
+            if (!string.IsNullOrEmpty(registrationInfo.HospitalName))
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Bệnh viện:</td><td>{registrationInfo.HospitalName}</td></tr>");
+            }
+
+            if (!string.IsNullOrEmpty(registrationInfo.HospitalAddress))
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Địa chỉ bệnh viện:</td><td>{registrationInfo.HospitalAddress}</td></tr>");
+            }
+
             sb.AppendLine("                </table>");
             sb.AppendLine("            </div>");
 
-            // Important notes
             sb.AppendLine("            <div class='highlight'>");
             sb.AppendLine("                <h3>⚠️ Lưu ý quan trọng</h3>");
             sb.AppendLine("                <ul>");
@@ -744,13 +772,12 @@ namespace BusinessLayer.Service
             sb.AppendLine("                </ul>");
             sb.AppendLine("            </div>");
 
-            // Call to action
             sb.AppendLine("            <div class='highlight'>");
             sb.AppendLine("                <h3>📞 Liên hệ hỗ trợ</h3>");
             sb.AppendLine("                <p>Nếu bạn có bất kỳ thắc mắc nào hoặc cần thay đổi lịch hẹn, vui lòng liên hệ:</p>");
             sb.AppendLine("                <ul>");
-            sb.AppendLine("                    <li>Email: giotmaunghiatinh@gmail.com</li>");
-            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX (8:00 - 17:00, Thứ 2 - Chủ nhật)</li>");
+            sb.AppendLine("                    <li>Email: support@blooddonation.vn</li>");
+            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX</li>");
             sb.AppendLine("                </ul>");
             sb.AppendLine("            </div>");
 
@@ -771,14 +798,13 @@ namespace BusinessLayer.Service
         {
             var user = await _userRepository.GetByEmailAsync(email);
             if (user == null)
-                // Không tìm thấy user. Trả về true để tránh lộ thông tin email nào đã đăng ký.
-                // Việc gửi mail sẽ không diễn ra.
-                return true;
+
+                return false;
 
             // 1. Tạo một token ngẫu nhiên và an toàn
             var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
 
-            // 2. Cập nhật token và thời gian hết hạn cho user
+            // 2. Cập nhật   token và thời gian hết hạn cho user
             user.PasswordResetToken = token;
             user.ResetTokenExpires = DateTime.UtcNow.AddHours(1);
 
