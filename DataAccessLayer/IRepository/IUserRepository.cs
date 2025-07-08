@@ -8,7 +8,6 @@ namespace DataAccessLayer.IRepository
     public interface IUserRepository : IGenericRepository<User>
     {
         Task<User> GetByEmailAsync(string email);
-        Task<User> GetByUsernameAsync(string username);
         Task<User> GetByNationalIdAsync(string nationalId);
         Task<User> GetByPhoneNumberAsync(string phoneNumber);
         Task<IEnumerable<User>> GetByRoleIdAsync(int roleId);

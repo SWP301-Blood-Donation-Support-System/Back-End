@@ -153,7 +153,7 @@ namespace BusinessLayer.Service
                     var emailInfo = new DonationRegistrationEmailInfoDTO
                     {
                         RegistrationId = 0, // Will be set after registration is saved
-                        DonorName = donor.FullName ?? donor.Username ?? "Người hiến máu",
+                        DonorName = donor.FullName ?? "Người hiến máu",
                         DonorEmail = donor.Email,
                         DonorPhone = donor.PhoneNumber ?? "",
                         BloodType = "", // Will need to get blood type name from BloodType entity
@@ -181,7 +181,7 @@ namespace BusinessLayer.Service
                     // Send thank you email for donation registration
                     _userServices.SendDonationRegistrationThankYouEmail(
                         donor.Email, 
-                        donor.FullName ?? donor.Username ?? donor.Email, 
+                        donor.FullName ?? donor.Email, 
                         emailInfo);
                         
                     Console.WriteLine($"=== DONATION REGISTRATION EMAIL SENT SUCCESSFULLY ===");
