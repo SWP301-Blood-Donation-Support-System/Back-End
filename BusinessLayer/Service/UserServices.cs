@@ -121,11 +121,6 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException("Email already exists");
                 }
-                existingUser = await _userRepository.GetByUsernameAsync(donor.Username);
-                if (existingUser != null)
-                {
-                    throw new InvalidOperationException("Username already exists");
-                }
                 User EntityUser = _mapper.Map<User>(donor);
 
                 // Remove image processing - set UserImage to null
@@ -138,7 +133,7 @@ namespace BusinessLayer.Service
                 await _userRepository.SaveChangesAsync();
 
                 // Send welcome email after successful registration
-                SendWelcomeEmail(donor.Email, donor.Username);
+                SendWelcomeEmail(donor.Email, "Dave");
             }
             catch (Exception ex)
             {
@@ -395,7 +390,6 @@ namespace BusinessLayer.Service
                 {
                     Subject = new ClaimsIdentity(new[] {
                         new Claim("UserID", user.UserId.ToString()),
-                        new Claim("UserName", user.Username ?? ""),
                         new Claim(ClaimTypes.Email, user.Email ?? ""),
                         new Claim("PhoneNumber", user.PhoneNumber ?? ""),
                         new Claim("FullName", user.FullName ?? ""),
@@ -812,7 +806,7 @@ namespace BusinessLayer.Service
             var resetLink = $"http://localhost:3000/reset-password?token={token}";
 
             var subject = "Yêu cầu đặt lại mật khẩu";
-            var body = GeneratePasswordResetEmailTemplate(user.FullName ?? user.Username, resetLink);
+            var body = GeneratePasswordResetEmailTemplate(user.FullName, resetLink);
 
             SendMail(subject, body, user.Email);
             return true;

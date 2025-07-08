@@ -692,8 +692,6 @@ public partial class BloodDonationDbContext : DbContext
                 .IsUnique()
                 .HasFilter("([StaffCode] IS NOT NULL)");
 
-            entity.HasIndex(e => e.Username, "UQ_User_Username").IsUnique();
-
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.BloodTypeId).HasColumnName("BloodTypeID");
@@ -716,7 +714,6 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.RoleId).HasColumnName("RoleID");
             entity.Property(e => e.StaffCode).HasMaxLength(50);
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-            entity.Property(e => e.Username).HasMaxLength(50);
 
             entity.HasOne(d => d.BloodType).WithMany(p => p.Users)
                 .HasForeignKey(d => d.BloodTypeId)
