@@ -197,13 +197,13 @@ namespace BusinessLayer.Service
                 .ContinueWith(task=>task.Result.Select(rc=>_mapper.Map<DonationRecordDTO>(rc)));
         }
 
-        public async Task<bool> UpdateRecordsStatusAsync(int recordId, int statusId)
+        public async Task<bool> UpdateRecordsResultAsync(int recordId, int resultId)
         {
             var record = await _donationRecordRepository.GetRecordAndRegistrationAndUserAsync(recordId);
-            record.BloodTestResult = statusId;
+            record.BloodTestResult = resultId;
             record.UpdatedAt = DateTime.UtcNow;
             
-            if (statusId == 2) // If status is "approved" 
+            if (resultId == 2) // If result is "approved" 
             {
                 // Get the donor information to determine blood type
                 // Create a new blood unit
