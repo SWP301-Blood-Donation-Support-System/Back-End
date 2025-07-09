@@ -24,6 +24,6 @@ namespace BusinessLayer.IService
         Task<IEnumerable<DonationRecordDTO>> GetRecordsByUserId(int userId);
         Task<bool> SaveChanges();
         Task<bool> UpdateRecordsAsync(int recordId, DonationRecordUpdateDTO updateDto);
-        Task<bool> UpdateRecordsStatusAsync(int recordId, int statusId);
+        Task<bool> UpdateRecordsResultAsync(int recordId, int resultId);
     }
 }

@@ -131,8 +131,8 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
-        [HttpPatch("{recordId}/status")]
-        public async Task<IActionResult> UpdateRecordStatus(int recordId,[FromBody] int statusId)
+        [HttpPatch("{recordId}/result")]
+        public async Task<IActionResult> UpdateRecordResult(int recordId,[FromBody] int resultId)
         {
             if(recordId<0)
             {
@@ -140,7 +140,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
             try
             {
-                var result = await _donationRecordService.UpdateRecordsStatusAsync(recordId,statusId);
+                var result = await _donationRecordService.UpdateRecordsResultAsync(recordId,resultId);
                 if (!result)
                 {
                     return NotFound($"Donation record with ID {recordId} not found.");

@@ -14,12 +14,12 @@ namespace BusinessLayer.Service
     public class HospitalService : IHospitalService
     {
         private readonly IHospitalRepository _hospitalRepository;
-        private readonly IMapper mapper;
+        private readonly IMapper _mapper;
 
         public HospitalService(IHospitalRepository hospitalRepository, IMapper mapper)
         {
             _hospitalRepository = hospitalRepository ?? throw new ArgumentNullException(nameof(hospitalRepository));
-            this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
       
@@ -29,7 +29,7 @@ namespace BusinessLayer.Service
             {
                 throw new ArgumentNullException(nameof(hospital), "Hospital cannot be null");
             }
-            var entity = mapper.Map<Hospital>(hospital);
+            var entity = _mapper.Map<Hospital>(hospital);
             entity.CreatedAt = DateTime.UtcNow;
             entity.IsDeleted = false;
             await _hospitalRepository.AddAsync(entity);
