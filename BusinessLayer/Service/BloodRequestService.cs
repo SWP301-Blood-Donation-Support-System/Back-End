@@ -287,14 +287,14 @@ namespace BusinessLayer.Service
 
                 // Group units by blood type ID and volume for prioritization
                 var unitsByTypeAndVolume = new Dictionary<int, Dictionary<decimal, List<BloodUnit>>>();
-                foreach (var unit in availableUnits.Where(u => u.Volume.HasValue))
+                foreach (var unit in availableUnits)
                 {
                     if (!unitsByTypeAndVolume.ContainsKey(unit.BloodTypeId))
                     {
                         unitsByTypeAndVolume[unit.BloodTypeId] = new Dictionary<decimal, List<BloodUnit>>();
                     }
 
-                    var volumeValue = unit.Volume.Value;
+                    var volumeValue = unit.Volume;
                     if (!unitsByTypeAndVolume[unit.BloodTypeId].ContainsKey(volumeValue))
                     {
                         unitsByTypeAndVolume[unit.BloodTypeId][volumeValue] = new List<BloodUnit>();
@@ -377,7 +377,7 @@ namespace BusinessLayer.Service
 
                         // Add to suggested units instead of assigning
                         suggestedUnits.Add(_mapper.Map<BloodUnitDTO>(selectedUnit));
-                        remainingVolume -= selectedUnit.Volume ?? 0;
+                        remainingVolume -= selectedUnit.Volume;
                     }
 
                     // If volume satisfied, break the loop

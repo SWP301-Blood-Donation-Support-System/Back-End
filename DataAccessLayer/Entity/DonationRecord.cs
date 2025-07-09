@@ -19,7 +19,7 @@ public partial class DonationRecord
 
     public int? DonationTypeId { get; set; }
 
-    public decimal? VolumeDonated { get; set; }
+    public decimal VolumeDonated { get; set; }
 
     public string? Note { get; set; }
 
