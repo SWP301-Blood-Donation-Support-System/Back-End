@@ -31,14 +31,16 @@ namespace BusinessLayer.Service
         private readonly AppSetting _appSetting;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
+        private readonly IHospitalService _hospitalService;
 
-        public UserServices(IUserRepository userRepository, IMapper mapper, IOptionsMonitor<AppSetting> options, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
+        public UserServices(IUserRepository userRepository, IMapper mapper, IOptionsMonitor<AppSetting> options, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IHospitalService hospitalService)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _appSetting = options.CurrentValue;
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _emailService = emailService;
+            _hospitalService = hospitalService;
         }
 
         public async Task<User> GetUserByIdAsync(int userId)
@@ -181,6 +183,30 @@ namespace BusinessLayer.Service
                 // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding admin: {ex.Message}");
                 throw; // Re-throw the exception to be handled by the caller
+            }
+        }
+        public async Task RegisterHospitalAsync(HospitalRegisterDTO hospital)
+        {
+            try
+            {
+                var existingUser = await _userRepository.GetByEmailAsync(hospital.Email);
+                if (existingUser != null)
+                {
+                    throw new InvalidOperationException("Email already exists");
+                }
+                User EntityUser=_mapper.Map<User>(hospital);
+                EntityUser.PasswordHash = EncryptPassword(hospital.PasswordHash);
+                EntityUser.IsActive = true;
+                EntityUser.RoleId = 4;
+                await _userRepository.AddAsync(EntityUser);
+                await _userRepository.SaveChangesAsync();
+                var hospitalName = _hospitalService.GetHospitalByIdAsync(hospital.HospitalId).Result.HospitalName;
+                SendWelcomeEmail(hospital.Email,hospitalName);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Error adding hospital: {ex.Message}");
+                throw;
             }
         }
 
