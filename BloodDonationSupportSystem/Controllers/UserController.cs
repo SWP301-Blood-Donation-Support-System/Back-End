@@ -169,6 +169,23 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Admin registered successfully.");
         }
+        [HttpPost("register-hospital")]
+        public async Task<IActionResult> RegisterHospital([FromBody] HospitalRegisterDTO hospitalRegisterDTO)
+        {
+            try
+            {
+                await _userServices.RegisterHospitalAsync(hospitalRegisterDTO);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
+            return Ok("Hospital registered successfully.");
+        }
         [HttpPatch("{userId}/role")]
         public async Task<IActionResult> SwitchRole(int userId, [FromBody] int roleId)
         {

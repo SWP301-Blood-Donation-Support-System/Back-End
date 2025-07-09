@@ -203,16 +203,13 @@ namespace BusinessLayer.Service
             record.BloodTestResult = statusId;
             record.UpdatedAt = DateTime.UtcNow;
             
-            if (statusId == 2) // If status is "approved" (assuming 2 is for approved status)
+            if (statusId == 2) // If status is "approved" 
             {
                 // Get the donor information to determine blood type
-                
-                
                 // Create a new blood unit
                 var bloodUnit = new BloodUnit
                 {
                     DonationRecordId = recordId,
-                    // Use donor's blood type if available and not unknown (1001)
                     BloodTypeId = record.Registration.Donor.BloodTypeId ?? 1001, // Default or use test result
                     ComponentId = record.DonationTypeId ?? 1, // Use donation type as component ID
                     Volume = record.VolumeDonated, // Use the volume donated

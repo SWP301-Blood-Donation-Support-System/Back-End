@@ -18,6 +18,7 @@ namespace BusinessLayer.IService
         Task RegisterDonorAsync(RegisterDTO donor);
         Task RegisterStaffAsync(StaffRegisterDTO staff);
         Task RegisterAdminAsync(StaffRegisterDTO admin);
+        Task RegisterHospitalAsync(HospitalRegisterDTO hospital);
         Task<User> UpdateUserAsync(User user);
         Task<User> UpdateDonorAsync(int donorId, DonorDTO donor);
         Task<bool> DeleteUserAsync(int userId);
