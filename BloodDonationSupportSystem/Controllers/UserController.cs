@@ -2,6 +2,7 @@
 using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -355,10 +356,12 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var result = await _userServices.ForgotPasswordAsync(request.Email);
+            if (!result)
+            {
+                return BadRequest(new { message = "Email sai hoặc không tồn tại" });
+            }
 
-            // **Bảo mật**: Luôn trả về thông báo thành công chung chung để tránh kẻ tấn công
-            // biết được email nào tồn tại trong hệ thống.
-            await _userServices.ForgotPasswordAsync(request.Email);
             return Ok(new { message = "Nếu tài khoản của bạn tồn tại, một email hướng dẫn đặt lại mật khẩu đã được gửi." });
         }
         [HttpPost("reset-password")]
@@ -377,6 +380,45 @@ namespace BloodDonationSupportSystem.Controllers
             }
 
             return Ok(new { message = "Mật khẩu của bạn đã được đặt lại thành công." });
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO request)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Lấy UserID từ claims của JWT token
+            var userIdString = User.FindFirst("UserId")?.Value;
+            if(string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
+            {
+                return Unauthorized(new { message = "Không thể xác định người dùng." });
+            }
+            try
+            {
+                var result = await _userServices.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
+
+                if (result)
+                {
+                    return Ok(new { message = "Đổi mật khẩu thành công." });
+                }
+
+                // Trường hợp này hiếm khi xảy ra nếu logic ở trên đúng
+                return BadRequest(new { message = "Không thể đổi mật khẩu." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Bắt lỗi cụ thể từ Service để trả về thông báo rõ ràng
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Các lỗi không mong muốn khác
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra.", error = ex.Message });
+            }
         }
     }
 }

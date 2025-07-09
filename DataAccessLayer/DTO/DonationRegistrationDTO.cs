@@ -10,7 +10,7 @@ namespace DataAccessLayer.DTO
     {
         public int DonorId { get; set; }
         public int ScheduleId { get; set; }
-        public int TimeSlotId { get; set; }
+        public int? TimeSlotId { get; set; }
     }
 
     public class DonationRegistrationResponseDTO
@@ -18,7 +18,7 @@ namespace DataAccessLayer.DTO
         public int RegistrationId { get; set; }
         public int DonorId { get; set; }
         public int ScheduleId { get; set; }
-        public int TimeSlotId { get; set; }
+        public int? TimeSlotId { get; set; }
         public int RegistrationStatusId { get; set; }
         public DateTime RegistrationDate { get; set; }
         public string Notes { get; set; }
@@ -38,6 +38,7 @@ namespace DataAccessLayer.DTO
         public string DonorName { get; set; }
         public string DonorEmail { get; set; }
         public string DonorPhone { get; set; }
+        public string DonorNationalId { get; set; }
         public string BloodType { get; set; }
         public DateTime ScheduleDate { get; set; }
         public string ScheduleLocation { get; set; }

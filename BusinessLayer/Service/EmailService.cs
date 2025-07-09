@@ -1,7 +1,9 @@
 ﻿using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
 using MailKit.Net.Smtp;
+using Microsoft.Extensions.Logging;
 using MimeKit;
+using Quartz.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +14,13 @@ namespace BE_Homnayangi.Ultils.EmailServices
     public class EmailService : IEmailService
     {
         private readonly EmailConfiguration _emailConfig;
+        private readonly ILogger<EmailService> _logger; 
 
-        public EmailService(EmailConfiguration emailConfig)
+
+        public EmailService(EmailConfiguration emailConfig, ILogger<EmailService> logger)
         {
             _emailConfig = emailConfig;
+            _logger = logger;
         }
 
         public void SendEmail(Message message)
@@ -55,9 +60,10 @@ namespace BE_Homnayangi.Ultils.EmailServices
 
                     client.Send(mailMessage);
                 }
-                catch
+                catch (Exception ex)
                 {
                     //log an error message or throw an exception or both.
+                    _logger.LogError(ex, "Failed to send email. SmtpServer: {SmtpServer}, Port: {Port}", _emailConfig.SmtpServer, _emailConfig.Port);
                     throw;
                 }
                 finally
@@ -80,9 +86,9 @@ namespace BE_Homnayangi.Ultils.EmailServices
 
                     await client.SendAsync(mailMessage);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    //log an error message or throw an exception, or both.
+                    _logger.LogError(ex, "Failed to send email asynchronously. SmtpServer: {SmtpServer}, Port: {Port}", _emailConfig.SmtpServer, _emailConfig.Port);
                     throw;
                 }
                 finally
