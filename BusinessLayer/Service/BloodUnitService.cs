@@ -12,13 +12,15 @@ using System.Threading.Tasks;
 
 namespace BusinessLayer.Service
 {
-    public class BloodUnitService: IBloodUnitService
+    public class BloodUnitService : IBloodUnitService
     {
         private readonly IBloodUnitRepository _bloodUnitRepository;
+        private readonly IBloodRequestRepository _bloodRequestRepository;
         private readonly IMapper _mapper;
-        public BloodUnitService(IBloodUnitRepository bloodUnitRepository, IMapper mapper)
+        public BloodUnitService(IBloodUnitRepository bloodUnitRepository,IBloodRequestRepository bloodRequestRepository, IMapper mapper)
         {
             _bloodUnitRepository = bloodUnitRepository ?? throw new ArgumentNullException(nameof(bloodUnitRepository));
+            _bloodRequestRepository = bloodRequestRepository ?? throw new ArgumentNullException(nameof(bloodRequestRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -40,17 +42,18 @@ namespace BusinessLayer.Service
             }
         }
 
-        public Task<bool> DeleteBloodUnitAsync(int id)
+        
+        public async Task<bool> DeleteBloodUnitAsync(int id)
         {
             try
             {
-                var bloodUnit = _bloodUnitRepository.GetByIdAsync(id);
+                var bloodUnit = await _bloodUnitRepository.GetByIdAsync(id);
                 if (bloodUnit == null)
                 {
                     throw new KeyNotFoundException("Blood unit not found.");
                 }
-                _bloodUnitRepository.DeleteAsync(id);
-                return _bloodUnitRepository.SaveChangesAsync();
+                await _bloodUnitRepository.DeleteAsync(id);
+                return await _bloodUnitRepository.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -92,11 +95,42 @@ namespace BusinessLayer.Service
             return true;
         }
 
-        public Task<bool> UpdateBloodUnitStatusAsync(int unitId, int bloodUnitStatusId)
+        public async Task<bool> UpdateBloodUnitStatusAsync(int unitId, int bloodUnitStatusId)
         {
-            return _bloodUnitRepository.UpdateUnitStatusAsync(unitId, bloodUnitStatusId);
+            return await _bloodUnitRepository.UpdateUnitStatusAsync(unitId, bloodUnitStatusId);
         }
 
-      
+        public async Task<bool> AssignBloodUnitToRequestAsync(int unitId, int requestId)
+        {
+            try
+            {
+                var bloodUnit = await _bloodUnitRepository.GetByIdAsync(unitId);
+                if (bloodUnit == null)
+                {
+                    throw new KeyNotFoundException("Blood unit not found.");
+                }
+                bloodUnit.RequestId = requestId;
+                bloodUnit.BloodUnitStatusId = 2;
+                bloodUnit.UpdatedAt = DateTime.UtcNow;
+                var request = await _bloodRequestRepository.GetByIdAsync(requestId);
+                request.Volume -= bloodUnit.Volume;
+                if(request.Volume <= 0)
+                {
+                    request.Volume = 0;
+                    request.RequestStatusId = 3;
+                }
+                request.UpdatedAt = DateTime.UtcNow;
+                await _bloodRequestRepository.UpdateAsync(request);
+                await _bloodUnitRepository.UpdateAsync(bloodUnit);
+                await _bloodUnitRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error assigning blood unit to request: {ex.Message}");
+                throw;
+            }
+        }
+
     }
 }

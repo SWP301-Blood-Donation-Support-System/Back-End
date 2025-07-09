@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.IService;
+using BusinessLayer.Service;
 using DataAccessLayer.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,26 +34,45 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> AddHospitalAsync([FromBody] HospitalDTO hospital)
         {
-            if (hospital == null)
+            try
             {
-                return BadRequest("Invalid hospital data.");
+                await _hospitalService.AddHospitalAsync(hospital);
             }
-            await _hospitalService.AddHospitalAsync(hospital);
-            return Ok(hospital);
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
+            return Ok("Hospital added successfully.");
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateHospitalAsync(int id, [FromBody] HospitalDTO hospital)
         {
-            if (hospital == null || id <= 0)
+            try
             {
-                return BadRequest("Invalid hospital data or ID.");
+                if (hospital == null || id <= 0)
+                {
+                    return BadRequest("Invalid hospital data or ID.");
+                }
+
+                var result = await _hospitalService.UpdateHospitalAsync(id, hospital);
+                if (!result)
+                {
+                    return NotFound("Hospital not found or update failed.");
+                }
             }
-            
-            var result = await _hospitalService.UpdateHospitalAsync(id, hospital);
-            if (!result)
+            catch (Exception ex)
             {
-                return NotFound("Hospital not found or update failed.");
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
             }
+
             return Ok("Hospital updated successfully.");
         }
     }

@@ -17,7 +17,7 @@ public partial class BloodUnit
 
     public DateTime? ExpiryDateTime { get; set; }
 
-    public decimal? Volume { get; set; }
+    public decimal Volume { get; set; }
 
     public int? BloodUnitStatusId { get; set; }
 

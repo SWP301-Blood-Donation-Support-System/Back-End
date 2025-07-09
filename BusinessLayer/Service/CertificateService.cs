@@ -11,7 +11,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace BusinessLayer.Service                         
+namespace BusinessLayer.Service
 {
     public class CertificateService : ICertificateService
     {
@@ -32,7 +32,7 @@ namespace BusinessLayer.Service
             _registrationRepository = registrationRepository ??
                 throw new ArgumentNullException(nameof(registrationRepository));
             _certificateSettings = certificateSettings.Value;
-            
+
             // Set QuestPDF license - use community license for open-source projects
             QuestPDF.Settings.License = LicenseType.Community;
 
@@ -73,13 +73,11 @@ namespace BusinessLayer.Service
             string vol350 = " [ ]";
             string vol450 = " [ ]";
 
-            if (record.VolumeDonated.HasValue)
-            {
-                decimal donatedVolume = record.VolumeDonated.Value;
-                if (donatedVolume <= 250) vol250 = " [x]";
-                else if (donatedVolume <= 350) vol350 = " [x]";
-                else vol450 = " [x]";
-            }
+
+            decimal donatedVolume = record.VolumeDonated;
+            if (donatedVolume <= 250) vol250 = " [x]";
+            else if (donatedVolume <= 350) vol350 = " [x]";
+            else vol450 = " [x]";
 
             // Generate PDF certificate using QuestPDF
             return GenerateCertificatePdf(
@@ -93,7 +91,7 @@ namespace BusinessLayer.Service
                 vol250: vol250,
                 vol350: vol350,
                 vol450: vol450,
-                volumeDonated: record.VolumeDonated?.ToString("0.##") ?? ""
+                volumeDonated: record.VolumeDonated.ToString("0.##") ?? ""
             );
         }
 
@@ -161,15 +159,15 @@ namespace BusinessLayer.Service
                                         notes.Item().Text("+ Giấy chứng nhận này được trao cho người hiến máu sau mỗi lần hiến máu tình nguyện.")
                                             .FontSize(18)
                                             .FontColor(DarkRedColor);
-                                            
+
                                         notes.Item().PaddingTop(8).Text("+ Có giá trị để truyền máu miễn phí bằng số lượng máu đã hiến, khi bản thân người hiến máu có nhu cầu sử dụng máu, tại tất cả các cơ sở y tế công lập trên toàn quốc.")
                                             .FontSize(18)
                                             .FontColor(DarkRedColor);
-                                            
+
                                         notes.Item().PaddingTop(8).Text("+ Người hiến máu cần xuất trình Giấy chứng nhận này để làm cơ sở cho các cơ sở y tế thực hiện việc truyền máu miễn phí.")
                                             .FontSize(18)
                                             .FontColor(DarkRedColor);
-                                            
+
                                         notes.Item().PaddingTop(8).Text("+ Cơ sở y tế có trách nhiệm ký, đóng dấu, xác nhận số lượng máu đã truyền miễn phí cho người hiến máu vào giấy chứng nhận.")
                                             .FontSize(18)
                                             .FontColor(DarkRedColor);
@@ -188,11 +186,11 @@ namespace BusinessLayer.Service
                                             .FontSize(20)
                                             .FontColor(DarkRedColor)
                                             .Bold();
-                                            
+
                                         sign.Item().AlignCenter().PaddingTop(40).Text(currentDate)
                                             .FontSize(20)
                                             .FontColor(DarkRedColor);
-                                            
+
                                         sign.Item().AlignCenter().PaddingTop(20).Text($"Số lượng: {volumeDonated} ml")
                                             .FontSize(20)
                                             .FontColor(DarkRedColor);
@@ -212,7 +210,7 @@ namespace BusinessLayer.Service
                                         .FontSize(18)
                                         .FontColor(DarkRedColor)
                                         .Bold();
-                                    
+
                                     // Header - second line
                                     rightColumn.Item().AlignCenter().Text("Độc lập - Tự do - Hạnh phúc")
                                         .FontSize(18)
@@ -244,28 +242,28 @@ namespace BusinessLayer.Service
                                             .Bold();
 
                                         // Donor information
-                                        info.Item().PaddingTop(15).Column(donor => 
+                                        info.Item().PaddingTop(15).Column(donor =>
                                         {
                                             donor.Spacing(8);
-                                            
+
                                             donor.Item().Text(text =>
                                             {
                                                 text.Span("Ông/Bà: ").FontSize(18).FontColor(DarkRedColor);
                                                 text.Span(donorName).FontSize(18).Bold().FontColor(DarkRedColor);
                                             });
-                                            
+
                                             donor.Item().Text(text =>
                                             {
                                                 text.Span("Sinh ngày: ").FontSize(18).FontColor(DarkRedColor);
                                                 text.Span(birthDate).FontSize(18).Bold().FontColor(DarkRedColor);
                                             });
-                                            
+
                                             donor.Item().Text(text =>
                                             {
                                                 text.Span("Số CCCD: ").FontSize(18).FontColor(DarkRedColor);
                                                 text.Span(nationalId).FontSize(18).Bold().FontColor(DarkRedColor);
                                             });
-                                            
+
                                             donor.Item().Text(text =>
                                             {
                                                 text.Span("Địa chỉ: ").FontSize(18).FontColor(DarkRedColor);
@@ -278,15 +276,15 @@ namespace BusinessLayer.Service
                                             .FontSize(22)
                                             .FontColor(DarkRedColor)
                                             .Bold();
-                                            
-                                        info.Item().PaddingTop(15).Text(text => 
+
+                                        info.Item().PaddingTop(15).Text(text =>
                                         {
                                             text.Span("Tại cơ sở tiếp nhận máu: ").FontSize(18).FontColor(DarkRedColor);
                                             text.Span("BloodDonation").FontSize(18).FontColor(DarkRedColor);
                                         });
 
                                         // Volume checkboxes
-                                        info.Item().PaddingTop(15).Text(text => 
+                                        info.Item().PaddingTop(15).Text(text =>
                                         {
                                             text.Span("Số lượng: ").FontSize(18).FontColor(DarkRedColor);
                                             text.Span($"250ml{vol250} 350ml{vol350} 450ml{vol450}").FontSize(18).FontColor(DarkRedColor).FontFamily("Arial");
@@ -300,12 +298,12 @@ namespace BusinessLayer.Service
                                         // Blood type and date row
                                         info.Item().PaddingTop(25).Row(row =>
                                         {
-                                            row.RelativeItem().Text(text => 
+                                            row.RelativeItem().Text(text =>
                                             {
                                                 text.Span("Nhóm máu: ").FontSize(18).FontColor(DarkRedColor);
                                                 text.Span(bloodType).FontSize(18).FontColor(DarkRedColor);
                                             });
-                                                
+
                                             row.RelativeItem().AlignRight().Text(currentDate)
                                                 .FontSize(18)
                                                 .FontColor(DarkRedColor);
@@ -318,17 +316,17 @@ namespace BusinessLayer.Service
                                                 .FontSize(18)
                                                 .FontColor(DarkRedColor)
                                                 .Bold();
-                                                
+
                                             sign.Item().AlignCenter().Text("(Ký tên, đóng dấu)")
                                                 .FontSize(18)
                                                 .FontColor(DarkRedColor);
-                                                
+
                                             // Add more vertical space for signature
                                             sign.Item().PaddingTop(60);
                                         });
 
                                         // Certificate ID
-                                        info.Item().PaddingTop(40).AlignLeft().Text(text => 
+                                        info.Item().PaddingTop(40).AlignLeft().Text(text =>
                                         {
                                             text.Span("Số: ").FontSize(18).Bold().FontColor(DarkRedColor);
                                             text.Span(certificateId).FontSize(18).Bold().FontColor(DarkRedColor);

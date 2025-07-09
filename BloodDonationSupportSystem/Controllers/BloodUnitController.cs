@@ -211,5 +211,19 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood unit updated successfully.");
         }
+        [HttpPatch("{unitId}/assign-to-request")]
+        public async Task<IActionResult> AssignBloodUnitToRequest(int unitId, [FromBody] int requestId)
+        {
+            if (unitId <= 0 || requestId <= 0)
+            {
+                return BadRequest("Invalid unit ID or request ID.");
+            }
+            var result = await _bloodUnitService.AssignBloodUnitToRequestAsync(unitId, requestId);
+            if (!result)
+            {
+                return NotFound($"No blood unit found with ID {unitId} or failed to assign to request {requestId}.");
+            }
+            return Ok("Blood unit assigned to request successfully.");
+        }
     }
 }
