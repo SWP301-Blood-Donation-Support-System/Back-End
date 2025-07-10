@@ -15,7 +15,11 @@ namespace BloodDonationSupportSystem.Controllers
         {
             _donationRecordService = donationRecordService ?? throw new ArgumentNullException(nameof(donationRecordService));
         }
+        /// <summary>
+        /// Retrieves a donation record by its unique ID.
+        /// </summary>
         [HttpGet("{recordId}")]
+        
         public async Task<IActionResult> GetRecordById(int recordId)
         {
             if (recordId <= 0)
@@ -131,6 +135,12 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Update the result of a donation record, if the result is 2 (Máu Đạt), it will generate a blood unit based on the record.
+        /// </summary>
+        /// <param name="recordId"></param>
+        /// <param name="resultId"></param>
+        /// <returns></returns>
         [HttpPatch("{recordId}/result")]
         public async Task<IActionResult> UpdateRecordResult(int recordId,[FromBody] int resultId)
         {

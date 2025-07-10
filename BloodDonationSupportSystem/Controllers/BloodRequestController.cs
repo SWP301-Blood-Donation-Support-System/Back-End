@@ -55,6 +55,12 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood request status updated successfully.");
         }
+        /// <summary>
+        /// Approve blood request by requestId and approverUserId in the body
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="approvedByUserId"></param>
+        /// <returns></returns>
         [HttpPatch("{requestId}/approve")]
         public async Task<IActionResult> ApproveBloodRequestAsync(int requestId, [FromBody] int approvedByUserId)
         {
@@ -69,6 +75,12 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood request approved successfully.");
         }
+        /// <summary>
+        /// Reject blood request by requestId and approverUserId in the body
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="rejectDTO"></param>
+        /// <returns></returns>
         [HttpPatch("{requestId}/reject")]
         public async Task<IActionResult> RejectBloodRequestAsync(int requestId, [FromBody] BloodRequestRejectDTO rejectDTO)
         {
@@ -83,6 +95,11 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood request rejected successfully.");
         }
+        /// <summary>
+        /// Auto calculate and give a list of blood unit that is most suited for assignment to this request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
         [HttpGet("{requestId}/suggested-blood-unit-list")]
         public async Task<IActionResult> AutoAssignBloodUnitsToRequests(int requestId)
         {

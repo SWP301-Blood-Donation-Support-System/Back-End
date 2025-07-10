@@ -37,8 +37,8 @@ if (emailConfig == null)
     throw new InvalidOperationException("EmailConfiguration is not properly configured in appsettings.json or User Secrets.");
 }
 
-if (string.IsNullOrEmpty(emailConfig.From) || 
-    string.IsNullOrEmpty(emailConfig.SmtpServer) || 
+if (string.IsNullOrEmpty(emailConfig.From) ||
+    string.IsNullOrEmpty(emailConfig.SmtpServer) ||
     string.IsNullOrEmpty(emailConfig.Username) || // Changed from UserName to Username
     string.IsNullOrEmpty(emailConfig.Password))
 {
@@ -119,7 +119,38 @@ builder.Services.AddCors(options =>
 
 // ====================== SWAGGER ====================== //
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Set the comments path for the Swagger JSON and UI
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+
+    // Add JWT Authentication support in Swagger
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                 {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // ====================== AUTOMAPPER ====================== //
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -137,7 +168,7 @@ builder.Services.AddScoped<IDonationScheduleService, DonationScheduleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
-builder.Services.AddScoped<IFeedbackService, FeedbackService > ();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<IBloodRequestService, BloodRequestService>();
@@ -154,7 +185,7 @@ builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
 builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-builder.Services.AddScoped<IBloodRequestRepository,BloodRequestRepository>();
+builder.Services.AddScoped<IBloodRequestRepository, BloodRequestRepository>();
 builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
 builder.Services.AddScoped<IBloodCompatibilityRepository, BloodCompatibilityRepository>();
 

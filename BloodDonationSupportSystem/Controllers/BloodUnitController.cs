@@ -211,6 +211,12 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood unit updated successfully.");
         }
+        /// <summary>
+        /// Assign blood unit to a request using unitId and requestId in the body
+        /// </summary>
+        /// <param name="unitId"></param>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
         [HttpPatch("{unitId}/assign-to-request")]
         public async Task<IActionResult> AssignBloodUnitToRequest(int unitId, [FromBody] int requestId)
         {
