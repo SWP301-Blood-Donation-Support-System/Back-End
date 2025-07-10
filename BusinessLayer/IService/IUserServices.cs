@@ -25,8 +25,6 @@ namespace BusinessLayer.IService
         Task<bool> UpdateDonationInfoAsync(int userId, DateTime donationDate);
         Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabilityId);
         Task<bool> UpdateUserRoleAsync(int userId, int roleId);
-        Task<bool> UpdateUserBloodTypeAsync(int userId, int bloodTypeId);
-        Task<bool> UpdateUserBloodTypeByDonorIdAsync(int donorId, int bloodTypeId);
         Task<bool> SaveChangesAsync();
         Task<string> GenerateToken(LoginDTO login);
         Task<string> ValidateGoogleToken(TokenRequest token);
