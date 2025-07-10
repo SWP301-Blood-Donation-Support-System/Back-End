@@ -945,5 +945,62 @@ namespace BusinessLayer.Service
 
             return true;
         }
+
+        public async Task<bool> UpdateUserBloodTypeAsync(int userId, int bloodTypeId)
+        {
+            if (userId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
+            }
+
+            if (bloodTypeId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bloodTypeId), "Blood Type ID must be greater than zero");
+            }
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.BloodTypeId = bloodTypeId;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user);
+            return await _userRepository.SaveChangesAsync();
+        }
+
+        public async Task<bool> UpdateUserBloodTypeByDonorIdAsync(int donorId, int bloodTypeId)
+        {
+            if (donorId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(donorId), "Donor ID must be greater than zero");
+            }
+
+            if (bloodTypeId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bloodTypeId), "Blood Type ID must be greater than zero");
+            }
+
+            // Tìm user dựa trên donorId (thực chất donorId chính là userId trong bảng User)
+            var user = await _userRepository.GetByIdAsync(donorId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"Donor with ID {donorId} not found");
+            }
+
+            // Kiểm tra nếu user có RoleId = 3 (Donor role)
+            if (user.RoleId != 3)
+            {
+                throw new InvalidOperationException($"User with ID {donorId} is not a donor");
+            }
+
+            user.BloodTypeId = bloodTypeId;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user);
+            return await _userRepository.SaveChangesAsync();
+        }
     }
 }
