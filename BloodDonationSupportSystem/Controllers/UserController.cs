@@ -85,6 +85,11 @@ namespace BloodDonationSupportSystem.Controllers
             var eligibleDonors = await _userServices.GetEligibleDonorsAsync();
             return Ok(eligibleDonors);
         }
+        /// <summary>
+        /// Login user and generate JWT token
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO login)
         {
@@ -115,6 +120,11 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Register account for donor
+        /// </summary>
+        /// <param name="registerDTO"></param>
+        /// <returns></returns>
         [HttpPost("register-donor")]
         public async Task<IActionResult> RegisterDonor([FromBody] RegisterDTO registerDTO)
         {
@@ -134,6 +144,11 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok("Donor registered successfully.");
 
         }
+        /// <summary>
+        /// Register account for staff
+        /// </summary>
+        /// <param name="staffRegisterDTO"></param>
+        /// <returns></returns>
         [HttpPost("register-staff")]
         public async Task<IActionResult> RegisterStaff([FromBody] StaffRegisterDTO staffRegisterDTO)
         {
@@ -152,6 +167,11 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Staff registered successfully.");
         }
+        /// <summary>
+        /// Register account for admin
+        /// </summary>
+        /// <param name="adminRegisterDTO"></param>
+        /// <returns></returns>
         [HttpPost("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] StaffRegisterDTO adminRegisterDTO)
         {
@@ -169,6 +189,11 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Admin registered successfully.");
         }
+        /// <summary>
+        /// Register account for hospital
+        /// </summary>
+        /// <param name="hospitalRegisterDTO"></param>
+        /// <returns></returns>
         [HttpPost("register-hospital")]
         public async Task<IActionResult> RegisterHospital([FromBody] HospitalRegisterDTO hospitalRegisterDTO)
         {
@@ -186,6 +211,12 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Hospital registered successfully.");
         }
+        /// <summary>
+        /// Update user role by Id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
         [HttpPatch("{userId}/role")]
         public async Task<IActionResult> SwitchRole(int userId, [FromBody] int roleId)
         {
@@ -203,7 +234,11 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest(new { status = "failed", message = ex.Message });
             }
         }
-
+        /// <summary>
+        /// Login or register using Google
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("google")]
         public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
         {
@@ -218,6 +253,12 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return NotFound(new { status = "failed", message = "Invalid" });
         }
+        /// <summary>
+        /// Update donor information 
+        /// </summary>
+        /// <param name="donorId"></param>
+        /// <param name="donorDTO"></param>
+        /// <returns></returns>
         [HttpPut("donor/{donorId}")]
         public async Task<IActionResult> UpdateDonor(int donorId, [FromBody] DonorDTO donorDTO)
         {
@@ -270,7 +311,11 @@ namespace BloodDonationSupportSystem.Controllers
         //        return BadRequest(new { status = "failed", message = ex.Message });
         //    }
         //}
-
+        /// <summary>
+        /// Send welcome email to new user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("send-welcome-email")]
         public IActionResult SendWelcomeEmail([FromBody] WelcomeEmailRequest request)
         {
@@ -349,6 +394,11 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return NoContent();
         }
+        /// <summary>
+        /// Forgot password for user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgetPasswordDTO request)
         {
@@ -364,6 +414,11 @@ namespace BloodDonationSupportSystem.Controllers
 
             return Ok(new { message = "Nếu tài khoản của bạn tồn tại, một email hướng dẫn đặt lại mật khẩu đã được gửi." });
         }
+        /// <summary>
+        /// Reset password for user using token
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO request)
         {
@@ -381,7 +436,11 @@ namespace BloodDonationSupportSystem.Controllers
 
             return Ok(new { message = "Mật khẩu của bạn đã được đặt lại thành công." });
         }
-
+        /// <summary>
+        /// Change password for user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO request)

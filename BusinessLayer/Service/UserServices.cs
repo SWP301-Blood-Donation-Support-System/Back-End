@@ -216,7 +216,7 @@ namespace BusinessLayer.Service
                     throw new InvalidOperationException("Email already exists");
                 }
                 User EntityUser=_mapper.Map<User>(hospital);
-                EntityUser.PasswordHash = EncryptPassword(hospital.PasswordHash);
+                EntityUser.PasswordHash = EncryptPassword("hospital123");
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 4;
                 await _userRepository.AddAsync(EntityUser);
