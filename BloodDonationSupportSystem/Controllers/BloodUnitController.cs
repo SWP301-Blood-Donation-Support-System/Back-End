@@ -18,58 +18,80 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllBloodUnits()
         {
-            var bloodUnits = await _bloodUnitService.GetAllBloodUnitsAsync();
-            
-            var result = bloodUnits.Select(bu => new
+            try
             {
-                bu.BloodUnitId,
-                bu.DonationRecordId,
-                bu.BloodTypeId,
-                BloodTypeName = bu.BloodType?.BloodTypeName,
-                bu.ComponentId,
-                ComponentName = bu.Component?.ComponentName,
-                bu.CollectedDateTime,
-                bu.ExpiryDateTime,
-                bu.Volume,
-                bu.BloodUnitStatusId,
-                StatusName = bu.BloodUnitStatus?.StatusName,
-                DonorId = bu.DonationRecord?.Registration?.DonorId,
-                DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
-                bu.CreatedAt,
-                bu.UpdatedAt
-            });
-            
-            return Ok(result);
+                var bloodUnits = await _bloodUnitService.GetAllBloodUnitsAsync();
+
+                var result = bloodUnits.Select(bu => new
+                {
+                    bu.BloodUnitId,
+                    bu.DonationRecordId,
+                    bu.BloodTypeId,
+                    BloodTypeName = bu.BloodType?.BloodTypeName,
+                    bu.ComponentId,
+                    ComponentName = bu.Component?.ComponentName,
+                    bu.CollectedDateTime,
+                    bu.ExpiryDateTime,
+                    bu.Volume,
+                    bu.BloodUnitStatusId,
+                    StatusName = bu.BloodUnitStatus?.StatusName,
+                    DonorId = bu.DonationRecord?.Registration?.DonorId,
+                    DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                    bu.CreatedAt,
+                    bu.UpdatedAt
+                });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBloodUnitById(int id)
         {
-            var bloodUnit = await _bloodUnitService.GetBloodUnitByIdAsync(id);
-            if (bloodUnit == null)
+            try
             {
-                return NotFound($"No blood unit found with ID {id}.");
+                var bloodUnit = await _bloodUnitService.GetBloodUnitByIdAsync(id);
+                if (bloodUnit == null)
+                {
+                    return NotFound($"No blood unit found with ID {id}.");
+                }
+
+                var result = new
+                {
+                    bloodUnit.BloodUnitId,
+                    bloodUnit.DonationRecordId,
+                    bloodUnit.BloodTypeId,
+                    BloodTypeName = bloodUnit.BloodType?.BloodTypeName,
+                    bloodUnit.ComponentId,
+                    ComponentName = bloodUnit.Component?.ComponentName,
+                    bloodUnit.CollectedDateTime,
+                    bloodUnit.ExpiryDateTime,
+                    bloodUnit.Volume,
+                    bloodUnit.BloodUnitStatusId,
+                    StatusName = bloodUnit.BloodUnitStatus?.StatusName,
+                    DonorId = bloodUnit.DonationRecord?.Registration?.DonorId,
+                    DonorName = bloodUnit.DonationRecord?.Registration?.Donor?.FullName,
+                    bloodUnit.CreatedAt,
+                    bloodUnit.UpdatedAt
+                };
+
+                return Ok(result);
             }
-            
-            var result = new
+            catch (Exception ex)
             {
-                bloodUnit.BloodUnitId,
-                bloodUnit.DonationRecordId,
-                bloodUnit.BloodTypeId,
-                BloodTypeName = bloodUnit.BloodType?.BloodTypeName,
-                bloodUnit.ComponentId,
-                ComponentName = bloodUnit.Component?.ComponentName,
-                bloodUnit.CollectedDateTime,
-                bloodUnit.ExpiryDateTime,
-                bloodUnit.Volume,
-                bloodUnit.BloodUnitStatusId,
-                StatusName = bloodUnit.BloodUnitStatus?.StatusName,
-                DonorId = bloodUnit.DonationRecord?.Registration?.DonorId,
-                DonorName = bloodUnit.DonationRecord?.Registration?.Donor?.FullName,
-                bloodUnit.CreatedAt,
-                bloodUnit.UpdatedAt
-            };
-            
-            return Ok(result);
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
         }
         [HttpPost]
         public async Task<IActionResult> AddBloodUnit([FromBody] BloodUnitDTO bloodUnitDTO)
@@ -91,125 +113,191 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpGet("by-blood-type/{bloodTypeId}")]
         public async Task<IActionResult> GetBloodUnitsByBloodType(int bloodTypeId)
         {
-            var bloodUnits = await _bloodUnitService.GetBloodUnitsByBloodTypeAsync(bloodTypeId);
-            
-            // Create anonymous object with donor information
-            var result = bloodUnits.Select(bu => new
+            try
             {
-                bu.BloodUnitId,
-                bu.DonationRecordId,
-                bu.BloodTypeId,
-                BloodTypeName = bu.BloodType?.BloodTypeName,
-                bu.ComponentId,
-                ComponentName = bu.Component?.ComponentName,
-                bu.CollectedDateTime,
-                bu.ExpiryDateTime,
-                bu.Volume,
-                bu.BloodUnitStatusId,
-                StatusName = bu.BloodUnitStatus?.StatusName,
-                DonorId = bu.DonationRecord?.Registration?.DonorId,
-                DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
-                bu.CreatedAt,
-                bu.UpdatedAt
-            });
-            
-            return Ok(result);
+                var bloodUnits = await _bloodUnitService.GetBloodUnitsByBloodTypeAsync(bloodTypeId);
+
+                // Create anonymous object with donor information
+                var result = bloodUnits.Select(bu => new
+                {
+                    bu.BloodUnitId,
+                    bu.DonationRecordId,
+                    bu.BloodTypeId,
+                    BloodTypeName = bu.BloodType?.BloodTypeName,
+                    bu.ComponentId,
+                    ComponentName = bu.Component?.ComponentName,
+                    bu.CollectedDateTime,
+                    bu.ExpiryDateTime,
+                    bu.Volume,
+                    bu.BloodUnitStatusId,
+                    StatusName = bu.BloodUnitStatus?.StatusName,
+                    DonorId = bu.DonationRecord?.Registration?.DonorId,
+                    DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                    bu.CreatedAt,
+                    bu.UpdatedAt
+                });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
         }
         [HttpGet("by-blood-component/{bloodComponentId}")]
         public async Task<IActionResult> GetBloodUnitsByBloodComponent(int bloodComponentId)
         {
-            var bloodUnits = await _bloodUnitService.GetBloodUnitsByBloodComponentAsync(bloodComponentId);
-            
-            // Create anonymous object with donor information
-            var result = bloodUnits.Select(bu => new
+            try
             {
-                bu.BloodUnitId,
-                bu.DonationRecordId,
-                bu.BloodTypeId,
-                BloodTypeName = bu.BloodType?.BloodTypeName,
-                bu.ComponentId,
-                ComponentName = bu.Component?.ComponentName,
-                bu.CollectedDateTime,
-                bu.ExpiryDateTime,
-                bu.Volume,
-                bu.BloodUnitStatusId,
-                StatusName = bu.BloodUnitStatus?.StatusName,
-                DonorId = bu.DonationRecord?.Registration?.DonorId,
-                DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
-                bu.CreatedAt,
-                bu.UpdatedAt
-            });
-            
-            return Ok(result);
+                var bloodUnits = await _bloodUnitService.GetBloodUnitsByBloodComponentAsync(bloodComponentId);
+
+                // Create anonymous object with donor information
+                var result = bloodUnits.Select(bu => new
+                {
+                    bu.BloodUnitId,
+                    bu.DonationRecordId,
+                    bu.BloodTypeId,
+                    BloodTypeName = bu.BloodType?.BloodTypeName,
+                    bu.ComponentId,
+                    ComponentName = bu.Component?.ComponentName,
+                    bu.CollectedDateTime,
+                    bu.ExpiryDateTime,
+                    bu.Volume,
+                    bu.BloodUnitStatusId,
+                    StatusName = bu.BloodUnitStatus?.StatusName,
+                    DonorId = bu.DonationRecord?.Registration?.DonorId,
+                    DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                    bu.CreatedAt,
+                    bu.UpdatedAt
+                });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
         }
         [HttpGet("by-status/{statusId}")]
         public async Task<IActionResult> GetBloodUnitsByStatus(int statusId)
         {
-            var bloodUnits = await _bloodUnitService.GetBloodUnitsByStatusAsync(statusId);
-            
-            // Create anonymous object with donor information
-            var result = bloodUnits.Select(bu => new
+            try
             {
-                bu.BloodUnitId,
-                bu.DonationRecordId,
-                bu.BloodTypeId,
-                BloodTypeName = bu.BloodType?.BloodTypeName,
-                bu.ComponentId,
-                ComponentName = bu.Component?.ComponentName,
-                bu.CollectedDateTime,
-                bu.ExpiryDateTime,
-                bu.Volume,
-                bu.BloodUnitStatusId,
-                StatusName = bu.BloodUnitStatus?.StatusName,
-                DonorId = bu.DonationRecord?.Registration?.DonorId,
-                DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
-                bu.CreatedAt,
-                bu.UpdatedAt
-            });
-            
-            return Ok(result);
+                var bloodUnits = await _bloodUnitService.GetBloodUnitsByStatusAsync(statusId);
+
+                // Create anonymous object with donor information
+                var result = bloodUnits.Select(bu => new
+                {
+                    bu.BloodUnitId,
+                    bu.DonationRecordId,
+                    bu.BloodTypeId,
+                    BloodTypeName = bu.BloodType?.BloodTypeName,
+                    bu.ComponentId,
+                    ComponentName = bu.Component?.ComponentName,
+                    bu.CollectedDateTime,
+                    bu.ExpiryDateTime,
+                    bu.Volume,
+                    bu.BloodUnitStatusId,
+                    StatusName = bu.BloodUnitStatus?.StatusName,
+                    DonorId = bu.DonationRecord?.Registration?.DonorId,
+                    DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                    bu.CreatedAt,
+                    bu.UpdatedAt
+                });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
         }
         [HttpPatch("{unitId}/status")]
-        public async Task<IActionResult> UpdateBloodUnitStatus(int unitId,[FromBody] int statusId)
+        public async Task<IActionResult> UpdateBloodUnitStatus(int unitId, [FromBody] int statusId)
         {
-            // 2. Validation tự động: 
-            // Nhờ [ApiController] và các DataAnnotations ([Required], [Range]) trong model,
-            // nếu client gửi UnitId <= 0, request sẽ tự động bị từ chối với lỗi 400 Bad Request.
-            // Anh không cần viết code "if (id <= 0)" nữa.
-
-            // 3. Lấy dữ liệu từ request body
-            var result = await _bloodUnitService.UpdateBloodUnitStatusAsync(unitId, statusId);
-
-            if (!result)
+            try
             {
-                return NotFound($"No blood unit found with ID {unitId}.");
-            }
+                // 2. Validation tự động: 
+                // Nhờ [ApiController] và các DataAnnotations ([Required], [Range]) trong model,
+                // nếu client gửi UnitId <= 0, request sẽ tự động bị từ chối với lỗi 400 Bad Request.
+                // Anh không cần viết code "if (id <= 0)" nữa.
 
-            return Ok("Blood unit status updated successfully.");
+                // 3. Lấy dữ liệu từ request body
+                var result = await _bloodUnitService.UpdateBloodUnitStatusAsync(unitId, statusId);
+
+                if (!result)
+                {
+                    return NotFound($"No blood unit found with ID {unitId}.");
+                }
+
+                return Ok("Blood unit status updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBloodUnit(int id)
         {
-            var result = await _bloodUnitService.DeleteBloodUnitAsync(id);
-            if (!result)
+            try
             {
-                return NotFound($"No blood unit found with ID {id}.");
+                var result = await _bloodUnitService.DeleteBloodUnitAsync(id);
+                if (!result)
+                {
+                    return NotFound($"No blood unit found with ID {id}.");
+                }
+                return Ok("Blood unit deleted successfully.");
             }
-            return Ok("Blood unit deleted successfully.");
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
         }
         [HttpPut]
         public async Task<IActionResult> UpdateBloodUnit([FromBody] BloodUnit bloodUnit)
         {
-            if (bloodUnit == null || bloodUnit.BloodUnitId <= 0)
+            try
             {
-                return BadRequest("Invalid blood unit data.");
+                if (bloodUnit == null || bloodUnit.BloodUnitId <= 0)
+                {
+                    return BadRequest("Invalid blood unit data.");
+                }
+                var result = await _bloodUnitService.UpdateBloodUnitAsync(bloodUnit);
+                if (!result)
+                {
+                    return NotFound($"No blood unit found with ID {bloodUnit.BloodUnitId}.");
+                }
+                return Ok("Blood unit updated successfully.");
             }
-            var result = await _bloodUnitService.UpdateBloodUnitAsync(bloodUnit);
-            if (!result)
+            catch (Exception ex)
             {
-                return NotFound($"No blood unit found with ID {bloodUnit.BloodUnitId}.");
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
             }
-            return Ok("Blood unit updated successfully.");
         }
         /// <summary>
         /// Assign blood unit to a request using unitId and requestId in the body
@@ -220,16 +308,27 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpPatch("{unitId}/assign-to-request")]
         public async Task<IActionResult> AssignBloodUnitToRequest(int unitId, [FromBody] int requestId)
         {
-            if (unitId <= 0 || requestId <= 0)
+            try
             {
-                return BadRequest("Invalid unit ID or request ID.");
+                if (unitId <= 0 || requestId <= 0)
+                {
+                    return BadRequest("Invalid unit ID or request ID.");
+                }
+                var result = await _bloodUnitService.AssignBloodUnitToRequestAsync(unitId, requestId);
+                if (!result)
+                {
+                    return NotFound($"No blood unit found with ID {unitId} or failed to assign to request {requestId}.");
+                }
+                return Ok("Blood unit assigned to request successfully.");
             }
-            var result = await _bloodUnitService.AssignBloodUnitToRequestAsync(unitId, requestId);
-            if (!result)
+            catch (Exception ex)
             {
-                return NotFound($"No blood unit found with ID {unitId} or failed to assign to request {requestId}.");
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
             }
-            return Ok("Blood unit assigned to request successfully.");
         }
     }
 }
