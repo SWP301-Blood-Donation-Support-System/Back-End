@@ -8,7 +8,7 @@ namespace DataAccessLayer.DTO
 {
     public class BloodUnitDTO
     {
-        public int DonationRecordId { get; set; }
+        public int BloodUnitId { get; set; }
 
         public int BloodTypeId { get; set; }
 
