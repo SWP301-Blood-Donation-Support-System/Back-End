@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace BloodDonationSupportSystem.Controllers
             _articleService = articleService;
         }
 
+        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff được tạo
         [HttpPost]
         public async Task<IActionResult> CreateArticle([FromBody] ArticleDTO articleDto)
         {
@@ -41,6 +43,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="id"></param>
         /// <param name="articleDto"></param>
         /// <returns></returns>
+        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff được sửa
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateArticle(int id, [FromBody] UpdateArticleDTO articleDto)
         {
@@ -56,6 +59,7 @@ namespace BloodDonationSupportSystem.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff được xóa
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {

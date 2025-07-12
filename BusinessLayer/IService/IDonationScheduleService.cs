@@ -25,5 +25,7 @@ namespace BusinessLayer.IService
         Task<DonationSchedule> GetDonationScheduleWithRegistrationsAndDetailsAsync(int scheduleId);
         Task<bool> RegisterForDonationSlotAsync(int scheduleId, string registeredBy);
         Task<bool> IsDonationScheduleFullyBookedAsync(int scheduleId);
+        Task CheckAndCreateSchedulesIfNeededAsync(); 
+
     }
 }

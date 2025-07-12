@@ -1,13 +1,16 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Staff")]
     public class DonationRecordController : ControllerBase
     {
         private readonly IDonationRecordService _donationRecordService;
@@ -89,8 +92,18 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(validations);
         }
         [HttpGet("user/{userId}")]
+        [Authorize(Roles = "Admin,Staff,Donor")]
         public async Task<IActionResult> GetRecordsByUserId(int userId)
         {
+            // Thêm logic kiểm tra: nếu là Donor, chỉ được xem của chính mình
+            var requestingUserId = int.Parse(User.FindFirst("UserID").Value);
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value; // Giả sử bạn có claim role
+
+            if (userRole == "Donor" && requestingUserId != userId)
+            {
+                return Forbid(); // Trả về lỗi 403 Forbidden
+            }
+
             if (userId <= 0)
             {
                 return BadRequest("Invalid user ID.");
@@ -101,7 +114,6 @@ namespace BloodDonationSupportSystem.Controllers
                 return NotFound("No records found for the given user ID.");
             }
             return Ok(records);
-
         }
 
         [HttpPut("{recordId}")]
