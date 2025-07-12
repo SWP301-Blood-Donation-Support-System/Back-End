@@ -165,9 +165,7 @@ namespace BusinessLayer.Service
 
                 for (var day = startDate; day <= endDate; day = day.AddDays(1))
                 {
-                    // Chỉ tạo lịch cho các ngày trong tuần (Thứ 2 -> Thứ 6)
-                    if (day.DayOfWeek != DayOfWeek.Saturday && day.DayOfWeek != DayOfWeek.Sunday)
-                    {
+
                         newSchedules.Add(new DonationSchedule
                         {
                             ScheduleDate = day,
@@ -176,7 +174,7 @@ namespace BusinessLayer.Service
                             CreatedBy = systemUser,
                             IsDeleted = false
                         });
-                    }
+                    
                 }
 
                 if (newSchedules.Any())
