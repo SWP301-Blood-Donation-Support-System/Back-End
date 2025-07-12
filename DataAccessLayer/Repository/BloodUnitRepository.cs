@@ -106,6 +106,15 @@ namespace DataAccessLayer.Repository
                 .FirstOrDefaultAsync(b => b.BloodUnitId == id);
         }
 
-       
+       public IQueryable<BloodUnit> GetAllAsQueryable()
+       {
+           return _context.BloodUnits
+               .Include(b => b.DonationRecord)
+                   .ThenInclude(dr => dr.Registration)
+                       .ThenInclude(r => r.Donor)
+               .Include(b => b.BloodType)
+               .Include(b => b.Component)
+               .Include(b => b.BloodUnitStatus);
+       }
     }
 }
