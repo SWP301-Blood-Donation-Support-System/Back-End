@@ -35,6 +35,12 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
 
+        /// <summary>
+        /// Update the article by the Id and the content in the body
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="articleDto"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateArticle(int id, [FromBody] UpdateArticleDTO articleDto)
         {
