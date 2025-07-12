@@ -173,7 +173,7 @@ namespace BusinessLayer.Service
                 }
 
                 bloodRequest.ApprovedByUserId = rejectedByUserId;
-                bloodRequest.RequestStatusId = 3;
+                bloodRequest.RequestStatusId = 4;
 
                 var currentNote = bloodRequest.Note ?? string.Empty;
 
