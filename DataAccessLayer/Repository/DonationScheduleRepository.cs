@@ -111,5 +111,11 @@ namespace DataAccessLayer.Repository
             var schedule = await _context.DonationSchedules.FirstOrDefaultAsync(s => s.ScheduleId == scheduleId);
             return schedule != null ? DefaultMaxCapacity : 0;
         }
+        public async Task<DonationSchedule> GetLatestScheduleAsync()
+        {
+            return await _context.DonationSchedules
+                                 .OrderByDescending(s => s.ScheduleDate)
+                                 .FirstOrDefaultAsync();
+        }
     }
 }

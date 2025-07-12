@@ -1,8 +1,10 @@
 ﻿using BusinessLayer.IService;
 using BusinessLayer.Service;
 using DataAccessLayer.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BloodDonationSupportSystem.Controllers
 {
@@ -17,11 +19,14 @@ namespace BloodDonationSupportSystem.Controllers
         }
         
         [HttpGet]
+        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff có quyền truy cập
         public async Task<IActionResult> GetAllRegistrations()
         {
             var registrations = await _donationRegistrationService.GetAllRegistrationsResponseAsync();
             return Ok(registrations);
         }
+
+        [Authorize]
         [HttpGet("registration/{registrationId}")]
         public async Task<IActionResult> GetRegistrationById(int registrationId)
         {
@@ -29,13 +34,28 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest("Invalid registration ID.");
             }
+
+            // Lấy thông tin người dùng đang đăng nhập
+            var loggedInUserId = int.Parse(User.FindFirstValue("UserID"));
+            var loggedInUserRole = User.FindFirstValue("RoleID");
+
             var registration = await _donationRegistrationService.GetRegistrationByIdResponseAsync(registrationId);
             if (registration == null)
             {
                 return NotFound($"No registration found with ID {registrationId}.");
             }
+
+            // LOGIC KIỂM TRA QUYỀN SỞ HỮU
+            // Nếu người dùng là Donor, họ chỉ có quyền xem đăng ký của chính mình.
+            if (loggedInUserRole == "3" && registration.DonorId != loggedInUserId)
+            {
+                return Forbid("You are not allowed to view this registration.");
+            }
+
             return Ok(registration);
         }
+
+
         [HttpGet("by-donor/{donorId}")]
         public async Task<IActionResult> GetRegistrationsByDonorId(int donorId)
         {
@@ -43,15 +63,29 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest("Invalid donor ID.");
             }
+
+            // Lấy thông tin người dùng đang đăng nhập
+            var loggedInUserId = int.Parse(User.FindFirstValue("UserID"));
+            var loggedInUserRole = User.FindFirstValue("RoleID");
+
+            // LOGIC KIỂM TRA QUYỀN SỞ HỮU
+            // Nếu người dùng là Donor, họ chỉ có quyền xem đăng ký của chính mình.
+            if (loggedInUserRole == "3" && donorId != loggedInUserId)
+            {
+                return Forbid("You are not allowed to view registrations for this donor.");
+            }
+
             var registrations = await _donationRegistrationService.GetRegistrationsByDonorIdResponseAsync(donorId);
             if (registrations == null || !registrations.Any())
             {
                 return NotFound($"No registrations found for donor ID {donorId}.");
             }
+
             return Ok(registrations);
         }
 
         [HttpGet("by-schedule/{scheduleId}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetRegistrationsByScheduleId(int scheduleId)
         {
             if (scheduleId <= 0)
@@ -114,27 +148,32 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Donor")] // Chỉ Donor được phép đăng ký
         public async Task<IActionResult> RegisterDonation([FromBody] DonationRegistrationDTO registrationDTO)
         {
             try
             {
-                await _donationRegistrationService.AddRegistrationAsync(registrationDTO);
-            }
-            catch (Exception ex)
-            {
-                return new BadRequestObjectResult(new
+                // Logic kiểm tra xem người đăng ký có phải là chính họ không
+                var loggedInUserId = int.Parse(User.FindFirstValue("UserID"));
+                if (registrationDTO.DonorId != loggedInUserId)
                 {
-                    status = "failed",
-                    msg = ex.Message
-                });
+                    return Forbid("You can only register for yourself.");
+                }
+
+                await _donationRegistrationService.AddRegistrationAsync(registrationDTO);
+                return Ok("Donation registered successfully.");
             }
-            return Ok("Donation registered successfully.");
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { status = "failed", msg = ex.Message });
+            }
         }
-        
-        
-        
-       
+
+
+
+
         [HttpPut("registration-status")]
+        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được cập nhật trạng thái
         public async Task<IActionResult> UpdateRegistrationStatus([FromBody] UpdateRegistrationStatusDTO request)
         {
             if (request == null)
@@ -158,23 +197,36 @@ namespace BloodDonationSupportSystem.Controllers
         
         
         [HttpPut("cancel-registration")]
-        public async Task<IActionResult> CancelRegistration([FromBody] UpdateRegistrationStatusDTO request)
+        [Authorize]
+        public async Task<IActionResult> CancelRegistration([FromBody] SoftDeleteRegistrationDTO request)
         {
-            if (request == null)
-            {
-                return BadRequest("Request data is required.");
-            }
-
             if (request.RegistrationId <= 0)
             {
                 return BadRequest("Invalid registration ID.");
             }
 
-            // Status ID 4 represents cancelled status
+            var registration = await _donationRegistrationService.GetRegistrationByIdAsync(request.RegistrationId);
+            if (registration == null)
+            {
+                return NotFound($"No registration found with ID {request.RegistrationId}.");
+            }
+
+            // Lấy thông tin người dùng đang đăng nhập
+            var loggedInUserId = int.Parse(User.FindFirstValue("UserID"));
+            var loggedInUserRole = User.FindFirstValue("RoleID");
+
+            // LOGIC KIỂM TRA QUYỀN SỞ HỮU
+            // Nếu là Donor, chỉ được hủy đăng ký của chính mình. Admin/Staff được hủy của bất kỳ ai.
+            if (loggedInUserRole == "3" && registration.DonorId != loggedInUserId)
+            {
+                return Forbid("You are not allowed to cancel this registration.");
+            }
+
+            // Status ID 4 đại diện cho trạng thái "Cancelled" (Đã hủy)
             var result = await _donationRegistrationService.UpdateRegistrationStatusAsync(request.RegistrationId, 4);
             if (!result)
             {
-                return NotFound($"No registration found with ID {request.RegistrationId} or failed to cancel registration.");
+                return StatusCode(500, "Failed to cancel registration.");
             }
             return Ok("Registration cancelled successfully.");
         }
@@ -182,6 +234,7 @@ namespace BloodDonationSupportSystem.Controllers
 
 
         [HttpPut("check-in")]
+        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được check-in
         public async Task<IActionResult> CheckIn([FromBody] CheckInDTO request)
         {
             // 2. Không cần check null/empty thủ công cho NationalId nữa
@@ -251,7 +304,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
         [HttpDelete]
-        //[ProducesResponseType(204)] // No Content
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> SoftDeleteRegistration([FromBody] SoftDeleteRegistrationDTO request)
         {
             var success = await _donationRegistrationService.SoftDeleteRegistrationAsync(request.RegistrationId);
