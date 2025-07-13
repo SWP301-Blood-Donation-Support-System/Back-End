@@ -44,7 +44,6 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpGet("by-donor/{donorId}")]
-        [HttpGet("by-donor/{donorId}")]
         public async Task<IActionResult> GetRegistrationsByDonorId(int donorId)
         {
             if (donorId <= 0)
