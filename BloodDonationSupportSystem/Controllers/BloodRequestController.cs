@@ -1,7 +1,7 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
-using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +9,7 @@ namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class BloodRequestController : ControllerBase
     {
         private readonly IBloodRequestService _bloodRequestService;
@@ -18,7 +18,7 @@ namespace BloodDonationSupportSystem.Controllers
             _bloodRequestService = bloodRequestService;
         }
 
-        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được xem tất cả
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được xem tất cả
         [HttpGet]
         public async Task<IActionResult> GetAllBloodRequestsAsync()
         {
@@ -36,7 +36,7 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(bloodRequest);
         }
         [HttpPost]
-        [Authorize(Roles = "Staff,Hospital")] // Staff và Hospital có thể tạo yêu cầu
+        //[Authorize(Roles = "Staff,Hospital")] // Staff và Hospital có thể tạo yêu cầu
         public async Task<IActionResult> AddBloodRequestAsync([FromBody] BloodRequestDTO bloodRequest)
         {
             if (bloodRequest == null)
@@ -48,7 +48,7 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpPatch("{requestId}/status")]
-        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được cập nhật trạng thái
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được cập nhật trạng thái
         public async Task<IActionResult> UpdateBloodRequestStatusAsync(int requestId, [FromBody] int statusId)
         {
             if (requestId <= 0 || statusId <= 0)
@@ -70,7 +70,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="approvedByUserId"></param>
         /// <returns></returns>
         [HttpPatch("{requestId}/approve")]
-        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được duyệt
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được duyệt
         public async Task<IActionResult> ApproveBloodRequestAsync(int requestId, [FromBody] int approvedByUserId)
         {
             if (requestId <= 0 || approvedByUserId <= 0)
@@ -92,7 +92,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="rejectDTO"></param>
         /// <returns></returns>
         [HttpPatch("{requestId}/reject")]
-        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được từ chối
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được từ chối
         public async Task<IActionResult> RejectBloodRequestAsync(int requestId, [FromBody] BloodRequestRejectDTO rejectDTO)
         {
             if (requestId <= 0)
@@ -112,7 +112,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="requestId"></param>
         /// <returns></returns>
         [HttpGet("{requestId}/suggested-blood-unit-list")]
-        [Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được xem gợi ý
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được xem gợi ý
         public async Task<IActionResult> AutoAssignBloodUnitsToRequests(int requestId)
         {
             try

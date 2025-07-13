@@ -2,7 +2,7 @@
 using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
 using Google.Apis.Auth;
-using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +24,7 @@ namespace BloodDonationSupportSystem.Controllers
 
         // GET: api/user
         [HttpGet]
-        [Authorize(Roles = "Admin")] // Chỉ Admin thấy tất cả user
+        //[Authorize(Roles = "Admin")] // Chỉ Admin thấy tất cả user
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userServices.GetAllUsersAsync();
@@ -33,7 +33,7 @@ namespace BloodDonationSupportSystem.Controllers
 
         // DELETE: api/user/5
         [HttpGet("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetUserById(int id)
         {
             if (id <= 0)
@@ -94,7 +94,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="login"></param>
         /// <returns></returns>
         [HttpPost("login")]
-        [AllowAnonymous] // Cho phép người dùng không đăng nhập truy cập
+        //[AllowAnonymous] // Cho phép người dùng không đăng nhập truy cập
         public async Task<IActionResult> Login([FromBody] LoginDTO login)
         {
             try
@@ -130,7 +130,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="registerDTO"></param>
         /// <returns></returns>
         [HttpPost("register-donor")]
-        [AllowAnonymous] 
+        //[AllowAnonymous] 
         public async Task<IActionResult> RegisterDonor([FromBody] RegisterDTO registerDTO)
         {
             try
@@ -155,7 +155,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="staffRegisterDTO"></param>
         /// <returns></returns>
         [HttpPost("register-staff")]
-        [Authorize(Roles = "Admin")] // Chỉ Admin được tạo tài khoản Staff
+        //[Authorize(Roles = "Admin")] // Chỉ Admin được tạo tài khoản Staff
         public async Task<IActionResult> RegisterStaff([FromBody] StaffRegisterDTO staffRegisterDTO)
         {
             try
@@ -246,7 +246,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("google")]
-        [AllowAnonymous] 
+        //[AllowAnonymous] 
         public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
         {
 
@@ -267,7 +267,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="donorDTO"></param>
         /// <returns></returns>
         [HttpPut("donor/{donorId}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UpdateDonor(int donorId, [FromBody] DonorDTO donorDTO)
         {
             if (donorDTO == null || donorId <= 0)
@@ -408,7 +408,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("forgot-password")]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgetPasswordDTO request)
         {
             if (!ModelState.IsValid)
@@ -429,7 +429,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("reset-password")]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO request)
         {
             if (!ModelState.IsValid)
@@ -451,7 +451,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO request)
         {

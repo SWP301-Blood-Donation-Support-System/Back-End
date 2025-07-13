@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Authorization;
 
 namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff có quyền truy cập
+    //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff có quyền truy cập
     public class BloodUnitController : ControllerBase
     {
         private readonly IBloodUnitService _bloodUnitService;

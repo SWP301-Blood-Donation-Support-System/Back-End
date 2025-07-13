@@ -10,7 +10,7 @@ namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,Staff")]
+    //[Authorize(Roles = "Admin,Staff")]
     public class DonationRecordController : ControllerBase
     {
         private readonly IDonationRecordService _donationRecordService;
