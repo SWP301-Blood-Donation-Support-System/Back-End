@@ -792,8 +792,7 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <h3>📞 Liên hệ hỗ trợ</h3>");
             sb.AppendLine("                <p>Nếu bạn có bất kỳ thắc mắc nào hoặc cần thay đổi lịch hẹn, vui lòng liên hệ:</p>");
             sb.AppendLine("                <ul>");
-            sb.AppendLine("                    <li>Email: support@blooddonation.vn</li>");
-            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX</li>");
+            sb.AppendLine("                    <li>Email: giotmaunghiatinh@gmail.com</li>");
             sb.AppendLine("                </ul>");
             sb.AppendLine("            </div>");
 
