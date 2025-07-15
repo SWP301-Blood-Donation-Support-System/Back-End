@@ -25,6 +25,10 @@ namespace BloodDonationSupportSystem.Controllers
             _bloodUnitRepository = bloodUnitRepository;
             _mapper = mapper;
         }
+        /// <summary>
+        /// Get all blood units
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAllBloodUnits()
         {
@@ -46,6 +50,11 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Get blood unit by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBloodUnitById(int id)
         {
@@ -68,6 +77,7 @@ namespace BloodDonationSupportSystem.Controllers
                     bloodUnit.CollectedDateTime,
                     bloodUnit.ExpiryDateTime,
                     bloodUnit.Volume,
+                    bloodUnit.RequestId,
                     bloodUnit.BloodUnitStatusId,
                     StatusName = bloodUnit.BloodUnitStatus?.StatusName,
                     DonorId = bloodUnit.DonationRecord?.Registration?.DonorId,
@@ -87,6 +97,11 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Create new blood unit
+        /// </summary>
+        /// <param name="bloodUnitDTO"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> AddBloodUnit([FromBody] BloodUnitDTO bloodUnitDTO)
         {
@@ -104,6 +119,11 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Blood unit added successfully.");
         }
+        /// <summary>
+        /// Get blood units by blood type
+        /// </summary>
+        /// <param name="bloodTypeId"></param>
+        /// <returns></returns>
         [HttpGet("by-blood-type/{bloodTypeId}")]
         public async Task<IActionResult> GetBloodUnitsByBloodType(int bloodTypeId)
         {
@@ -123,6 +143,7 @@ namespace BloodDonationSupportSystem.Controllers
                     bu.CollectedDateTime,
                     bu.ExpiryDateTime,
                     bu.Volume,
+                    bu.RequestId,
                     bu.BloodUnitStatusId,
                     StatusName = bu.BloodUnitStatus?.StatusName,
                     DonorId = bu.DonationRecord?.Registration?.DonorId,
@@ -142,6 +163,11 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Get blood units by component
+        /// </summary>
+        /// <param name="bloodComponentId"></param>
+        /// <returns></returns>
         [HttpGet("by-blood-component/{bloodComponentId}")]
         public async Task<IActionResult> GetBloodUnitsByBloodComponent(int bloodComponentId)
         {
@@ -161,6 +187,7 @@ namespace BloodDonationSupportSystem.Controllers
                     bu.CollectedDateTime,
                     bu.ExpiryDateTime,
                     bu.Volume,
+                    bu.RequestId,
                     bu.BloodUnitStatusId,
                     StatusName = bu.BloodUnitStatus?.StatusName,
                     DonorId = bu.DonationRecord?.Registration?.DonorId,
@@ -180,13 +207,17 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
-        [HttpGet("by-status/{statusId}")]
-        public async Task<IActionResult> GetBloodUnitsByStatus(int statusId)
+        /// <summary>
+        /// Get blood units by blood request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
+        [HttpGet("by-record/{recordtId}")]
+        public async Task<IActionResult> GetBloodUnitsByRecord(int requestId)
         {
             try
             {
-                var bloodUnits = await _bloodUnitService.GetBloodUnitsByStatusAsync(statusId);
-
+                var bloodUnits = await _bloodUnitService.GetBloodUnitsByRecordIdAsync(requestId);
                 // Create anonymous object with donor information
                 var result = bloodUnits.Select(bu => new
                 {
@@ -199,6 +230,90 @@ namespace BloodDonationSupportSystem.Controllers
                     bu.CollectedDateTime,
                     bu.ExpiryDateTime,
                     bu.Volume,
+                    bu.RequestId,
+                    bu.BloodUnitStatusId,
+                    StatusName = bu.BloodUnitStatus?.StatusName,
+                    DonorId = bu.DonationRecord?.Registration?.DonorId,
+                    DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                    bu.CreatedAt,
+                    bu.UpdatedAt
+                });
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
+        }
+        /// <summary>
+        /// Get blood units by blood request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
+        [HttpGet("by-blood-request/{requestId}")]
+        public async Task<IActionResult> GetBloodUnitsByRequest(int requestId)
+        {
+            try
+            {
+                var bloodUnits = await _bloodUnitService.GetBloodUnitsByRequestIdAsync(requestId);
+                var result = bloodUnits.Select(bu => new
+                {
+                    bu.BloodUnitId,
+                    bu.DonationRecordId,
+                    bu.BloodTypeId,
+                    BloodTypeName = bu.BloodType?.BloodTypeName,
+                    bu.ComponentId,
+                    ComponentName = bu.Component?.ComponentName,
+                    bu.CollectedDateTime,
+                    bu.ExpiryDateTime,
+                    bu.Volume,
+                    bu.RequestId,
+                    bu.BloodUnitStatusId,
+                    StatusName = bu.BloodUnitStatus?.StatusName,
+                    DonorId = bu.DonationRecord?.Registration?.DonorId,
+                    DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
+                    bu.CreatedAt,
+                    bu.UpdatedAt
+                });
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
+        }
+        /// <summary>
+        /// Get blood units by status
+        /// </summary>
+        /// <param name="statusId"></param>
+        /// <returns></returns>
+        [HttpGet("by-status/{statusId}")]
+        public async Task<IActionResult> GetBloodUnitsByStatus(int statusId)
+        {
+            try
+            {
+                var bloodUnits = await _bloodUnitService.GetBloodUnitsByStatusAsync(statusId);
+
+                var result = bloodUnits.Select(bu => new
+                {
+                    bu.BloodUnitId,
+                    bu.DonationRecordId,
+                    bu.BloodTypeId,
+                    BloodTypeName = bu.BloodType?.BloodTypeName,
+                    bu.ComponentId,
+                    ComponentName = bu.Component?.ComponentName,
+                    bu.CollectedDateTime,
+                    bu.ExpiryDateTime,
+                    bu.Volume,
+                    bu.RequestId,
                     bu.BloodUnitStatusId,
                     StatusName = bu.BloodUnitStatus?.StatusName,
                     DonorId = bu.DonationRecord?.Registration?.DonorId,
@@ -218,6 +333,12 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Update blood unit status
+        /// </summary>
+        /// <param name="unitId"></param>
+        /// <param name="statusId"></param>
+        /// <returns></returns>
         [HttpPatch("{unitId}/status")]
         public async Task<IActionResult> UpdateBloodUnitStatus(int unitId, [FromBody] int statusId)
         {
@@ -247,6 +368,11 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Delete blood units (shouldn't)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBloodUnit(int id)
         {
@@ -268,6 +394,11 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Update blood units
+        /// </summary>
+        /// <param name="bloodUnit"></param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<IActionResult> UpdateBloodUnit([FromBody] BloodUnit bloodUnit)
         {

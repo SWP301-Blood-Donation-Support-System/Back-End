@@ -85,6 +85,14 @@ namespace BusinessLayer.Service
         {
             return await _bloodUnitRepository.GetUnitsByStatusAsync(statusId);
         }
+        public async Task<IEnumerable<BloodUnit>> GetBloodUnitsByRecordIdAsync(int recordId)
+        {
+            return await _bloodUnitRepository.GetUnitsByRecordIdAsync(recordId);
+        }
+        public async Task<IEnumerable<BloodUnit>> GetBloodUnitsByRequestIdAsync(int requestId)
+        {
+            return await _bloodUnitRepository.GetUnitsByRequestIdAsync(requestId);
+        }
 
         public async Task<bool> UpdateBloodUnitAsync(BloodUnit bloodUnit)
         {

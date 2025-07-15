@@ -18,6 +18,8 @@ namespace BusinessLayer.IService
         Task<IEnumerable<BloodUnit>> GetBloodUnitsByBloodTypeAsync(int bloodTypeId);
         Task<IEnumerable<BloodUnit>> GetBloodUnitsByBloodComponentAsync(int bloodComponentId);
         Task<IEnumerable<BloodUnit>> GetBloodUnitsByStatusAsync(int statusId);
+        Task<IEnumerable<BloodUnit>> GetBloodUnitsByRecordIdAsync(int recordId);
+        Task<IEnumerable<BloodUnit>> GetBloodUnitsByRequestIdAsync(int requestId);
         Task<bool> UpdateBloodUnitStatusAsync(int unitId, int bloodUnitStatusId);
         Task<bool> AssignBloodUnitToRequestAsync(int unitId, int requestId);
     }

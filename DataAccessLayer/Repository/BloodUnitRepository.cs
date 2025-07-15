@@ -69,6 +69,18 @@ namespace DataAccessLayer.Repository
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<BloodUnit>> GetUnitsByRequestIdAsync(int requestId)
+        {
+            return await _context.BloodUnits
+                .Where(p => p.RequestId == requestId)
+                .Include(b => b.DonationRecord)
+                    .ThenInclude(dr => dr.Registration)
+                        .ThenInclude(r => r.Donor)
+                .Include(b => b.BloodType)
+                .Include(b => b.Component)
+                .Include(b => b.BloodUnitStatus)
+                .ToListAsync();
+        }
         public Task<bool> UpdateUnitStatusAsync(int unitId, int bloodUnitStatusId)
         {
             var unit = _context.BloodUnits.Find(unitId);
