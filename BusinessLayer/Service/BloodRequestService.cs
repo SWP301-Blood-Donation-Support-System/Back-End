@@ -289,7 +289,7 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException(
                         $"No suitable blood units found for request ID {requestId}. " +
-                        $"Requested: {bloodRequest.Volume}ml of blood type {bloodRequest.BloodType.BloodTypeName} component {bloodRequest.BloodComponent.ComponentName}."
+                        $"Requested: {bloodRequest.Volume}ml of blood type {bloodRequest.BloodType?.BloodTypeName} component {bloodRequest.BloodComponent?.ComponentName}."
                     );
                 }
 
@@ -410,7 +410,7 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException(
                         $"No suitable blood units found for request ID {requestId}. " +
-                        $"Requested: {bloodRequest.Note}ml of blood type {bloodRequest.Note} Component {bloodRequest.BloodComponentId}."
+                        $"Requested: {bloodRequest.Volume}ml of blood type {bloodRequest.Note} Component {bloodRequest.BloodComponentId}."
                     );
                 }
             }
