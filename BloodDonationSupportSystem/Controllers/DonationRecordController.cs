@@ -1,13 +1,16 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(Roles = "Admin,Staff")]
     public class DonationRecordController : ControllerBase
     {
         private readonly IDonationRecordService _donationRecordService;
@@ -89,6 +92,7 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(validations);
         }
         [HttpGet("user/{userId}")]
+        //[Authorize(Roles = "Admin,Staff,Donor")]
         public async Task<IActionResult> GetRecordsByUserId(int userId)
         {
             if (userId <= 0)
@@ -101,7 +105,6 @@ namespace BloodDonationSupportSystem.Controllers
                 return NotFound("No records found for the given user ID.");
             }
             return Ok(records);
-
         }
 
         [HttpPut("{recordId}")]

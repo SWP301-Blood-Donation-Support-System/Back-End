@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+
 namespace BusinessLayer.Service
 {
     public class DonationScheduleService : IDonationScheduleService
@@ -140,5 +141,51 @@ namespace BusinessLayer.Service
             return await _donationScheduleRepository.GetScheduleByDateAsync(date);
         }
 
+        public async Task CheckAndCreateSchedulesIfNeededAsync()
+        {
+            const int thresholdDays = 14; // Nếu lịch trống trong vòng 14 ngày tới
+            const int createForwardDays = 30; // Thì tạo lịch cho 30 ngày tiếp theo
+            const string systemUser = "System-AutoJob"; // Người tạo
+
+            var latestSchedule = await _donationScheduleRepository.GetLatestScheduleAsync();
+            var today = DateTime.UtcNow.Date;
+
+            // Xác định ngày cuối cùng có lịch. Nếu không có lịch nào, bắt đầu từ hôm nay.
+            var lastScheduledDate = latestSchedule?.ScheduleDate?.Date ?? today;
+
+            // Kiểm tra xem có cần tạo lịch mới không.
+            // Điều kiện: Ngày cuối cùng có lịch cách hôm nay dưới 14 ngày.
+            if (lastScheduledDate < today.AddDays(thresholdDays))
+            {
+                // Ngày bắt đầu tạo lịch mới là ngày sau ngày cuối cùng đã có lịch
+                var startDate = lastScheduledDate.AddDays(1);
+                var endDate = startDate.AddDays(createForwardDays);
+
+                var newSchedules = new List<DonationSchedule>();
+
+                for (var day = startDate; day <= endDate; day = day.AddDays(1))
+                {
+
+                        newSchedules.Add(new DonationSchedule
+                        {
+                            ScheduleDate = day,
+                            RegisteredSlots = 0,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = systemUser,
+                            IsDeleted = false
+                        });
+                    
+                }
+
+                if (newSchedules.Any())
+                {
+                    foreach (var schedule in newSchedules)
+                    {
+                        await _donationScheduleRepository.AddAsync(schedule);
+                    }
+                    await _donationScheduleRepository.SaveChangesAsync();
+                }
+            }
+        }
     }
 }

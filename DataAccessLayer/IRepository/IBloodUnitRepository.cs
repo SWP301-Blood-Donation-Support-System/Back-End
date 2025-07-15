@@ -9,6 +9,7 @@ namespace DataAccessLayer.IRepository
 {
     public interface IBloodUnitRepository : IGenericRepository<BloodUnit>
     {
+        IQueryable<BloodUnit> GetAllAsQueryable();
         Task<IEnumerable<BloodUnit>> GetUnitsByBloodTypeIdAsync(int bloodTypeId);
         Task<IEnumerable<BloodUnit>> GetUnitsByStatusAsync(int bloodUnitStatusId);
         Task<IEnumerable<BloodUnit>> GetUnitsByBloodComponentIdAsync(int bloodComponentId);

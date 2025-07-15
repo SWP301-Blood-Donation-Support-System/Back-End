@@ -1,8 +1,10 @@
 ﻿using BusinessLayer.IService;
 using BusinessLayer.Service;
 using DataAccessLayer.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BloodDonationSupportSystem.Controllers
 {
@@ -15,13 +17,16 @@ namespace BloodDonationSupportSystem.Controllers
         {
             _donationRegistrationService = donationRegistrationService;
         }
-        
+
         [HttpGet]
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff có quyền truy cập
         public async Task<IActionResult> GetAllRegistrations()
         {
             var registrations = await _donationRegistrationService.GetAllRegistrationsResponseAsync();
             return Ok(registrations);
         }
+
+        //[Authorize]
         [HttpGet("registration/{registrationId}")]
         public async Task<IActionResult> GetRegistrationById(int registrationId)
         {
@@ -29,6 +34,7 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return BadRequest("Invalid registration ID.");
             }
+
             var registration = await _donationRegistrationService.GetRegistrationByIdResponseAsync(registrationId);
             if (registration == null)
             {
@@ -36,6 +42,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok(registration);
         }
+
         [HttpGet("by-donor/{donorId}")]
         public async Task<IActionResult> GetRegistrationsByDonorId(int donorId)
         {
@@ -48,10 +55,12 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 return NotFound($"No registrations found for donor ID {donorId}.");
             }
+
             return Ok(registrations);
         }
 
         [HttpGet("by-schedule/{scheduleId}")]
+        //[Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetRegistrationsByScheduleId(int scheduleId)
         {
             if (scheduleId <= 0)
@@ -114,11 +123,13 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpPost]
+        //[Authorize(Roles = "Donor")] // Chỉ Donor được phép đăng ký
         public async Task<IActionResult> RegisterDonation([FromBody] DonationRegistrationDTO registrationDTO)
         {
             try
             {
                 await _donationRegistrationService.AddRegistrationAsync(registrationDTO);
+
             }
             catch (Exception ex)
             {
@@ -130,11 +141,12 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok("Donation registered successfully.");
         }
-        
-        
-        
-       
+
+
+
+
         [HttpPut("registration-status")]
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được cập nhật trạng thái
         public async Task<IActionResult> UpdateRegistrationStatus([FromBody] UpdateRegistrationStatusDTO request)
         {
             if (request == null)
@@ -155,10 +167,12 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok("Registration status updated successfully.");
         }
 
-        
-        
+
+
         [HttpPut("cancel-registration")]
+        //[Authorize]
         public async Task<IActionResult> CancelRegistration([FromBody] UpdateRegistrationStatusDTO request)
+
         {
             if (request == null)
             {
@@ -166,6 +180,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
 
             if (request.RegistrationId <= 0)
+
             {
                 return BadRequest("Invalid registration ID.");
             }
@@ -179,9 +194,8 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok("Registration cancelled successfully.");
         }
 
-
-
         [HttpPut("check-in")]
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được check-in
         public async Task<IActionResult> CheckIn([FromBody] CheckInDTO request)
         {
             // 2. Không cần check null/empty thủ công cho NationalId nữa
@@ -251,7 +265,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
         [HttpDelete]
-        //[ProducesResponseType(204)] // No Content
+        //[Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> SoftDeleteRegistration([FromBody] SoftDeleteRegistrationDTO request)
         {
             var success = await _donationRegistrationService.SoftDeleteRegistrationAsync(request.RegistrationId);

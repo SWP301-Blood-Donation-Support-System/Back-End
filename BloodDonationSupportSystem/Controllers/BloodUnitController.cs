@@ -1,47 +1,41 @@
-﻿using BusinessLayer.IService;
+﻿using AutoMapper;
+using BusinessLayer.IService;
 using DataAccessLayer.DTO;
 using DataAccessLayer.Entity;
+using DataAccessLayer.IRepository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+//using Microsoft.AspNetCore.Authorization;
 
 namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff có quyền truy cập
     public class BloodUnitController : ControllerBase
     {
         private readonly IBloodUnitService _bloodUnitService;
-        public BloodUnitController(IBloodUnitService bloodUnitService)
+        private readonly IBloodUnitRepository _bloodUnitRepository;
+        private readonly IMapper _mapper;
+        public BloodUnitController(IBloodUnitService bloodUnitService, IBloodUnitRepository bloodUnitRepository, IMapper mapper)
         {
             _bloodUnitService = bloodUnitService;
+            _bloodUnitRepository = bloodUnitRepository;
+            _mapper = mapper;
         }
         [HttpGet]
         public async Task<IActionResult> GetAllBloodUnits()
         {
             try
             {
-                var bloodUnits = await _bloodUnitService.GetAllBloodUnitsAsync();
+                // Sử dụng ProjectTo để EF Core tạo câu lệnh SQL tối ưu
+                var bloodUnitDTOs = await _bloodUnitRepository.GetAllAsQueryable()
+                    .ProjectTo<BloodUnitResponseDTO>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
 
-                var result = bloodUnits.Select(bu => new
-                {
-                    bu.BloodUnitId,
-                    bu.DonationRecordId,
-                    bu.BloodTypeId,
-                    BloodTypeName = bu.BloodType?.BloodTypeName,
-                    bu.ComponentId,
-                    ComponentName = bu.Component?.ComponentName,
-                    bu.CollectedDateTime,
-                    bu.ExpiryDateTime,
-                    bu.Volume,
-                    bu.BloodUnitStatusId,
-                    StatusName = bu.BloodUnitStatus?.StatusName,
-                    DonorId = bu.DonationRecord?.Registration?.DonorId,
-                    DonorName = bu.DonationRecord?.Registration?.Donor?.FullName,
-                    bu.CreatedAt,
-                    bu.UpdatedAt
-                });
-
-                return Ok(result);
+                return Ok(bloodUnitDTOs);
             }
             catch (Exception ex)
             {

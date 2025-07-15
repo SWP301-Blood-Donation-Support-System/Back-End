@@ -134,8 +134,8 @@ namespace BusinessLayer.Service
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration
-                SendWelcomeEmail(donor.Email, "Dave");
+                // Send welcome email after successful registration - use the actual full name
+                SendWelcomeEmail(donor.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
@@ -165,8 +165,8 @@ namespace BusinessLayer.Service
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration
-                SendWelcomeEmail(staff.Email, "Dave");
+                // Send welcome email after successful registration - use the actual full name
+                SendWelcomeEmail(staff.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
@@ -196,8 +196,8 @@ namespace BusinessLayer.Service
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration
-                SendWelcomeEmail(admin.Email, "John");
+                // Send welcome email after successful registration - use the actual full name
+                SendWelcomeEmail(admin.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
@@ -528,8 +528,8 @@ namespace BusinessLayer.Service
                     LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
                     await _userRepository.SaveChangesAsync();
 
-                    // Send welcome email for new Google user
-                    SendWelcomeEmail(payload.Email, payload.Name ?? payload.Email);
+                    // Send welcome email for new Google user - use actual name from Google payload
+                    SendWelcomeEmail(payload.Email, payload.Name ?? "");
 
                     return await GenerateToken(userLogin);
                 }
@@ -556,7 +556,7 @@ namespace BusinessLayer.Service
             _emailService.SendEmail(message);
         }
 
-        public void SendWelcomeEmail(string userEmail, string userName = "")
+        public void SendWelcomeEmail(string userEmail, string fullName = "")
         {
             try
             {
@@ -564,10 +564,10 @@ namespace BusinessLayer.Service
                 Console.WriteLine($"=== ATTEMPTING TO SEND WELCOME EMAIL ===");
                 Console.WriteLine($"Email service is null: {_emailService == null}");
                 Console.WriteLine($"Target email: {userEmail}");
-                Console.WriteLine($"User name: {userName}");
+                Console.WriteLine($"Full name: {fullName}");
                 
                 var subject = "Chào mừng bạn đến với Hệ thống Hỗ trợ Hiến máu!";
-                var htmlBody = GenerateWelcomeEmailTemplate(userName, userEmail);
+                var htmlBody = GenerateWelcomeEmailTemplate(fullName, userEmail);
 
                 var message = new Message(
                     to: new string[] { userEmail },
@@ -596,9 +596,9 @@ namespace BusinessLayer.Service
             }
         }
 
-        private string GenerateWelcomeEmailTemplate(string userName, string userEmail)
+        private string GenerateWelcomeEmailTemplate(string fullName, string userEmail)
         {
-            var displayName = !string.IsNullOrEmpty(userName) ? userName : userEmail;
+            var displayName = !string.IsNullOrEmpty(fullName) ? fullName : userEmail;
             var currentDate = GetVietnamTime().ToString("dd/MM/yyyy HH:mm");
 
             var sb = new StringBuilder();
@@ -645,18 +645,18 @@ namespace BusinessLayer.Service
             return sb.ToString();
         }
 
-        public void SendDonationRegistrationThankYouEmail(string userEmail, string userName, DonationRegistrationEmailInfoDTO registrationInfo)
+        public void SendDonationRegistrationThankYouEmail(string userEmail, string fullName, DonationRegistrationEmailInfoDTO registrationInfo)
         {
             try
             {
                 Console.WriteLine($"=== ATTEMPTING TO SEND DONATION REGISTRATION THANK YOU EMAIL ===");
                 Console.WriteLine($"Email service is null: {_emailService == null}");
                 Console.WriteLine($"Target email: {userEmail}");
-                Console.WriteLine($"User name: {userName}");
+                Console.WriteLine($"Full name: {fullName}");
                 Console.WriteLine($"Registration code: {registrationInfo.RegistrationCode}");
                 
                 var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
-                var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(userName, userEmail, registrationInfo);
+                var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(fullName, userEmail, registrationInfo);
 
                 var message = new Message(
                     to: new string[] { userEmail },
@@ -683,9 +683,9 @@ namespace BusinessLayer.Service
             }
         }
 
-        private string GenerateDonationRegistrationThankYouEmailTemplate(string userName, string userEmail, DonationRegistrationEmailInfoDTO registrationInfo)
+        private string GenerateDonationRegistrationThankYouEmailTemplate(string fullName, string userEmail, DonationRegistrationEmailInfoDTO registrationInfo)
         {
-            var displayName = !string.IsNullOrEmpty(userName) ? userName : registrationInfo.DonorName ?? userEmail;
+            var displayName = !string.IsNullOrEmpty(fullName) ? fullName : registrationInfo.DonorName ?? userEmail;
             var currentDate = GetVietnamTime().ToString("dd/MM/yyyy HH:mm");
 
             // Tạo đối tượng CultureInfo cho tiếng Việt
@@ -729,7 +729,7 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <h3>📋 Thông tin đăng ký</h3>");
             sb.AppendLine("                <table>");
             sb.AppendLine($"                    <tr><td class='label'>Mã đăng ký:</td><td class='important'>{registrationInfo.RegistrationCode ?? registrationInfo.RegistrationId.ToString()}</td></tr>");
-            sb.AppendLine($"                    <tr><td class='label'>Ngày đăng ký:</td><td>{registrationInfo.RegistrationDate.ToString("dd/MM/yyyy HH:mm")}</td></tr>");
+            sb.AppendLine($"                    <tr><td class='label'>Ngày đăng ký:</td><td>{registrationInfo.RegistrationDate.ToString("dd/MM/yyyy")}</td></tr>");
             sb.AppendLine($"                    <tr><td class='label'>Họ tên:</td><td>{registrationInfo.DonorName ?? displayName}</td></tr>");
             sb.AppendLine($"                    <tr><td class='label'>Email:</td><td>{registrationInfo.DonorEmail ?? userEmail}</td></tr>");
 
@@ -792,8 +792,7 @@ namespace BusinessLayer.Service
             sb.AppendLine("                <h3>📞 Liên hệ hỗ trợ</h3>");
             sb.AppendLine("                <p>Nếu bạn có bất kỳ thắc mắc nào hoặc cần thay đổi lịch hẹn, vui lòng liên hệ:</p>");
             sb.AppendLine("                <ul>");
-            sb.AppendLine("                    <li>Email: support@blooddonation.vn</li>");
-            sb.AppendLine("                    <li>Hotline: 1900-XXX-XXX</li>");
+            sb.AppendLine("                    <li>Email: giotmaunghiatinh@gmail.com</li>");
             sb.AppendLine("                </ul>");
             sb.AppendLine("            </div>");
 
@@ -860,7 +859,7 @@ namespace BusinessLayer.Service
             return true;
         }
 
-        private string GeneratePasswordResetEmailTemplate(string userName, string resetLink)
+        private string GeneratePasswordResetEmailTemplate(string fullName, string resetLink)
         {
             var emailTemplate = $@"
 <!DOCTYPE html>
@@ -881,7 +880,7 @@ namespace BusinessLayer.Service
             <td bgcolor='#ffffff' style='padding: 40px 30px;'>
                 <h1 style='font-size: 24px; color: #333333;'>Yêu cầu Đặt lại Mật khẩu</h1>
                 <p style='margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;'>
-                    Xin chào {userName},
+                    Xin chào {fullName},
                 </p>
                 <p style='margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;'>
                     Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng nhấp vào nút bên dưới để tiến hành.

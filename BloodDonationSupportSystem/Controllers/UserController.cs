@@ -2,12 +2,13 @@
 using BusinessLayer.Utils;
 using DataAccessLayer.DTO;
 using Google.Apis.Auth;
-using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace BloodDonationSupportSystem.Controllers
 {
@@ -23,6 +24,7 @@ namespace BloodDonationSupportSystem.Controllers
 
         // GET: api/user
         [HttpGet]
+        //[Authorize(Roles = "Admin")] // Chỉ Admin thấy tất cả user
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userServices.GetAllUsersAsync();
@@ -31,6 +33,7 @@ namespace BloodDonationSupportSystem.Controllers
 
         // DELETE: api/user/5
         [HttpGet("{id}")]
+        //[Authorize]
         public async Task<IActionResult> GetUserById(int id)
         {
             if (id <= 0)
@@ -91,6 +94,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="login"></param>
         /// <returns></returns>
         [HttpPost("login")]
+        //[AllowAnonymous] // Cho phép người dùng không đăng nhập truy cập
         public async Task<IActionResult> Login([FromBody] LoginDTO login)
         {
             try
@@ -126,6 +130,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="registerDTO"></param>
         /// <returns></returns>
         [HttpPost("register-donor")]
+        //[AllowAnonymous] 
         public async Task<IActionResult> RegisterDonor([FromBody] RegisterDTO registerDTO)
         {
             try
@@ -150,6 +155,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="staffRegisterDTO"></param>
         /// <returns></returns>
         [HttpPost("register-staff")]
+        //[Authorize(Roles = "Admin")] // Chỉ Admin được tạo tài khoản Staff
         public async Task<IActionResult> RegisterStaff([FromBody] StaffRegisterDTO staffRegisterDTO)
         {
             try
@@ -240,6 +246,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("google")]
+        //[AllowAnonymous] 
         public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
         {
 
@@ -260,6 +267,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="donorDTO"></param>
         /// <returns></returns>
         [HttpPut("donor/{donorId}")]
+        //[Authorize]
         public async Task<IActionResult> UpdateDonor(int donorId, [FromBody] DonorDTO donorDTO)
         {
             if (donorDTO == null || donorId <= 0)
@@ -400,19 +408,32 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("forgot-password")]
+        //[AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgetPasswordDTO request)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var result = await _userServices.ForgotPasswordAsync(request.Email);
+                if (!result)
+                {
+                    return BadRequest(new { message = "Email sai hoặc không tồn tại" });
+                }
+                return Ok(new { message = "Nếu tài khoản của bạn tồn tại, một email hướng dẫn đặt lại mật khẩu đã được gửi." });
             }
-            var result = await _userServices.ForgotPasswordAsync(request.Email);
-            if (!result)
+            catch(Exception ex)
             {
-                return BadRequest(new { message = "Email sai hoặc không tồn tại" });
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
             }
 
-            return Ok(new { message = "Nếu tài khoản của bạn tồn tại, một email hướng dẫn đặt lại mật khẩu đã được gửi." });
+            
         }
         /// <summary>
         /// Reset password for user using token
@@ -420,6 +441,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("reset-password")]
+        //[AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO request)
         {
             if (!ModelState.IsValid)
@@ -441,7 +463,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO request)
         {

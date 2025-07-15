@@ -2,6 +2,7 @@ using BE_Homnayangi.Ultils.EmailServices;
 using BloodDonationSupportSystem.Utils;
 using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
+using BusinessLayer.QuartzJobs.Job;
 using BusinessLayer.QuartzJobs.Schedulers;
 using BusinessLayer.Service;
 using BusinessLayer.Utils;
@@ -54,6 +55,25 @@ builder.Services.Configure<CertificateSettings>(
 builder.Services.AddQuartz();
 builder.Services.AddTransient<NotifQuartzScheduler>();
 builder.Services.AddQuartzHostedService();
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+
+    // --- Job t? ??ng t?o l?ch hi?n máu ---
+    var autoScheduleJobKey = new JobKey("AutoScheduleCreationJob");
+    q.AddJob<AutoScheduleCreationJob>(opts => opts.WithIdentity(autoScheduleJobKey));
+
+    // Ch?y job này vào 1 gi? sáng m?i ngày
+    q.AddTrigger(opts => opts
+        .ForJob(autoScheduleJobKey)
+        .WithIdentity("AutoScheduleCreationJob-trigger")
+        .WithCronSchedule("0 0 1 * * ?") // Cú pháp Cron: giây phút gi? ngày tháng WDAY
+        .WithDescription("Trigger to run auto schedule creation job daily at 1 AM")
+    );
+});
+
+builder.Services.AddTransient<NotifQuartzScheduler>();
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 // ====================== CONTROLLERS & API BEHAVIOR ====================== //
 builder.Services.AddControllers();
@@ -174,6 +194,7 @@ builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<IBloodRequestService, BloodRequestService>();
 builder.Services.AddScoped<IHospitalService, HospitalService>();
 builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -188,6 +209,7 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IBloodRequestRepository, BloodRequestRepository>();
 builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
 builder.Services.AddScoped<IBloodCompatibilityRepository, BloodCompatibilityRepository>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 
 // Generic Repositories
 builder.Services.AddScoped<IGenericRepository<Gender>, GenericRepository<Gender>>();
