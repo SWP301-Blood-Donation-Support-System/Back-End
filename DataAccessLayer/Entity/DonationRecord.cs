@@ -10,11 +10,11 @@ public partial class DonationRecord
     public int RegistrationId { get; set; }
 
     public DateTime DonationDateTime { get; set; }
-
+    public decimal? DonorHeight { get; set; }
     public decimal? DonorWeight { get; set; }
 
     public decimal? DonorTemperature { get; set; }
-
+    public int? DonorHeartRate { get; set; }
     public string? DonorBloodPressure { get; set; }
 
     public int? DonationTypeId { get; set; }
