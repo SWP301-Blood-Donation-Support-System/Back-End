@@ -9,6 +9,7 @@ namespace BloodDonationSupportSystem.Mapper
         public BloodRequestProfile()
         {
             CreateMap<BloodRequest, BloodRequestDTO>().ReverseMap();
+            CreateMap<BloodRequest, BloodRequestResponseDTO>().ReverseMap();
         }
     }
 }
