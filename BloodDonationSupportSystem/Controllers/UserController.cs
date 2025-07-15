@@ -411,17 +411,29 @@ namespace BloodDonationSupportSystem.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgetPasswordDTO request)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var result = await _userServices.ForgotPasswordAsync(request.Email);
+                if (!result)
+                {
+                    return BadRequest(new { message = "Email sai hoặc không tồn tại" });
+                }
+                return Ok(new { message = "Nếu tài khoản của bạn tồn tại, một email hướng dẫn đặt lại mật khẩu đã được gửi." });
             }
-            var result = await _userServices.ForgotPasswordAsync(request.Email);
-            if (!result)
+            catch(Exception ex)
             {
-                return BadRequest(new { message = "Email sai hoặc không tồn tại" });
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
             }
 
-            return Ok(new { message = "Nếu tài khoản của bạn tồn tại, một email hướng dẫn đặt lại mật khẩu đã được gửi." });
+            
         }
         /// <summary>
         /// Reset password for user using token
