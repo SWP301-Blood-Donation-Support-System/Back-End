@@ -130,6 +130,7 @@ namespace BusinessLayer.Service
                 request.UpdatedAt = DateTime.UtcNow;
                 await _bloodRequestRepository.UpdateAsync(request);
                 await _bloodUnitRepository.UpdateAsync(bloodUnit);
+                await _bloodRequestRepository.SaveChangesAsync();
                 await _bloodUnitRepository.SaveChangesAsync();
                 return true;
             }
