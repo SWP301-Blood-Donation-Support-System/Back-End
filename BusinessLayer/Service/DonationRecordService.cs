@@ -205,6 +205,10 @@ namespace BusinessLayer.Service
             
             if (resultId == 2) // If result is "approved" 
             {
+                if (record.Registration.Donor.BloodTypeId == 1001)
+                {
+                    throw new InvalidOperationException("Không thể lưu túi máu chưa biết nhóm máu");
+                }
                 // Get the donor information to determine blood type
                 // Create a new blood unit
                 var bloodUnit = new BloodUnit
