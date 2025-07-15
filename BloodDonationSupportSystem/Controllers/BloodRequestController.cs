@@ -25,6 +25,11 @@ namespace BloodDonationSupportSystem.Controllers
             var bloodRequests = await _bloodRequestService.GetAllBloodRequestsAsync();
             return Ok(bloodRequests);
         }
+        /// <summary>
+        /// Get blood request by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBloodRequestByIdAsync(int id)
         {
@@ -35,6 +40,42 @@ namespace BloodDonationSupportSystem.Controllers
             }
             return Ok(bloodRequest);
         }
+        /// <summary>
+        /// Get blood requests by status ID
+        /// </summary>
+        /// <param name="statusId"></param>
+        /// <returns></returns>
+        [HttpGet("status/{statusId}")]
+        public async Task<IActionResult> GetBloodRequestsByStatusIdAsync(int statusId)
+        {
+            var bloodRequests = await _bloodRequestService.GetBloodRequestsByStatusIdAsync(statusId);
+            if (bloodRequests == null || !bloodRequests.Any())
+            {
+                return NotFound("No blood requests found for the given status ID.");
+            }
+            return Ok(bloodRequests);
+        }
+        /// <summary>
+        /// Get blood requests by urgency ID
+        /// </summary>
+        /// <param name="urgencyId"></param>
+        /// <returns></returns>
+        [HttpGet("urgency/{urgencyId}")]
+        public async Task<IActionResult> GetBloodRequestsByUrgencyIdAsync(int urgencyId)
+        {
+            var bloodRequests = await _bloodRequestService.GetBloodRequestsByUrgencyIdAsync(urgencyId);
+            if(bloodRequests==null || !bloodRequests.Any())
+            {
+                return NotFound("No blood requests found for the given urgency ID.");
+            }
+            return Ok(bloodRequests);
+        }
+
+        /// <summary>
+        /// Create blood request
+        /// </summary>
+        /// <param name="bloodRequest"></param>
+        /// <returns></returns>
         [HttpPost]
         //[Authorize(Roles = "Staff,Hospital")] // Staff và Hospital có thể tạo yêu cầu
         public async Task<IActionResult> AddBloodRequestAsync([FromBody] BloodRequestDTO bloodRequest)

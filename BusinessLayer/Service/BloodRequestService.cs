@@ -60,11 +60,12 @@ namespace BusinessLayer.Service
             }
         }
 
-        public async Task<IEnumerable<BloodRequest>> GetBloodRequestsByBloodTypeIdAsync(int bloodTypeId)
+        public async Task<IEnumerable<BloodRequestResponseDTO>> GetBloodRequestsByBloodTypeIdAsync(int bloodTypeId)
         {
             try
             {
-                return await _bloodRequestRepository.GetBloodRequestsByBloodTypeIdAsync(bloodTypeId);
+                var requests = await _bloodRequestRepository.GetBloodRequestsByBloodTypeIdAsync(bloodTypeId);
+                return _mapper.Map<IEnumerable<BloodRequestResponseDTO>>(requests);
             }
             catch (Exception ex)
             {
@@ -73,11 +74,12 @@ namespace BusinessLayer.Service
             }
         }
 
-        public async Task<IEnumerable<BloodRequest>> GetBloodRequestsByComponentIdAsync(int componentId)
+        public async Task<IEnumerable<BloodRequestResponseDTO>> GetBloodRequestsByComponentIdAsync(int componentId)
         {
             try
             {
-                return await _bloodRequestRepository.GetBloodRequestsByComponentIdAsync(componentId);
+                var requests = await _bloodRequestRepository.GetBloodRequestsByComponentIdAsync(componentId);
+                return _mapper.Map<IEnumerable<BloodRequestResponseDTO>>(requests);
             }
             catch (Exception ex)
             {
@@ -99,11 +101,12 @@ namespace BusinessLayer.Service
             }
         }
 
-        public async Task<IEnumerable<BloodRequest>> GetBloodRequestsByStaffIdAsync(int staffId)
+        public async Task<IEnumerable<BloodRequestResponseDTO>> GetBloodRequestsByStaffIdAsync(int staffId)
         {
             try
             {
-                return await _bloodRequestRepository.GetBloodRequestsByStaffIdAsync(staffId);
+                var requests = await _bloodRequestRepository.GetBloodRequestsByStaffIdAsync(staffId);
+                return _mapper.Map<IEnumerable<BloodRequestResponseDTO>>(requests);
             }
             catch (Exception ex)
             {
@@ -112,11 +115,12 @@ namespace BusinessLayer.Service
             }
         }
 
-        public async Task<IEnumerable<BloodRequest>> GetBloodRequestsByStatusIdAsync(int statusId)
+        public async Task<IEnumerable<BloodRequestResponseDTO>> GetBloodRequestsByStatusIdAsync(int statusId)
         {
             try
             {
-                return await _bloodRequestRepository.GetBloodRequestsByStatusIdAsync(statusId);
+                var requests = await _bloodRequestRepository.GetBloodRequestsByStatusIdAsync(statusId);
+                return _mapper.Map<IEnumerable<BloodRequestResponseDTO>>(requests);
             }
             catch (Exception ex)
             {
@@ -125,11 +129,12 @@ namespace BusinessLayer.Service
             }
         }
 
-        public async Task<IEnumerable<BloodRequest>> GetBloodRequestsByUrgencyIdAsync(int urgencyId)
+        public async Task<IEnumerable<BloodRequestResponseDTO>> GetBloodRequestsByUrgencyIdAsync(int urgencyId)
         {
             try
             {
-                return await _bloodRequestRepository.GetBloodRequestsByUrgencyIdAsync(urgencyId);
+                var requests = await _bloodRequestRepository.GetBloodRequestsByUrgencyIdAsync(urgencyId);
+                return _mapper.Map<IEnumerable<BloodRequestResponseDTO>>(requests);
             }
             catch (Exception ex)
             {
@@ -282,7 +287,10 @@ namespace BusinessLayer.Service
 
                 if (!availableUnits.Any())
                 {
-                    return new List<BloodUnitDTO>();
+                    throw new InvalidOperationException(
+                        $"No suitable blood units found for request ID {requestId}. " +
+                        $"Requested: {bloodRequest.Volume}ml."
+                    );
                 }
 
                 // Group units by blood type ID and volume for prioritization
@@ -384,17 +392,27 @@ namespace BusinessLayer.Service
                     if (remainingVolume <= 0)
                         break;
                 }
-                if (remainingVolume > 0)
+
+                if (suggestedUnits.Any())
                 {
-                    // Calculate actual fulfilled volume for the error message
                     decimal fulfilledVolume = bloodRequest.Volume - remainingVolume;
-                    // Throw InvalidOperationException if the request cannot be fully fulfilled
+
+                    // Log a warning instead of throwing an exception
+                    if (remainingVolume > 0)
+                    {
+                        Console.WriteLine($"WARNING: Could not fulfill the entire blood request for ID {requestId}. " +
+                            $"Requested: {bloodRequest.Volume}ml, Fulfilled: {fulfilledVolume}ml, Remaining: {remainingVolume}ml still needed.");
+                    }
+
+                    return suggestedUnits;
+                }
+                else
+                {
                     throw new InvalidOperationException(
-                        $"Could not fulfill the entire blood request for ID {requestId}. " +
-                        $"Requested: {bloodRequest.Volume}ml, Fulfilled: {fulfilledVolume}ml, Remaining: {remainingVolume}ml still needed."
+                        $"No suitable blood units found for request ID {requestId}. " +
+                        $"Requested: {bloodRequest.Volume}ml."
                     );
                 }
-                return suggestedUnits; 
             }
             catch (Exception ex)
             {
