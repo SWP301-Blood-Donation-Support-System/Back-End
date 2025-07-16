@@ -23,5 +23,6 @@ namespace BusinessLayer.IService
         Task<bool> RejectBloodRequestAsync(int requestId, int rejectedByUserId, string? rejectReason);
         Task<bool> SoftDeleteBloodRequestAsync(int requestId);
         Task<IEnumerable<BloodUnitDTO>> AutoAssignBloodUnitsToRequestAsync(int requestId);
+        Task RefreshRemainingVolume(int requestId);
     }
 }

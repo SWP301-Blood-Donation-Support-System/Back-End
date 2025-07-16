@@ -242,6 +242,7 @@ public partial class BloodDonationDbContext : DbContext
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.UrgencyId).HasColumnName("UrgencyID");
             entity.Property(e => e.Volume).HasColumnType("decimal(6, 2)");
+            entity.Property(e => e.RemainingVolume).HasColumnType("decimal(6, 2)");
 
             entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.BloodRequestApprovedByUsers).HasForeignKey(d => d.ApprovedByUserId);
 
