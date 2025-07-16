@@ -36,6 +36,7 @@ namespace BusinessLayer.Service
             {
                 var entity = _mapper.Map<BloodRequest>(bloodRequest);
                 entity.RequestStatusId = 1;
+                entity.RemainingVolume = bloodRequest.Volume;
                 entity.RequestDateTime = DateTime.UtcNow;
                 await _bloodRequestRepository.AddAsync(entity);
                 await _bloodRequestRepository.SaveChangesAsync();
@@ -322,7 +323,7 @@ namespace BusinessLayer.Service
                     }
                 }
 
-                decimal remainingVolume = bloodRequest.Volume;
+                decimal remainingVolume = (decimal)bloodRequest.RemainingVolume;
                 var suggestedUnits = new List<BloodUnitDTO>();
 
                 // Try each blood type in priority order
@@ -410,7 +411,7 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException(
                         $"No suitable blood units found for request ID {requestId}. " +
-                        $"Requested: {bloodRequest.Volume}ml."
+                        $"Requested: {bloodRequest.RemainingVolume}ml."
                     );
                 }
             }
@@ -486,6 +487,42 @@ namespace BusinessLayer.Service
                     return new List<int> { 5, 1, 3, 7, 6, 2, 4, 8 };
                 default:
                     return new List<int> { 8 }; // Default to universal donor (O-) if ID unknown
+            }
+        }
+        public async Task RefreshRemainingVolume(int requestId)
+        {
+            try
+            {
+                var bloodRequest = await _bloodRequestRepository.GetByIdAsync(requestId);
+                if (bloodRequest == null)
+                {
+                    throw new KeyNotFoundException("Blood request not found");
+                }
+                // Get all assigned blood units for this request
+                var assignedUnits = await _bloodUnitRepository.GetUnitsByRequestIdAsync(requestId);
+                // Calculate the total volume of assigned units
+                decimal totalAssignedVolume = assignedUnits.Sum(u => u.Volume);
+                // Update the remaining volume in the request
+                bloodRequest.RemainingVolume = bloodRequest.Volume - totalAssignedVolume;
+                if(bloodRequest.RemainingVolume <= 0)
+                {
+                    bloodRequest.RemainingVolume = 0;
+                    bloodRequest.RequestStatusId = 3; // Set to Complete
+                }
+                // If there are still volumes remaining and request status is complete
+                // set the status to Approved (2)
+                if (bloodRequest.RemainingVolume>0 && bloodRequest.RequestStatusId == 3)
+                {
+                    bloodRequest.RequestStatusId = 2; // Set to Approved if there are still volumes remaining
+                }
+                bloodRequest.UpdatedAt = DateTime.UtcNow;
+                await _bloodRequestRepository.UpdateAsync(bloodRequest);
+                await _bloodRequestRepository.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error refreshing remaining volume for request ID {requestId}: {ex.Message}");
+                throw;
             }
         }
     }

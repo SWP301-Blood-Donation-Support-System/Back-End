@@ -16,6 +16,7 @@ namespace DataAccessLayer.DTO
         public int BloodComponentId { get; set; }
 
         public decimal Volume { get; set; }
+        public decimal? RemainingVolume { get; set; }
 
         public DateTime RequiredDateTime { get; set; }
 

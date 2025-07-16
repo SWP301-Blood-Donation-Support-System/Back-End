@@ -16,11 +16,13 @@ namespace BusinessLayer.Service
     {
         private readonly IBloodUnitRepository _bloodUnitRepository;
         private readonly IBloodRequestRepository _bloodRequestRepository;
+        private readonly IBloodRequestService _bloodRequestService;
         private readonly IMapper _mapper;
-        public BloodUnitService(IBloodUnitRepository bloodUnitRepository,IBloodRequestRepository bloodRequestRepository, IMapper mapper)
+        public BloodUnitService(IBloodUnitRepository bloodUnitRepository,IBloodRequestRepository bloodRequestRepository,IBloodRequestService bloodRequestService, IMapper mapper)
         {
             _bloodUnitRepository = bloodUnitRepository ?? throw new ArgumentNullException(nameof(bloodUnitRepository));
             _bloodRequestRepository = bloodRequestRepository ?? throw new ArgumentNullException(nameof(bloodRequestRepository));
+            _bloodRequestService = bloodRequestService ?? throw new ArgumentNullException(nameof(bloodRequestService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -121,10 +123,10 @@ namespace BusinessLayer.Service
                 bloodUnit.BloodUnitStatusId = 2;
                 bloodUnit.UpdatedAt = DateTime.UtcNow;
                 var request = await _bloodRequestRepository.GetByIdAsync(requestId);
-                request.Volume -= bloodUnit.Volume;
-                if(request.Volume <= 0)
+                request.RemainingVolume -= bloodUnit.Volume;
+                if(request.RemainingVolume <= 0)
                 {
-                    request.Volume = 0;
+                    request.RemainingVolume = 0;
                     request.RequestStatusId = 3;
                 }
                 request.UpdatedAt = DateTime.UtcNow;
@@ -137,6 +139,31 @@ namespace BusinessLayer.Service
             catch (Exception ex)
             {
                 Console.WriteLine($"Error assigning blood unit to request: {ex.Message}");
+                throw;
+            }
+        }
+        public async Task<bool> UnassignBloodUnitFromRequestAsync(int unitId, int requestId)
+        {
+            try
+            {
+                var bloodUnit = await _bloodUnitRepository.GetByIdAsync(unitId);
+                if (bloodUnit == null)
+                {
+                    throw new KeyNotFoundException("Blood unit not found.");
+                }
+                bloodUnit.RequestId = null;
+                bloodUnit.BloodUnitStatusId = 1; // Reset to available status
+                bloodUnit.UpdatedAt = DateTime.UtcNow;
+                
+                await _bloodUnitRepository.UpdateAsync(bloodUnit);
+                await _bloodUnitRepository.SaveChangesAsync();
+
+                await _bloodRequestService.RefreshRemainingVolume(requestId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error unassigning blood unit from request: {ex.Message}");
                 throw;
             }
         }

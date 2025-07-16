@@ -208,16 +208,16 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
         /// <summary>
-        /// Get blood units by blood request
+        /// Get blood units by donation record
         /// </summary>
-        /// <param name="requestId"></param>
+        /// <param name="recordId"></param>
         /// <returns></returns>
-        [HttpGet("by-record/{recordtId}")]
-        public async Task<IActionResult> GetBloodUnitsByRecord(int requestId)
+        [HttpGet("by-record/{recordId}")]
+        public async Task<IActionResult> GetBloodUnitsByRecord(int recordId)
         {
             try
             {
-                var bloodUnits = await _bloodUnitService.GetBloodUnitsByRecordIdAsync(requestId);
+                var bloodUnits = await _bloodUnitService.GetBloodUnitsByRecordIdAsync(recordId);
                 // Create anonymous object with donor information
                 var result = bloodUnits.Select(bu => new
                 {
@@ -291,7 +291,7 @@ namespace BloodDonationSupportSystem.Controllers
             }
         }
         /// <summary>
-        /// Get blood units by status
+        /// Get blood units by status (1=Khả dụng, 2=Đã sử dụng, 3=Hết hạn, 4=Hư)
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns></returns>
@@ -445,6 +445,37 @@ namespace BloodDonationSupportSystem.Controllers
                     return NotFound($"No blood unit found with ID {unitId} or failed to assign to request {requestId}.");
                 }
                 return Ok("Blood unit assigned to request successfully.");
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
+        }
+        /// <summary>
+        /// Unassign blood unit from a request using unitId and requestId in the body
+        /// </summary>
+        /// <param name="unitId"></param>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
+        [HttpPatch("{unitId}/unassign-from-request")]
+        public async Task<IActionResult> UnassignBloodUnitFromRequest(int unitId, [FromBody] int requestId)
+        {
+            try
+            {
+                if(unitId <= 0 || requestId <= 0)
+                {
+                    return BadRequest("Invalid unit ID or request ID.");
+                }
+                var result = await _bloodUnitService.UnassignBloodUnitFromRequestAsync(unitId, requestId);
+                if(!result)
+                {
+                    return NotFound($"No blood unit found with ID {unitId} or failed to unassign from request {requestId}.");
+                }
+                return Ok("Blood unit unassigned from request successfully.");
             }
             catch (Exception ex)
             {
