@@ -1,5 +1,7 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.DTO;
+using Microsoft.AspNetCore.Authorization;
+
 //using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
