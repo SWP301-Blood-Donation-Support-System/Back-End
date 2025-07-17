@@ -1,6 +1,6 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.DTO;
-using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -17,12 +17,14 @@ namespace BloodDonationSupportSystem.Controllers
             _articleService = articleService;
         }
 
+
         /// <summary>
         /// Create a new article (Admin and Staff only)
         /// </summary>
         /// <param name="articleDto">Article creation data</param>
         /// <returns>Created article</returns>
         [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff được tạo
         [HttpPost]
         public async Task<IActionResult> CreateArticle([FromBody] ArticleCreateDTO articleDto)
         {
@@ -69,6 +71,10 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="articleDto">Article update data</param>
         /// <returns>Update result</returns>
         [Authorize(Roles = "Admin,Staff")]
+        /// <param name="id"></param>
+        /// <param name="articleDto"></param>
+        /// <returns></returns>
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff được sửa
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateArticle(int id, [FromBody] UpdateArticleDTO articleDto)
         {
@@ -103,6 +109,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="id">Article ID</param>
         /// <returns>Delete result</returns>
         [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff được xóa
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {

@@ -16,12 +16,15 @@ namespace BusinessLayer.Service
     public class DonationRecordService : IDonationRecordService
     {
         private readonly IDonationRecordRepository _donationRecordRepository;
+        private readonly IBloodUnitRepository _bloodUnitRepository;
         private readonly IMapper _mapper;
 
 
-        public DonationRecordService(IDonationRecordRepository donationRecordRepository, IMapper mapper)
+        public DonationRecordService(IDonationRecordRepository donationRecordRepository,IBloodUnitRepository bloodUnitRepository, IMapper mapper)
         {
+      
             _donationRecordRepository = donationRecordRepository ?? throw new ArgumentNullException(nameof(donationRecordRepository));
+            _bloodUnitRepository = bloodUnitRepository ?? throw new ArgumentNullException(nameof(bloodUnitRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -205,8 +208,17 @@ namespace BusinessLayer.Service
             
             if (resultId == 2) // If result is "approved" 
             {
+                if (record.Registration.Donor.BloodTypeId == 1001)
+                {
+                    throw new InvalidOperationException("Không thể lưu túi máu chưa biết nhóm máu");
+                }
                 // Get the donor information to determine blood type
                 // Create a new blood unit
+                var existingBloodUnits = await _bloodUnitRepository.GetUnitsByRecordIdAsync(recordId);
+                if(existingBloodUnits.Any())
+                {
+                    throw new InvalidOperationException("Đã có túi máu được tạo từ hồ sơ này, không thể tạo thêm");
+                }
                 var bloodUnit = new BloodUnit
                 {
                     DonationRecordId = recordId,
