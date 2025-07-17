@@ -14,6 +14,7 @@ namespace DataAccessLayer.IRepository
         Task<IEnumerable<BloodUnit>> GetUnitsByStatusAsync(int bloodUnitStatusId);
         Task<IEnumerable<BloodUnit>> GetUnitsByBloodComponentIdAsync(int bloodComponentId);
         Task<IEnumerable<BloodUnit>> GetUnitsByRecordIdAsync(int recordId);
+        Task<IEnumerable<BloodUnit>> GetUnitsByRequestIdAsync(int requestId);
         Task<bool> UpdateUnitStatusAsync(int unitId, int bloodUnitStatusId);
     }
 }

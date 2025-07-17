@@ -65,7 +65,7 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> CreateSchedule([FromBody] DonationScheduleDTO scheduleDTO)
         {
             if (scheduleDTO == null)
@@ -101,7 +101,7 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateSchedule(int id, [FromBody] DonationScheduleDTO scheduleDTO)
         {
             if (scheduleDTO == null)
@@ -148,7 +148,7 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> DeleteSchedule(int id)
         {
             if (id <= 0)
@@ -217,7 +217,7 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         [HttpPost("{id}/restore")]
-        [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> RestoreSchedule(int id)
         {
             if (id <= 0)

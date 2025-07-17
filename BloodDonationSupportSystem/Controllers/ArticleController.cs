@@ -1,6 +1,6 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.DTO;
-using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -65,10 +65,10 @@ namespace BloodDonationSupportSystem.Controllers
         /// <summary>
         /// Update an existing article (Admin and Staff only)
         /// </summary>
-        /// <param name="id">Article ID</param>
-        /// <param name="articleDto">Article update data</param>
-        /// <returns>Update result</returns>
-        [Authorize(Roles = "Admin,Staff")]
+        /// <param name="id"></param>
+        /// <param name="articleDto"></param>
+        /// <returns></returns>
+        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff được sửa
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateArticle(int id, [FromBody] UpdateArticleDTO articleDto)
         {
@@ -102,7 +102,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// </summary>
         /// <param name="id">Article ID</param>
         /// <returns>Delete result</returns>
-        [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {

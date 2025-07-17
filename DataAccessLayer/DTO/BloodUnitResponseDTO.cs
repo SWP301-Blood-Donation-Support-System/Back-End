@@ -10,6 +10,7 @@ namespace DataAccessLayer.DTO
     {
         public int BloodUnitId { get; set; }
         public int DonationRecordId { get; set; }
+        public int DonorId { get; set; }
         public string BloodTypeName { get; set; }
         public string ComponentName { get; set; }
         public DateTime? CollectedDateTime { get; set; }

@@ -10,7 +10,7 @@ namespace BloodDonationSupportSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,Staff")]
+    //[Authorize(Roles = "Admin,Staff")]
     public class DonationRecordController : ControllerBase
     {
         private readonly IDonationRecordService _donationRecordService;
@@ -92,18 +92,9 @@ namespace BloodDonationSupportSystem.Controllers
             return Ok(validations);
         }
         [HttpGet("user/{userId}")]
-        [Authorize(Roles = "Admin,Staff,Donor")]
+        //[Authorize(Roles = "Admin,Staff,Donor")]
         public async Task<IActionResult> GetRecordsByUserId(int userId)
         {
-            // Thêm logic kiểm tra: nếu là Donor, chỉ được xem của chính mình
-            var requestingUserId = int.Parse(User.FindFirst("UserID").Value);
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value; // Giả sử bạn có claim role
-
-            if (userRole == "Donor" && requestingUserId != userId)
-            {
-                return Forbid(); // Trả về lỗi 403 Forbidden
-            }
-
             if (userId <= 0)
             {
                 return BadRequest("Invalid user ID.");
