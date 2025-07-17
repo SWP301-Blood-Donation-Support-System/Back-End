@@ -64,7 +64,7 @@ namespace BloodDonationSupportSystem.Controllers
         public async Task<IActionResult> GetBloodRequestsByUrgencyIdAsync(int urgencyId)
         {
             var bloodRequests = await _bloodRequestService.GetBloodRequestsByUrgencyIdAsync(urgencyId);
-            if(bloodRequests==null || !bloodRequests.Any())
+            if (bloodRequests == null || !bloodRequests.Any())
             {
                 return NotFound("No blood requests found for the given urgency ID.");
             }
@@ -80,12 +80,35 @@ namespace BloodDonationSupportSystem.Controllers
         //[Authorize(Roles = "Staff,Hospital")] // Staff và Hospital có thể tạo yêu cầu
         public async Task<IActionResult> AddBloodRequestAsync([FromBody] BloodRequestDTO bloodRequest)
         {
-            if (bloodRequest == null)
+            try
             {
-                return BadRequest("Invalid blood request data.");
+                if (bloodRequest == null)
+                {
+                    return BadRequest("Invalid blood request data.");
+                }
+                if (bloodRequest.Volume <= 0)
+                {
+                    throw new ArgumentException("Volume must be greater than 0");
+                }
+                await _bloodRequestService.AddBloodRequestAsync(bloodRequest);
+                return Ok(bloodRequest);
             }
-            await _bloodRequestService.AddBloodRequestAsync(bloodRequest);
-            return Ok(bloodRequest);
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "failed",
+                    msg = ex.Message
+                });
+            }
         }
 
         [HttpPatch("{requestId}/status")]
