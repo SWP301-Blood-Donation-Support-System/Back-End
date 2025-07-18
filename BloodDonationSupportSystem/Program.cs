@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using System.Text;
+using BloodDonationSupportSystem.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +70,16 @@ builder.Services.AddQuartz(q =>
         .WithCronSchedule("0 0 1 * * ?") // Cú pháp Cron: giây phút gi? ngày tháng WDAY
         .WithDescription("Trigger to run auto schedule creation job daily at 1 AM")
     );
+
+    var reminderJobKey = new JobKey("DonationReminderJob");
+    q.AddJob<DonationReminderJob>(opts => opts.WithIdentity(reminderJobKey));
+
+    q.AddTrigger(opts => opts
+    .ForJob(reminderJobKey)
+    .WithIdentity("DonationReminderJob-trigger")
+    .WithCronSchedule("0 0 8 * * ?") // 8:00 AM every day
+    .WithDescription("Trigger to run donation reminder job daily at 8 AM")
+    );
 });
 
 builder.Services.AddTransient<NotifQuartzScheduler>();
@@ -114,6 +125,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -173,6 +198,8 @@ builder.Services.AddSwaggerGen(c =>
 
 // ====================== AUTOMAPPER ====================== //
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddSignalR();
+
 
 // ====================== DEPENDENCY INJECTION ====================== //
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -249,5 +276,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
+
 
 app.Run();
