@@ -68,6 +68,17 @@ namespace DataAccessLayer.Repository
                 .ToListAsync();
         }
 
+        public async Task<BloodRequest> GetBloodRequestWithDetailsAsync(int id)
+        {
+            return await _context.BloodRequests
+                .Include(r => r.BloodType)
+                .Include(r => r.BloodComponent)
+                .Include(r => r.RequestStatus)
+                .Include(r => r.Urgency)
+                .Include(r => r.RequestingStaff)
+                .FirstOrDefaultAsync(r => r.RequestId == id);
+        }
+
         public async Task<bool> UpdateBloodRequestStatusAsync(int requestId, int statusId)
         {
             var request = await _context.BloodRequests.FindAsync(requestId);
