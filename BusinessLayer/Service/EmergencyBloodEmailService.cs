@@ -106,6 +106,8 @@ namespace BusinessLayer.Service
 
         public async Task SendEmergencyBloodRequestToCompatibleDonorsAsync(int bloodRequestId, int bloodTypeId, int componentId)
         {
+            // Since the BloodRequest already contains BloodTypeId and BloodComponentId, 
+            // we don't need the additional parameters. Just call the main method.
             await SendEmergencyBloodRequestEmailAsync(bloodRequestId);
         }
 
@@ -137,7 +139,7 @@ namespace BusinessLayer.Service
             var currentDate = GetVietnamTime().ToString("dd/MM/yyyy HH:mm");
             
             var vietnameseCulture = new CultureInfo("vi-VN");
-            var requiredDate = bloodRequest.RequiredDateTime?.ToString("dddd, 'ngày' dd/MM/yyyy 'lúc' HH:mm", vietnameseCulture) ?? "Ngay l?p t?c";
+            var requiredDate = bloodRequest.RequiredDateTime?.ToString("dddd, 'ngày' dd/MM/yyyy", vietnameseCulture) ?? "Ngay lập tức";
             
             // Get urgency level text
             var urgencyText = GetUrgencyText(bloodRequest.UrgencyId);
@@ -215,12 +217,7 @@ namespace BusinessLayer.Service
             sb.AppendLine($"                    <tr><td class='info-label'>Mức độ khẩn cấp:</td><td class='info-value' style='color: {urgencyColor};'>{urgencyText}</td></tr>");
             sb.AppendLine($"                    <tr><td class='info-label'>Nhóm máu cần:</td><td class='info-value'>{bloodRequest.BloodType?.BloodTypeName ?? "Chưa xác định"}</td></tr>");
             sb.AppendLine($"                    <tr><td class='info-label'>Thành phần máu:</td><td class='info-value'>{bloodRequest.BloodComponent?.ComponentName ?? "Chưa xác định"}</td></tr>");
-            sb.AppendLine($"                    <tr><td class='info-label'>Số lượng cần:</td><td class='info-value'>{bloodRequest.Volume} ml</td></tr>");
             sb.AppendLine($"                    <tr><td class='info-label'>Thời gian cần:</td><td class='info-value'>{requiredDate}</td></tr>");
-            if (!string.IsNullOrEmpty(bloodRequest.Note))
-            {
-                sb.AppendLine($"                    <tr><td class='info-label'>Ghi chú:</td><td class='info-value'>{bloodRequest.Note}</td></tr>");
-            }
             sb.AppendLine("                </table>");
             sb.AppendLine("            </div>");
 

@@ -93,7 +93,7 @@ namespace BusinessLayer.Service
         {
             try
             {
-                return await _bloodRequestRepository.GetByIdAsync(id);
+                return await _bloodRequestRepository.GetBloodRequestWithDetailsAsync(id);
             }
             catch (Exception ex)
             {
