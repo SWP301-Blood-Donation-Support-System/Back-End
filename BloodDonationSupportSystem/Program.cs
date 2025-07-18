@@ -1,4 +1,4 @@
-using BE_Homnayangi.Ultils.EmailServices;
+﻿using BE_Homnayangi.Ultils.EmailServices;
 using BloodDonationSupportSystem.Utils;
 using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
@@ -58,15 +58,15 @@ builder.Services.AddQuartz(q =>
 {
     q.UseMicrosoftDependencyInjectionJobFactory();
 
-    // --- Job t? ??ng t?o l?ch hi?n m�u ---
+    // --- Job tự động tạo lịch hiến máu ---
     var autoScheduleJobKey = new JobKey("AutoScheduleCreationJob");
     q.AddJob<AutoScheduleCreationJob>(opts => opts.WithIdentity(autoScheduleJobKey));
 
-    // Ch?y job n�y v�o 1 gi? s�ng m?i ng�y
+    // Chạy job này vào 1 giờ sáng mỗi ngày
     q.AddTrigger(opts => opts
         .ForJob(autoScheduleJobKey)
         .WithIdentity("AutoScheduleCreationJob-trigger")
-        .WithCronSchedule("0 0 1 * * ?") // C� ph�p Cron: gi�y ph�t gi? ng�y th�ng WDAY
+        .WithCronSchedule("0 0 1 * * ?") // Cú pháp Cron: giây phút giờ ngày tháng WDAY
         .WithDescription("Trigger to run auto schedule creation job daily at 1 AM")
     );
 });
@@ -193,6 +193,7 @@ builder.Services.AddScoped<IBloodRequestService, BloodRequestService>();
 builder.Services.AddScoped<IHospitalService, HospitalService>();
 builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<IEmergencyBloodEmailService, EmergencyBloodEmailService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
