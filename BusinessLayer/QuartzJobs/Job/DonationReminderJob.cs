@@ -1,10 +1,10 @@
-﻿using BusinessLayer.IService;
+﻿using BusinessLayer.Hubs;
+using BusinessLayer.IService;
 using DataAccessLayer.IRepository;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using System.Threading.Tasks;
-using BloodDonationSupportSystem.Hubs; 
 namespace BusinessLayer.QuartzJobs.Job
 {
     [DisallowConcurrentExecution]

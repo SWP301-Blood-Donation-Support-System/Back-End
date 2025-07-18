@@ -3,13 +3,13 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace BloodDonationSupportSystem.Hubs
+namespace BusinessLayer.Hubs
 {
     public class NotificationHub : Hub
     {
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.User.FindFirstValue("UserID");
+            var userId = Context.User.FindFirst("UserID").Value;
 
             if (!string.IsNullOrEmpty(userId))
             {
@@ -23,7 +23,7 @@ namespace BloodDonationSupportSystem.Hubs
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            var userId = Context.User.FindFirstValue("UserID");
+            var userId = Context.User.FindFirst("UserID").Value;
 
             if (!string.IsNullOrEmpty(userId))
             {

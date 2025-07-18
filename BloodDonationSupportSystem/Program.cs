@@ -1,6 +1,7 @@
 using BE_Homnayangi.Ultils.EmailServices;
 using BloodDonationSupportSystem.Utils;
 using BuisinessLayer.Utils.EmailConfiguration;
+using BusinessLayer.Hubs;
 using BusinessLayer.IService;
 using BusinessLayer.QuartzJobs.Job;
 using BusinessLayer.QuartzJobs.Schedulers;
@@ -15,7 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using System.Text;
-using BloodDonationSupportSystem.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
