@@ -1,4 +1,4 @@
-using BE_Homnayangi.Ultils.EmailServices;
+﻿using BE_Homnayangi.Ultils.EmailServices;
 using BloodDonationSupportSystem.Utils;
 using BuisinessLayer.Utils.EmailConfiguration;
 using BusinessLayer.IService;
@@ -52,22 +52,21 @@ builder.Services.AddSingleton(emailConfig);
 
 builder.Services.Configure<CertificateSettings>(
     builder.Configuration.GetSection("CertificateSettings"));
-builder.Services.AddQuartz();
-builder.Services.AddTransient<NotifQuartzScheduler>();
-builder.Services.AddQuartzHostedService();
+
+// ====================== QUARTZ CONFIGURATION ====================== //
 builder.Services.AddQuartz(q =>
 {
     q.UseMicrosoftDependencyInjectionJobFactory();
 
-    // --- Job t? ??ng t?o l?ch hi?n m�u ---
+    // --- Job tự động tạo lịch hiến máu ---
     var autoScheduleJobKey = new JobKey("AutoScheduleCreationJob");
     q.AddJob<AutoScheduleCreationJob>(opts => opts.WithIdentity(autoScheduleJobKey));
 
-    // Ch?y job n�y v�o 1 gi? s�ng m?i ng�y
+    // Chạy job này vào 1 giờ sáng mỗi ngày
     q.AddTrigger(opts => opts
         .ForJob(autoScheduleJobKey)
         .WithIdentity("AutoScheduleCreationJob-trigger")
-        .WithCronSchedule("0 0 1 * * ?") // C� ph�p Cron: gi�y ph�t gi? ng�y th�ng WDAY
+        .WithCronSchedule("0 0 1 * * ?") // Cú pháp Cron: giây phút giờ ngày tháng WDAY
         .WithDescription("Trigger to run auto schedule creation job daily at 1 AM")
     );
 });
@@ -183,7 +182,6 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IDonationRegistrationServices, DonationRegistrationService>();
 builder.Services.AddScoped<ITimeSlotServices, TimeSlotServices>();
 builder.Services.AddScoped<IDonationRecordService, DonationRecordService>();
-builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IDonationScheduleService, DonationScheduleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBloodUnitService, BloodUnitService>();
@@ -195,6 +193,7 @@ builder.Services.AddScoped<IBloodRequestService, BloodRequestService>();
 builder.Services.AddScoped<IHospitalService, HospitalService>();
 builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<IEmergencyBloodEmailService, EmergencyBloodEmailService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -204,7 +203,6 @@ builder.Services.AddScoped<IDonationRecordRepository, DonationRecordRepository>(
 builder.Services.AddScoped<IDonationScheduleRepository, DonationScheduleRepository>();
 builder.Services.AddScoped<IBloodUnitRepository, BloodUnitRepository>();
 builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
-builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IBloodRequestRepository, BloodRequestRepository>();
 builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
@@ -227,21 +225,26 @@ builder.Services.AddScoped<IGenericRepository<RegistrationStatus>, GenericReposi
 builder.Services.AddScoped<IGenericRepository<ArticleCategory>, GenericRepository<ArticleCategory>>();
 builder.Services.AddScoped<IGenericRepository<ArticleStatus>, GenericRepository<ArticleStatus>>();
 builder.Services.AddScoped<IGenericRepository<BloodTestResult>, GenericRepository<BloodTestResult>>();
+
 // ====================== BUILD APPLICATION ====================== //
 var app = builder.Build();
 
 // ====================== MIDDLEWARE PIPELINE ====================== //
 if (app.Environment.IsDevelopment())
 {
-
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
-app.UseSwagger();
-app.UseSwaggerUI();
+else
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAllOrigins");
+// Fix CORS - only use one policy that exists
 app.UseCors("AllowCors");
-app.UseCors("AllowReact");
 
 app.UseAuthentication();
 app.UseAuthorization();

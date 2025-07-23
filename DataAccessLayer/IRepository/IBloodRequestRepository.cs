@@ -16,6 +16,6 @@ namespace DataAccessLayer.IRepository
         Task<IEnumerable<BloodRequest>> GetBloodRequestsByStaffIdAsync(int staffId);
         Task<bool> UpdateBloodRequestStatusAsync(int requestId, int statusId);
         Task<bool> SoftDeleteBloodRequestAsync(int requestId);
-
+        Task<BloodRequest> GetBloodRequestWithDetailsAsync(int id);
     }
 }
