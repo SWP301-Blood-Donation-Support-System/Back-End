@@ -307,7 +307,10 @@ namespace BusinessLayer.Service
                 donor.LastDonationDate = donationRecord.DonationDateTime;
                 
                 int donationTypeId = donationRecord.DonationTypeId ?? 1;
-                
+                //Type 1: Toàn Phần
+                // Type 2: Huyết Tương
+                // Type 3: Tiểu cầu
+                // Type 4: Hồng cầu
                 if (donationTypeId == 1 || donationTypeId == 4)
                 {
                     donor.NextEligibleDonationDate = donor.LastDonationDate.Value.AddDays(84); 
