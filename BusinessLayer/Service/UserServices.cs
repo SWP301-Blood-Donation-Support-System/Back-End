@@ -511,7 +511,7 @@ namespace BusinessLayer.Service
             {
                 var payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, new GoogleJsonWebSignature.ValidationSettings
                 {
-                    Audience = new[] { "439095486459-gvdm000c5lstr8v0j1cl3ng9bg4gs4l2.apps.googleusercontent.com" }
+                    Audience = new[] { "1038271412034-f887nt2v6kln6nb09e20pvjgfo1o7jn0.apps.googleusercontent.com" }
                 });
                 string email = payload.Email;
                 var user = (await _userRepository.GetAllAsync()).FirstOrDefault(p => p.Email == email);
