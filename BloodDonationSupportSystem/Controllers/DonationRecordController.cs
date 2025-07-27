@@ -22,7 +22,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// Retrieves a donation record by its unique ID.
         /// </summary>
         [HttpGet("{recordId}")]
-        
+
         public async Task<IActionResult> GetRecordById(int recordId)
         {
             if (recordId <= 0)
@@ -40,8 +40,19 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllRecords()
         {
-            var records = await _donationRecordService.GetAllDonationRecordsAsync();
-            return Ok(records);
+            try
+            {
+                var records = await _donationRecordService.GetAllDonationRecordsAsync();
+                return Ok(records);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
         }
         [HttpPost]
         public async Task<IActionResult> AddRecord([FromBody] DonationRecordDTO donationRecord)
@@ -145,15 +156,15 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="resultId"></param>
         /// <returns></returns>
         [HttpPatch("{recordId}/result")]
-        public async Task<IActionResult> UpdateRecordResult(int recordId,[FromBody] int resultId)
+        public async Task<IActionResult> UpdateRecordResult(int recordId, [FromBody] int resultId)
         {
-            if(recordId<0)
+            if (recordId < 0)
             {
                 return BadRequest("Id is invalid");
             }
             try
             {
-                var result = await _donationRecordService.UpdateRecordsResultAsync(recordId,resultId);
+                var result = await _donationRecordService.UpdateRecordsResultAsync(recordId, resultId);
                 if (!result)
                 {
                     return NotFound($"Donation record with ID {recordId} not found.");

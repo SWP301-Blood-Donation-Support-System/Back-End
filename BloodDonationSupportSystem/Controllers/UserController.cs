@@ -249,16 +249,23 @@ namespace BloodDonationSupportSystem.Controllers
         //[AllowAnonymous] 
         public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
         {
-
-            var token = await _userServices.ValidateGoogleToken(request);
-            if (!string.IsNullOrEmpty(token))
+            try
             {
-                return new JsonResult(new
+                var token = await _userServices.ValidateGoogleToken(request);
+                if (!string.IsNullOrEmpty(token))
                 {
-                    result = token
-                });
+                    return new JsonResult(new
+                    {
+                        result = token
+                    });
+                }
+                return NotFound(new { status = "failed", message = "Invalid" });
             }
-            return NotFound(new { status = "failed", message = "Invalid" });
+            catch(Exception ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+            
         }
         /// <summary>
         /// Update donor information 
