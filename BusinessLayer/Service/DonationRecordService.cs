@@ -21,8 +21,7 @@ namespace BusinessLayer.Service
 
 
         public DonationRecordService(IDonationRecordRepository donationRecordRepository, IBloodUnitRepository bloodUnitRepository, IMapper mapper)
-        {
-
+        { 
             _donationRecordRepository = donationRecordRepository ?? throw new ArgumentNullException(nameof(donationRecordRepository));
             _bloodUnitRepository = bloodUnitRepository ?? throw new ArgumentNullException(nameof(bloodUnitRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -250,13 +249,14 @@ namespace BusinessLayer.Service
                                 break;
                         }
                     }
-                }else if (resultId == 3)
+                }
+                else if (resultId == 3)
                 {
                     bloodUnit.BloodUnitStatusId = 4;
                     bloodUnit.ExpiryDateTime = record.DonationDateTime;
                 }
-                    // Add the blood unit to the donation record
-                    record.BloodUnits.Add(bloodUnit);
+                // Add the blood unit to the donation record
+                record.BloodUnits.Add(bloodUnit);
             }
 
             await _donationRecordRepository.UpdateAsync(record);
