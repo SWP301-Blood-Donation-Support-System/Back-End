@@ -120,7 +120,7 @@ namespace BloodDonationSupportSystem.Controllers
                 return new JsonResult(new
                 {
                     status = "failed",
-                    message = "An error occurred during login"
+                    message = "An error occurred during login"+ ex.Message
                 });
             }
         }

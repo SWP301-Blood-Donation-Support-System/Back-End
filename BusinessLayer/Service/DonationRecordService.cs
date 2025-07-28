@@ -49,10 +49,9 @@ namespace BusinessLayer.Service
                 throw new ArgumentNullException(nameof(donationRecord), "Record cannot be null");
             }
 
-            // Set creation timestamp
 
             var donationRecordEntity = _mapper.Map<DonationRecord>(donationRecord);
-            var addedRecord = await _donationRecordRepository.AddAsync(donationRecordEntity);
+            await _donationRecordRepository.AddAsync(donationRecordEntity);
             await _donationRecordRepository.SaveChangesAsync();
         }
 
@@ -154,7 +153,6 @@ namespace BusinessLayer.Service
             return await _donationRecordRepository.SaveChangesAsync();
         }
 
-        // Trong DonationRecordService, triển khai:
         public async Task<bool> ValidateDonationRecordAsync(int recordId, int userId)
         {
             if (recordId <= 0)
@@ -255,7 +253,6 @@ namespace BusinessLayer.Service
                     bloodUnit.BloodUnitStatusId = 4;
                     bloodUnit.ExpiryDateTime = record.DonationDateTime;
                 }
-                // Add the blood unit to the donation record
                 record.BloodUnits.Add(bloodUnit);
             }
 

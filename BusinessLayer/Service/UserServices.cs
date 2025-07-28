@@ -215,16 +215,16 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException("Email already exists");
                 }
-                User EntityUser=_mapper.Map<User>(hospital);
+                User EntityUser = _mapper.Map<User>(hospital);
                 EntityUser.PasswordHash = EncryptPassword("hospital123");
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 4;
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
                 var hospitalName = _hospitalService.GetHospitalByIdAsync(hospital.HospitalId).Result.HospitalName;
-                SendWelcomeEmail(hospital.Email,hospitalName);
+                SendWelcomeEmail(hospital.Email, hospitalName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Error adding hospital: {ex.Message}");
                 throw;
@@ -514,7 +514,7 @@ namespace BusinessLayer.Service
                     Audience = new[] { "1038271412034-f887nt2v6kln6nb09e20pvjgfo1o7jn0.apps.googleusercontent.com" }
                 });
                 string email = payload.Email;
-                var user = (await _userRepository.GetAllAsync()).FirstOrDefault(p => p.Email == email);
+                var user= await _userRepository.GetByEmailAsync(email);
 
                 if (user == null)
                 {
@@ -524,14 +524,7 @@ namespace BusinessLayer.Service
                         PasswordHash = EncryptPassword(Guid.NewGuid().ToString()),
                     };
                     await RegisterDonorAsync(googleDTO);
-                    user = (await _userRepository.GetAllAsync()).FirstOrDefault(p => p.Email == email);
-                    LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
                     await _userRepository.SaveChangesAsync();
-
-                    // Send welcome email for new Google user - use actual name from Google payload
-                    SendWelcomeEmail(payload.Email, payload.Name ?? "");
-
-                    return await GenerateToken(userLogin);
                 }
                 else
                 {
@@ -540,8 +533,10 @@ namespace BusinessLayer.Service
                     return await GenerateToken(userLogin);
                 }
             }
-            catch (InvalidJwtException)
+            catch (InvalidJwtException ex)
             {
+                Console.WriteLine($"Error generating token: {ex.Message}");
+                throw;
             }
             return null;
         }
@@ -565,7 +560,7 @@ namespace BusinessLayer.Service
                 Console.WriteLine($"Email service is null: {_emailService == null}");
                 Console.WriteLine($"Target email: {userEmail}");
                 Console.WriteLine($"Full name: {fullName}");
-                
+
                 var subject = "Chào mừng bạn đến với Hệ thống Hỗ trợ Hiến máu!";
                 var htmlBody = GenerateWelcomeEmailTemplate(fullName, userEmail);
 
@@ -575,9 +570,9 @@ namespace BusinessLayer.Service
                     content: htmlBody);
 
                 Console.WriteLine($"Created email message successfully");
-                
+
                 _emailService.SendEmail(message);
-                
+
                 Console.WriteLine($"=== EMAIL SENT SUCCESSFULLY to {userEmail} ===");
             }
             catch (Exception ex)
@@ -591,7 +586,7 @@ namespace BusinessLayer.Service
                     Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                 }
                 Console.WriteLine($"=== END ERROR LOG ===");
-                
+
                 // Don't throw - email failure shouldn't break registration
             }
         }
@@ -654,7 +649,7 @@ namespace BusinessLayer.Service
                 Console.WriteLine($"Target email: {userEmail}");
                 Console.WriteLine($"Full name: {fullName}");
                 Console.WriteLine($"Registration code: {registrationInfo.RegistrationCode}");
-                
+
                 var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
                 var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(fullName, userEmail, registrationInfo);
 
@@ -664,9 +659,9 @@ namespace BusinessLayer.Service
                     content: htmlBody);
 
                 Console.WriteLine($"Created donation registration email message successfully");
-                
+
                 _emailService.SendEmail(message);
-                
+
                 Console.WriteLine($"=== DONATION REGISTRATION EMAIL SENT SUCCESSFULLY to {userEmail} ===");
             }
             catch (Exception ex)
