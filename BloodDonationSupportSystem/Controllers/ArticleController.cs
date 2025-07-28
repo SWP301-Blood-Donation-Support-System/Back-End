@@ -25,8 +25,9 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="imageFile">Image file to upload</param>
         /// <returns>Cloudinary image URL</returns>
         [HttpPost("upload-image")]
+        [Consumes("multipart/form-data")]
         [Authorize(Roles = "Admin,Staff")]
-        public async Task<IActionResult> UploadArticleImage([FromForm] IFormFile imageFile)
+        public async Task<IActionResult> UploadArticleImage(IFormFile imageFile)
         {
             try
             {
@@ -73,8 +74,9 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="imageFiles">Multiple image files to upload</param>
         /// <returns>List of Cloudinary image URLs</returns>
         [HttpPost("upload-images")]
+        [Consumes("multipart/form-data")]
         [Authorize(Roles = "Admin,Staff")]
-        public async Task<IActionResult> UploadMultipleArticleImages([FromForm] IFormFile[] imageFiles)
+        public async Task<IActionResult> UploadMultipleArticleImages(IFormFile[] imageFiles)
         {
             try
             {
