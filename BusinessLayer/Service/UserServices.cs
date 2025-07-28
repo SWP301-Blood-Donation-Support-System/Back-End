@@ -525,11 +525,15 @@ namespace BusinessLayer.Service
                     };
                     await RegisterDonorAsync(googleDTO);
                     await _userRepository.SaveChangesAsync();
+                    user = await _userRepository.GetByEmailAsync(email); 
+                    LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
+                    userLogin.PasswordHash = DecryptPassword(user.PasswordHash);
+                    return await GenerateToken(userLogin);
                 }
                 else
                 {
                     LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
-                    userLogin.PasswordHash = DecryptPassword(userLogin.PasswordHash);
+                    userLogin.PasswordHash = DecryptPassword(user.PasswordHash);
                     return await GenerateToken(userLogin);
                 }
             }
