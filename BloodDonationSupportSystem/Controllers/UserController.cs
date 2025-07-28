@@ -523,11 +523,6 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest(new { status = "failed", message = "Invalid user ID" });
             }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
                 var result = await _userServices.UpdateUserBloodTypeAsync(userId, dto.BloodTypeId);
@@ -594,6 +589,51 @@ namespace BloodDonationSupportSystem.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { status = "failed", message = "An error occurred while updating donor blood type", error = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Update donor availability for a user by userId
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="availabilityId"></param>
+        /// <returns></returns>
+        [HttpPatch("{userId}/availability")]
+        public async Task<IActionResult> UpdateUserDonationAvailability(int userId, [FromBody] int availabilityId )
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var result = await _userServices.UpdateUserDonationAvailabilityAsync(userId, availabilityId);
+                
+                if (!result)
+                {
+                    return BadRequest(new { status = "failed", message = "Failed to update donor availability" });
+                }
+                return Ok(new { 
+                    status = "success", 
+                    message = "Donor availability updated successfully",
+                    donorId = userId,
+                    newAvailabilityId = availabilityId
+                });
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { status = "failed", message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { status = "failed", message = "An error occurred while updating donor availability", error = ex.Message });
             }
         }
     }
