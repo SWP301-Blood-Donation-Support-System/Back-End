@@ -11,7 +11,6 @@ namespace DataAccessLayer.DTO.Dashboard
         public decimal SuccessRate { get; set; } // Percentage of successful donations
         public decimal TotalVolumeCollected { get; set; } // In milliliters
         public List<RecentDonationDTO> RecentDonations { get; set; }
-        public List<DonationsByDateDTO> DonationTrend { get; set; }
         public Dictionary<int, int> DonationsByType { get; set; } // DonationTypeId -> Count
     }
 
@@ -24,12 +23,5 @@ namespace DataAccessLayer.DTO.Dashboard
         public string BloodTypeName { get; set; }
         public int? DonationTypeId { get; set; }
         public string DonationTypeName { get; set; }
-    }
-
-    public class DonationsByDateDTO
-    {
-        public DateTime Date { get; set; }
-        public int Count { get; set; }
-        public decimal TotalVolume { get; set; }
     }
 }

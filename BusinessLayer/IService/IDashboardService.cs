@@ -9,15 +9,10 @@ namespace BusinessLayer.IService
     {
         Task<DashboardSummaryDTO> GetDashboardSummaryAsync();
         Task<DonorStatisticsDTO> GetDonorStatisticsAsync();
-        Task<DonorStatisticsDTO> GetDonorStatisticsAsync(DateTime startDate, DateTime endDate);
         Task<BloodInventoryDTO> GetBloodInventoryAsync();
-        Task<BloodInventoryDTO> GetBloodInventoryAsync(DateTime startDate, DateTime endDate);
         Task<DonationActivityDTO> GetDonationActivityAsync();
-        Task<DonationActivityDTO> GetDonationActivityAsync(DateTime startDate, DateTime endDate);
-        Task<BloodRequestsDTO> GetBloodRequestsAsync();
-        Task<BloodRequestsDTO> GetBloodRequestsAsync(DateTime startDate, DateTime endDate);
+        Task<BloodRequestsDTO> GetBloodRequestsStatisticsAsync();
         Task<HospitalActivityDTO> GetHospitalActivityAsync();
-        Task<HospitalActivityDTO> GetHospitalActivityAsync(DateTime startDate, DateTime endDate);
         Task<SystemHealthDTO> GetSystemHealthAsync();
     }
 }

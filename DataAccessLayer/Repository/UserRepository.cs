@@ -36,7 +36,7 @@ namespace DataAccessLayer.Repository
         public async Task<IEnumerable<User>> GetEligibleDonorsAsync()
         {
             return await _context.Users
-                .Where(u => u.NextEligibleDonationDate <= DateTime.UtcNow)
+                .Where(u => u.DonationAvailabilityId == 1 && u.RoleId==3)
                 .ToListAsync();
         }
 

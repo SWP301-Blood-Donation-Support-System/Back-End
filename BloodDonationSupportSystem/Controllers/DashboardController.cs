@@ -51,12 +51,12 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
-        [HttpGet("donor-statistics-by-date")]
-        public async Task<IActionResult> GetDashboardStatisticsByDate(DateTime startDate, DateTime endDate)
+        [HttpGet("blood-inventory-statistics")]
+        public async Task<IActionResult> GetBloodInventoryStatisticsAsync()
         {
             try
             {
-                var statistics = await _dashboardService.GetDonorStatisticsAsync(startDate, endDate);
+                var statistics = await _dashboardService.GetBloodInventoryAsync();
                 return Ok(statistics);
             }
             catch (Exception ex)
@@ -68,6 +68,74 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        [HttpGet("donation-activity-statistics")]
+        public async Task<IActionResult> GetDonationActivityStatisticsAsync()
+        {
+            try
+            {
+                var statistics = await _dashboardService.GetDonationActivityAsync();
+                return Ok(statistics);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
+        }
+        [HttpGet("blood-request-statistics")]
+        public async Task<IActionResult> GetBloodRequestsStatisticsAsync()
+        {
+            try
+            {
+                var statistics = await _dashboardService.GetBloodRequestsStatisticsAsync();
+                return Ok(statistics);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
+        }
+        [HttpGet("hospital-activity-statistics")]
+        public async Task<IActionResult> GetHospitalActivityStatisticsAsync()
+        {
+            try
+            {
+                var statistics = await _dashboardService.GetHospitalActivityAsync();
+                return Ok(statistics);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
+        }
+        [HttpGet("system-health")]
+        public async Task<IActionResult> GetSystemHealthAsync()
+        {
+            try
+            {
+                var healthStatus = await _dashboardService.GetSystemHealthAsync();
+                return Ok(healthStatus);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
 
+        }
     }
 }

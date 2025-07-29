@@ -7,6 +7,5 @@ namespace DataAccessLayer.DTO.Dashboard
     {
         public Dictionary<int, int> UsersByRole { get; set; } 
         public int ActiveUsersLast30Days { get; set; }
-        public decimal RegistrationToCompletionRate { get; set; } 
     }
 }

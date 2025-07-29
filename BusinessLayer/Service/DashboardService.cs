@@ -50,8 +50,7 @@ namespace BusinessLayer.Service
                     .Where(u => u.BloodUnitStatusId == availableUnitStatus)
                     .SumAsync(u => u.Volume);
                 
-                // Request metrics
-                var pendingRequestStatus = 2; // Status ID 2 for approved/pending requests
+                var pendingRequestStatus = 2; // Status ID 2 for approved requests
                 var requests = await _bloodRequestRepository.GetBloodRequestsByStatusIdAsync(pendingRequestStatus);
                 
                 // Donation metrics
@@ -66,13 +65,8 @@ namespace BusinessLayer.Service
                 
                 // Fulfillment calculation
                 var totalRequests = await _bloodRequestRepository.GetAllAsync();
-                var completedRequests = totalRequests.Where(r => r.RequestStatusId == 3); // Assuming 3 is "completed"
+                var completedRequests = totalRequests.Where(r => r.RequestStatusId == 3); // 3 is "completed"
                 
-                decimal fulfillmentRate = 0;
-                if (totalRequests.Any())
-                {
-                    fulfillmentRate = (decimal)completedRequests.Count() / totalRequests.Count() * 100;
-                }
                 
                 return new DashboardSummaryDTO
                 {
@@ -83,7 +77,6 @@ namespace BusinessLayer.Service
                     ScheduledDonations = scheduledDonations.Count(),
                     CompletedDonationsThisMonth = completedDonationsThisMonth,
                     TotalBloodVolumeAvailable = availableVolume,
-                    FulfillmentRate = fulfillmentRate
                 };
             }
             catch (Exception ex)
@@ -93,12 +86,8 @@ namespace BusinessLayer.Service
             }
         }
         
-        public async Task<DonorStatisticsDTO> GetDonorStatisticsAsync()
-        {
-            return await GetDonorStatisticsAsync(DateTime.UtcNow.AddMonths(-6), DateTime.UtcNow);
-        }
         
-        public async Task<DonorStatisticsDTO> GetDonorStatisticsAsync(DateTime startDate, DateTime endDate)
+        public async Task<DonorStatisticsDTO> GetDonorStatisticsAsync()
         {
             try
             {
@@ -118,28 +107,6 @@ namespace BusinessLayer.Service
                     .GroupBy(d => d.DonationAvailabilityId)
                     .ToDictionary(g => g.Key, g => g.Count());
                 
-                // Get registration trend data
-                var monthlyTrend = new List<DonorTrendDTO>();
-                var periodMonths = (endDate.Year - startDate.Year) * 12 + endDate.Month - startDate.Month;
-                
-                for (int i = 0; i <= periodMonths; i++)
-                {
-                    var month = startDate.AddMonths(i);
-                    var monthStart = new DateTime(month.Year, month.Month, 1);
-                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
-                    
-                    var registrationsInMonth = donors.Count(d => 
-                        d.CreatedAt.HasValue && 
-                        d.CreatedAt >= monthStart && 
-                        d.CreatedAt <= monthEnd);
-                    
-                    monthlyTrend.Add(new DonorTrendDTO
-                    {
-                        Date = monthStart,
-                        Count = registrationsInMonth
-                    });
-                }
-                
                 return new DonorStatisticsDTO
                 {
                     TotalDonors = donors.Count(),
@@ -147,7 +114,6 @@ namespace BusinessLayer.Service
                     NewDonorsThisMonth = newDonorsThisMonth,
                     DonorsByBloodType = donorsByBloodType,
                     DonorsByAvailability = donorsByAvailability,
-                    RegistrationTrend = monthlyTrend
                 };
             }
             catch (Exception ex)
@@ -157,22 +123,21 @@ namespace BusinessLayer.Service
             }
         }
         
-        public async Task<BloodInventoryDTO> GetBloodInventoryAsync()
-        {
-            return await GetBloodInventoryAsync(DateTime.UtcNow.AddMonths(-3), DateTime.UtcNow);
-        }
         
-        public async Task<BloodInventoryDTO> GetBloodInventoryAsync(DateTime startDate, DateTime endDate)
+        public async Task<BloodInventoryDTO> GetBloodInventoryAsync()
         {
             try
             {
                 var bloodUnits = await _bloodUnitRepository.GetAllAsync();
                 var availableStatus = 1; 
-                var assignedStatus = 2; 
-                var expiredStatus = 4; 
-                
+                var assignedStatus = 2;
+                var expiredStatus = 3;
+                var unusableStatus = 4;
+
+
                 var availableUnits = bloodUnits.Where(u => u.BloodUnitStatusId == availableStatus).Count();
                 var assignedUnits = bloodUnits.Where(u => u.BloodUnitStatusId == assignedStatus).Count();
+                var unusableUnits = bloodUnits.Where(u => u.BloodUnitStatusId == unusableStatus).Count();
                 var expiredUnits = bloodUnits.Where(u => u.BloodUnitStatusId == expiredStatus).Count();
                 var expiringWithinWeek = bloodUnits
                     .Count(u => u.BloodUnitStatusId == availableStatus && 
@@ -196,34 +161,7 @@ namespace BusinessLayer.Service
                     .ToDictionary(g => g.Key, g => g.Count());
                 
                 // Get collection trend data
-                var monthlyTrend = new List<BloodCollectionTrendDTO>();
-                var periodMonths = (endDate.Year - startDate.Year) * 12 + endDate.Month - startDate.Month;
-                
-                for (int i = 0; i <= periodMonths; i++)
-                {
-                    var month = startDate.AddMonths(i);
-                    var monthStart = new DateTime(month.Year, month.Month, 1);
-                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
-                    
-                    var collectedInMonth = bloodUnits
-                        .Where(u => u.CollectedDateTime >= monthStart && u.CollectedDateTime <= monthEnd)
-                        .Sum(u => u.Volume);
-                    
-                    var usedInMonth = bloodUnits
-                        .Where(u => 
-                            u.UpdatedAt.HasValue && 
-                            u.UpdatedAt >= monthStart && 
-                            u.UpdatedAt <= monthEnd && 
-                            u.BloodUnitStatusId == assignedStatus)
-                        .Sum(u => u.Volume);
-                    
-                    monthlyTrend.Add(new BloodCollectionTrendDTO
-                    {
-                        Date = monthStart,
-                        CollectedVolume = collectedInMonth,
-                        UsedVolume = usedInMonth
-                    });
-                }
+              
                 
                 return new BloodInventoryDTO
                 {
@@ -231,11 +169,11 @@ namespace BusinessLayer.Service
                     AvailableUnits = availableUnits,
                     AssignedUnits = assignedUnits,
                     ExpiredUnits = expiredUnits,
+                    UnusableUnits=unusableUnits,
                     ExpiringWithinWeek = expiringWithinWeek,
                     UnitsByBloodType = unitsByBloodType,
                     UnitsByComponent = unitsByComponent,
                     UnitsByStatus = unitsByStatus,
-                    CollectionTrend = monthlyTrend
                 };
             }
             catch (Exception ex)
@@ -245,12 +183,8 @@ namespace BusinessLayer.Service
             }
         }
         
-        public async Task<DonationActivityDTO> GetDonationActivityAsync()
-        {
-            return await GetDonationActivityAsync(DateTime.UtcNow.AddMonths(-6), DateTime.UtcNow);
-        }
         
-        public async Task<DonationActivityDTO> GetDonationActivityAsync(DateTime startDate, DateTime endDate)
+        public async Task<DonationActivityDTO> GetDonationActivityAsync()
         {
             try
             {
@@ -290,28 +224,7 @@ namespace BusinessLayer.Service
                     })
                     .ToList();
                 
-                // Get donation trend data
-                var donationsByDate = new List<DonationsByDateDTO>();
-                var periodMonths = (endDate.Year - startDate.Year) * 12 + endDate.Month - startDate.Month;
-                
-                for (int i = 0; i <= periodMonths; i++)
-                {
-                    var month = startDate.AddMonths(i);
-                    var monthStart = new DateTime(month.Year, month.Month, 1);
-                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
-                    
-                    var donationsInMonth = records.Where(r => 
-                        r.DonationDateTime >= monthStart && 
-                        r.DonationDateTime <= monthEnd);
-                    
-                    donationsByDate.Add(new DonationsByDateDTO
-                    {
-                        Date = monthStart,
-                        Count = donationsInMonth.Count(),
-                        TotalVolume = donationsInMonth.Sum(r => r.VolumeDonated)
-                    });
-                }
-                
+               
                 // Group donations by type
                 var donationsByType = records
                     .Where(r => r.DonationTypeId.HasValue)
@@ -326,7 +239,6 @@ namespace BusinessLayer.Service
                     SuccessRate = successRate,
                     TotalVolumeCollected = totalVolumeCollected,
                     RecentDonations = recentDonations,
-                    DonationTrend = donationsByDate,
                     DonationsByType = donationsByType
                 };
             }
@@ -337,12 +249,7 @@ namespace BusinessLayer.Service
             }
         }
         
-        public async Task<BloodRequestsDTO> GetBloodRequestsAsync()
-        {
-            return await GetBloodRequestsAsync(DateTime.UtcNow.AddMonths(-6), DateTime.UtcNow);
-        }
-        
-        public async Task<BloodRequestsDTO> GetBloodRequestsAsync(DateTime startDate, DateTime endDate)
+        public async Task<BloodRequestsDTO> GetBloodRequestsStatisticsAsync()
         {
             try
             {
@@ -374,26 +281,7 @@ namespace BusinessLayer.Service
                     .ToDictionary(g => g.Key, g => g.Count());
                 
                 // Get request trend data
-                var requestTrend = new List<RequestTrendDTO>();
-                var periodMonths = (endDate.Year - startDate.Year) * 12 + endDate.Month - startDate.Month;
-                
-                for (int i = 0; i <= periodMonths; i++)
-                {
-                    var month = startDate.AddMonths(i);
-                    var monthStart = new DateTime(month.Year, month.Month, 1);
-                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
-                    
-                    var requestsInMonth = requests.Where(r => 
-                        r.RequestDateTime >= monthStart && 
-                        r.RequestDateTime <= monthEnd);
-                    
-                    requestTrend.Add(new RequestTrendDTO
-                    {
-                        Date = monthStart,
-                        RequestCount = requestsInMonth.Count(),
-                        VolumeRequested = requestsInMonth.Sum(r => r.Volume)
-                    });
-                }
+              
                 
                 return new BloodRequestsDTO
                 {
@@ -406,7 +294,6 @@ namespace BusinessLayer.Service
                     FulfillmentRate = fulfillmentRate,
                     RequestsByUrgency = requestsByUrgency,
                     RequestsByBloodType = requestsByBloodType,
-                    RequestTrend = requestTrend
                 };
             }
             catch (Exception ex)
@@ -418,15 +305,10 @@ namespace BusinessLayer.Service
         
         public async Task<HospitalActivityDTO> GetHospitalActivityAsync()
         {
-            return await GetHospitalActivityAsync(DateTime.UtcNow.AddMonths(-6), DateTime.UtcNow);
-        }
-        
-        public async Task<HospitalActivityDTO> GetHospitalActivityAsync(DateTime startDate, DateTime endDate)
-        {
             try
             {
                 var hospitals = await _hospitalRepository.GetAllAsync();
-                var hospitalRoleId = 4; // Assuming 4 is hospital role
+                var hospitalRoleId = 4; 
                 var hospitalUsers = await _userRepository.GetByRoleIdAsync(hospitalRoleId);
                 
                 var activeHospitalCount = hospitalUsers.Count(h => h.IsActive);
@@ -514,11 +396,11 @@ namespace BusinessLayer.Service
                     u.UpdatedAt.HasValue && u.UpdatedAt >= DateTime.UtcNow.AddDays(-30));
                 
                 // Calculate registration to completion rate
-                var donorRoleId = 3; // Role ID for donors
+                var donorRoleId = 3; 
                 var donors = users.Where(u => u.RoleId == donorRoleId).ToList();
                 
                 var records = await _donationRecordRepository.GetAllAsync();
-                var successfulTestResult = 2; // "Approved" test result
+                var successfulTestResult = 2; 
                 
                 var totalRegisteredDonors = donors.Count;
                 var donorsWithSuccessfulDonations = records
@@ -527,17 +409,12 @@ namespace BusinessLayer.Service
                     .Distinct()
                     .Count();
                 
-                decimal registrationToCompletionRate = totalRegisteredDonors > 0 
-                    ? (decimal)donorsWithSuccessfulDonations / totalRegisteredDonors * 100 
-                    : 0;
-                
                 var bloodUnits = await _bloodUnitRepository.GetAllAsync();
                 
                 return new SystemHealthDTO
                 {
                     UsersByRole = usersByRole,
                     ActiveUsersLast30Days = activeUsersLast30Days,
-                    RegistrationToCompletionRate = registrationToCompletionRate,
                 };
             }
             catch (Exception ex)
