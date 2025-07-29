@@ -229,7 +229,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// </summary>
         /// <param name="articleDto">Article creation data</param>
         /// <returns>Created article</returns>
-        [Authorize(Roles = "Admin,Staff")]
+        //[Authorize(Roles = "Admin,Staff")]
         [HttpPost]
         public async Task<IActionResult> CreateArticle([FromBody] ArticleCreateDTO articleDto)
         {
