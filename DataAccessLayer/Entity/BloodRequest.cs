@@ -14,7 +14,7 @@ public partial class BloodRequest
     public int BloodComponentId { get; set; }
 
     public decimal Volume { get; set; }
-    public decimal? RemainingVolume { get; set; }
+    public decimal RemainingVolume { get; set; }
 
     public DateTime? RequestDateTime { get; set; }
 

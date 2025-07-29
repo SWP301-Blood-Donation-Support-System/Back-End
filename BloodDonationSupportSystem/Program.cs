@@ -126,6 +126,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+            RoleClaimType = "RoleID", // hoặc "roles", tùy vào key trong JWT
         };
     });
 
@@ -206,11 +207,16 @@ builder.Services.AddScoped<IHospitalService, HospitalService>();
 builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IEmergencyBloodEmailService, EmergencyBloodEmailService>();
+
 builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
 
 // Quartz Jobs
 builder.Services.AddScoped<AutoScheduleCreationJob>();
 builder.Services.AddScoped<TomorrowDonationReminderJob>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();

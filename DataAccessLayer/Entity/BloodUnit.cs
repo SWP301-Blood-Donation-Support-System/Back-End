@@ -19,7 +19,7 @@ public partial class BloodUnit
 
     public decimal Volume { get; set; }
 
-    public int? BloodUnitStatusId { get; set; }
+    public int BloodUnitStatusId { get; set; }
 
     public int? RequestId { get; set; }
 
