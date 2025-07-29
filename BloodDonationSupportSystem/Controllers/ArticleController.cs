@@ -147,7 +147,7 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         /// <summary>
-        /// Soft delete an article (Admin and Staff only)
+        /// Soft delete an article (Admin and Staff only) - Sets IsDeleted = true
         /// </summary>
         /// <param name="id">Article ID</param>
         /// <returns>Delete result</returns>
@@ -162,7 +162,7 @@ namespace BloodDonationSupportSystem.Controllers
                 {
                     return NotFound(new { status = "failed", message = "Không tìm thấy bài viết" });
                 }
-                return Ok(new { status = "success", message = "Xóa bài viết thành công" });
+                return Ok(new { status = "success", message = "Xóa bài viết thành công (soft delete)" });
             }
             catch (Exception ex)
             {
