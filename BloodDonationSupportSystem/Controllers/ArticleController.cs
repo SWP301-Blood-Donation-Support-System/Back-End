@@ -339,8 +339,8 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                // If requesting non-published articles (assuming status 1 = published), require authorization
-                if (statusId != 1)
+                // If requesting non-published articles (assuming status 3 = published), require authorization
+                if (statusId != 3)
                 {
                     var currentUserRole = User.FindFirstValue(ClaimTypes.Role); // Use ClaimTypes.Role
                     if (currentUserRole != "Admin" && currentUserRole != "Staff")
@@ -364,12 +364,12 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         /// <summary>
-        /// Publish an article (Admin and Staff only)
+        /// Publish an article (Admin and Staff only) - Set status to 3
         /// </summary>
         /// <param name="id">Article ID</param>
         /// <returns>Publish result</returns>
         [HttpPatch("{id}/publish")]
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "1,2")]
         public async Task<IActionResult> PublishArticle(int id)
         {
             try
@@ -381,11 +381,11 @@ namespace BloodDonationSupportSystem.Controllers
                     return NotFound(new { status = "failed", message = "Không tìm thấy bài viết" });
                 }
 
-                // Create update DTO with published status (assuming status ID 1 = Published)
+                // Create update DTO with published status (status ID = 3)
                 var updateDto = new UpdateArticleDTO
                 {
                     ArticleCategoryId = currentArticle.ArticleCategoryId,
-                    ArticleStatusId = 1, // Published status
+                    ArticleStatusId = 3, // Published status = 3
                     Title = currentArticle.Title,
                     Content = currentArticle.Content ?? "",
                     Picture = currentArticle.Picture
