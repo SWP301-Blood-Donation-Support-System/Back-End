@@ -33,8 +33,10 @@ namespace BusinessLayer.Service
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
         private readonly IHospitalService _hospitalService;
+        private readonly IDonationRegistrationRepository _donationRegistrationRepository;
+        private readonly IUserNotificationService _userNotificationService;
 
-        public UserServices(IUserRepository userRepository, IMapper mapper, IOptionsMonitor<AppSetting> options, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IHospitalService hospitalService)
+        public UserServices(IUserRepository userRepository, IMapper mapper, IOptionsMonitor<AppSetting> options, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IHospitalService hospitalService, IDonationRegistrationRepository donationRegistrationRepository, IUserNotificationService userNotificationService)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -42,6 +44,8 @@ namespace BusinessLayer.Service
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _emailService = emailService;
             _hospitalService = hospitalService;
+            _donationRegistrationRepository = donationRegistrationRepository ?? throw new ArgumentNullException(nameof(donationRegistrationRepository));
+            _userNotificationService = userNotificationService ?? throw new ArgumentNullException(nameof(userNotificationService));
         }
 
         private DateTime GetVietnamTime()
@@ -741,7 +745,6 @@ namespace BusinessLayer.Service
             // SỬ DỤNG CHUỖI ĐÃ ĐỊNH DẠNG TIẾNG VIỆT
             sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{scheduleDateVietnamese}</td></tr>");
 
-
             if (!string.IsNullOrEmpty(registrationInfo.StartTime) && !string.IsNullOrEmpty(registrationInfo.EndTime))
             {
                 sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>{registrationInfo.StartTime} - {registrationInfo.EndTime}</td></tr>");
@@ -1143,6 +1146,260 @@ namespace BusinessLayer.Service
             return await _userRepository.SaveChangesAsync();
         }
 
-      
+        /// <summary>
+        /// Lấy danh sách người có lịch hiến máu vào ngày mai
+        /// </summary>
+        /// <returns>Danh sách TomorrowDonationScheduleDTO</returns>
+        public async Task<IEnumerable<TomorrowDonationScheduleDTO>> GetTomorrowDonationSchedulesAsync()
+        {
+            try
+            {
+                var registrations = await _donationRegistrationRepository.GetUpcomingApprovedRegistrationsAsync(1, 1); // 1 ngày tới, status = 1 (approved)
+
+                return registrations.Select(r => new TomorrowDonationScheduleDTO
+                {
+                    RegistrationId = r.RegistrationId,
+                    DonorId = r.DonorId,
+                    DonorName = r.Donor?.FullName,
+                    DonorEmail = r.Donor?.Email,
+                    DonorPhone = r.Donor?.PhoneNumber,
+                    BloodTypeName = r.Donor?.BloodType?.BloodTypeName,
+                    ScheduleDate = r.Schedule?.ScheduleDate ?? DateTime.MinValue,
+                    TimeSlotName = r.TimeSlot?.TimeSlotName,
+                    StartTime = r.TimeSlot?.StartTime.ToString(@"hh\:mm"),
+                    EndTime = r.TimeSlot?.EndTime.ToString(@"hh\:mm"),
+                    Location = "", // DonationSchedule không có Location field
+                    HospitalName = "", // Cần thêm nếu có relationship với Hospital
+                    HospitalAddress = "", // Cần thêm nếu có relationship với Hospital
+                    RegistrationStatusId = r.RegistrationStatusId ?? 0,
+                    StatusName = r.RegistrationStatus?.RegistrationStatusName // Sửa từ StatusName thành RegistrationStatusName
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetTomorrowDonationSchedulesAsync: {ex.Message}");
+                return new List<TomorrowDonationScheduleDTO>();
+            }
+        }
+
+        /// <summary>
+        /// Gửi thông báo nhắc nhở tự động cho những người có lịch hiến vào ngày mai
+        /// </summary>
+        /// <returns>Kết quả xử lý</returns>
+        public async Task<AutoReminderJobResponseDTO> SendTomorrowDonationRemindersAsync()
+        {
+            var startTime = DateTime.UtcNow;
+            var response = new AutoReminderJobResponseDTO
+            {
+                ProcessedAt = startTime,
+                ProcessedBy = "System-AutoReminderJob"
+            };
+
+            try
+            {
+                // Lấy danh sách người có lịch hiến vào ngày mai
+                var tomorrowSchedules = await GetTomorrowDonationSchedulesAsync();
+                var schedulesList = tomorrowSchedules.ToList();
+                
+                response.TotalUpcomingDonations = schedulesList.Count;
+
+                if (!schedulesList.Any())
+                {
+                    response.ExecutionTime = DateTime.UtcNow - startTime;
+                    return response;
+                }
+
+                foreach (var schedule in schedulesList)
+                {
+                    try
+                    {
+                        // Kiểm tra thông tin cần thiết
+                        if (string.IsNullOrEmpty(schedule.DonorEmail) || string.IsNullOrEmpty(schedule.DonorName))
+                        {
+                            response.FailedNotifications++;
+                            response.ErrorMessages.Add($"Donor ID {schedule.DonorId}: Thiếu thông tin email hoặc tên");
+                            continue;
+                        }
+
+                        // Tạo nội dung thông báo
+                        var vietnamTime = GetVietnamTime();
+                        var donationDate = schedule.ScheduleDate.ToString("dddd, 'ngày' dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"));
+                        var timeInfo = !string.IsNullOrEmpty(schedule.StartTime) && !string.IsNullOrEmpty(schedule.EndTime) 
+                            ? $"từ {schedule.StartTime} đến {schedule.EndTime}" 
+                            : "theo lịch đã đăng ký";
+
+                        var subject = "🩸 Nhắc nhở: Lịch hiến máu của bạn vào ngày mai";
+                        var message = $"Xin chào {schedule.DonorName},\n\n" +
+                            $"Đây là lời nhắc nhở về lịch hiến máu của bạn:\n\n" +
+                            $"📅 Ngày hiến máu: {donationDate}\n" +
+                            $"⏰ Thời gian: {timeInfo}\n";
+
+                        if (!string.IsNullOrEmpty(schedule.Location))
+                        {
+                            message += $"📍 Địa điểm: {schedule.Location}\n";
+                        }
+
+                        message += $"\n💡 Lưu ý quan trọng:\n" +
+                            $"- Vui lòng có mặt đúng giờ\n" +
+                            $"- Mang theo CCCD/CMND\n" +
+                            $"- Không uống rượu bia trong 24h trước khi hiến máu\n" +
+                            $"- Ăn no và uống đủ nước trước khi đến\n" +
+                            $"- Ngủ đủ giấc và giữ tinh thần thoải mái\n\n" +
+                            $"Cảm ơn bạn đã tham gia hiến máu cứu người! 🙏\n\n" +
+                            $"Trân trọng,\n" +
+                            $"Hệ thống Hỗ trợ Hiến máu";
+
+                        // 1. Gửi notification trong hệ thống
+                        try
+                        {
+                            await _userNotificationService.CreateNotificationForUserAsync(
+                                schedule.DonorId, 
+                                subject, 
+                                message, 
+                                2 // NotificationTypeId = 2 (reminder)
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to create notification for donor {schedule.DonorId}: {ex.Message}");
+                        }
+
+                        // 2. Gửi email
+                        try
+                        {
+                            var emailBody = GenerateTomorrowDonationReminderEmailTemplate(schedule, message);
+                            SendMail(subject, emailBody, schedule.DonorEmail);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to send email to {schedule.DonorEmail}: {ex.Message}");
+                        }
+
+                        response.SuccessfulNotifications++;
+                    }
+                    catch (Exception ex)
+                    {
+                        response.FailedNotifications++;
+                        response.ErrorMessages.Add($"Donor ID {schedule.DonorId}: {ex.Message}");
+                    }
+                }
+
+                response.ExecutionTime = DateTime.UtcNow - startTime;
+                
+                // Log kết quả
+                Console.WriteLine($"=== AUTO REMINDER JOB COMPLETED ===");
+                Console.WriteLine($"Total schedules: {response.TotalUpcomingDonations}");
+                Console.WriteLine($"Successful notifications: {response.SuccessfulNotifications}");
+                Console.WriteLine($"Failed notifications: {response.FailedNotifications}");
+                Console.WriteLine($"Execution time: {response.ExecutionTime.TotalSeconds} seconds");
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.FailedNotifications = response.TotalUpcomingDonations;
+                response.ErrorMessages.Add($"Job execution failed: {ex.Message}");
+                response.ExecutionTime = DateTime.UtcNow - startTime;
+                
+                Console.WriteLine($"=== AUTO REMINDER JOB FAILED ===");
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return response;
+            }
+        }
+
+        /// <summary>
+        /// Tạo template email cho thông báo nhắc nhở hiến máu vào ngày mai
+        /// </summary>
+        private string GenerateTomorrowDonationReminderEmailTemplate(TomorrowDonationScheduleDTO schedule, string message)
+        {
+            var currentDate = GetVietnamTime().ToString("dd/MM/yyyy HH:mm");
+            var donationDate = schedule.ScheduleDate.ToString("dddd, 'ngày' dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"));
+
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html lang='vi'>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("    <meta charset='UTF-8'>");
+            sb.AppendLine("    <title>Nhắc nhở lịch hiến máu</title>");
+            sb.AppendLine("    <style>");
+            sb.AppendLine("        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }");
+            sb.AppendLine("        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }");
+            sb.AppendLine("        .header { background-color: #B22222; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }");
+            sb.AppendLine("        .content { padding: 20px 0; }");
+            sb.AppendLine("        .schedule-info { background-color: #fff3cd; padding: 15px; border: 1px solid #ffeaa7; border-radius: 4px; margin: 15px 0; }");
+            sb.AppendLine("        .highlight { background-color: #f8f9fa; padding: 15px; border-left: 4px solid #B22222; margin: 15px 0; border-radius: 4px; }");
+            sb.AppendLine("        .important { color: #B22222; font-weight: bold; }");
+            sb.AppendLine("        .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }");
+            sb.AppendLine("        table { width: 100%; border-collapse: collapse; margin: 10px 0; }");
+            sb.AppendLine("        td { padding: 8px; border-bottom: 1px solid #eee; }");
+            sb.AppendLine("        .label { font-weight: bold; width: 40%; }");
+            sb.AppendLine("    </style>");
+            sb.AppendLine("</head>");
+            sb.AppendLine("<body>");
+            sb.AppendLine("    <div class='container'>");
+            sb.AppendLine("        <div class='header'>");
+            sb.AppendLine("            <h1>🩸 Nhắc nhở lịch hiến máu</h1>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='content'>");
+            sb.AppendLine($"            <h2>Kính chào {schedule.DonorName}!</h2>");
+            sb.AppendLine("            <p>Đây là lời nhắc nhở về lịch hiến máu của bạn vào <strong>ngày mai</strong>.</p>");
+
+            sb.AppendLine("            <div class='schedule-info'>");
+            sb.AppendLine("                <h3>📅 Thông tin lịch hiến máu</h3>");
+            sb.AppendLine("                <table>");
+            sb.AppendLine($"                    <tr><td class='label'>Ngày hiến máu:</td><td class='important'>{donationDate}</td></tr>");
+            
+            if (!string.IsNullOrEmpty(schedule.StartTime) && !string.IsNullOrEmpty(schedule.EndTime))
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Thời gian:</td><td>{schedule.StartTime} - {schedule.EndTime}</td></tr>");
+            }
+
+            if (!string.IsNullOrEmpty(schedule.Location))
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Địa điểm:</td><td>{schedule.Location}</td></tr>");
+            }
+
+            if (!string.IsNullOrEmpty(schedule.BloodTypeName))
+            {
+                sb.AppendLine($"                    <tr><td class='label'>Nhóm máu:</td><td class='important'>{schedule.BloodTypeName}</td></tr>");
+            }
+
+            sb.AppendLine("                </table>");
+            sb.AppendLine("            </div>");
+
+            sb.AppendLine("            <div class='highlight'>");
+            sb.AppendLine("                <h3>⚠️ Lưu ý quan trọng</h3>");
+            sb.AppendLine("                <ul>");
+            sb.AppendLine("                    <li>Vui lòng có mặt <strong>đúng giờ</strong> theo lịch đã đăng ký</li>");
+            sb.AppendLine("                    <li>Mang theo <strong>CCCD/CMND</strong> để xác nhận danh tính</li>");
+            sb.AppendLine("                    <li>Không uống rượu bia trong 24h trước khi hiến máu</li>");
+            sb.AppendLine("                    <li>Ăn no trước khi hiến máu 3-4 tiếng và uống đủ nước</li>");
+            sb.AppendLine("                    <li>Ngủ đủ giấc và giữ tinh thần thoải mái</li>");
+            sb.AppendLine("                    <li>Nếu có sự cố, vui lòng liên hệ sớm để điều chỉnh</li>");
+            sb.AppendLine("                </ul>");
+            sb.AppendLine("            </div>");
+
+            sb.AppendLine("            <div class='highlight'>");
+            sb.AppendLine("                <h3>📞 Liên hệ hỗ trợ</h3>");
+            sb.AppendLine("                <p>Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ:</p>");
+            sb.AppendLine("                <ul>");
+            sb.AppendLine("                    <li>Email: giotmaunghiatinh@gmail.com</li>");
+            sb.AppendLine("                </ul>");
+            sb.AppendLine("            </div>");
+
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='footer'>");
+            sb.AppendLine("            <p><em style='color: #B22222; font-size: 18px;'>\"Hiến máu cứu người - Một nghĩa cử cao đẹp\"</em></p>");
+            sb.AppendLine("            <p>Cảm ơn bạn đã đồng hành cùng chúng tôi!</p>");
+            sb.AppendLine($"            <p style='font-size: 12px; color: #999;'>Email được gửi tự động lúc: {currentDate}</p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("    </div>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            return sb.ToString();
+        }
     }
 }

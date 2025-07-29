@@ -246,5 +246,87 @@ namespace BloodDonationSupportSystem.Controllers
                     new { message = $"Lỗi khi gửi thông báo cho user {userId}", error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Lấy danh sách người có lịch hiến máu vào ngày mai
+        /// </summary>
+        /// <returns>Danh sách người có lịch hiến vào ngày mai</returns>
+        /// <response code="200">Trả về danh sách thành công</response>
+        /// <response code="500">Lỗi server nội bộ</response>
+        /// <remarks>
+        /// Endpoint công khai để xem danh sách người có lịch hiến vào ngày mai.
+        /// 
+        /// Ví dụ request:
+        ///     GET /api/donationreminder/tomorrow-schedules
+        ///     
+        /// Response sẽ bao gồm:
+        /// - RegistrationId, DonorId, DonorName, DonorEmail
+        /// - ScheduleDate, TimeSlotName, StartTime, EndTime
+        /// - Location, BloodTypeName, StatusName
+        /// </remarks>
+        [HttpGet("tomorrow-schedules")]
+        [ProducesResponseType(typeof(IEnumerable<TomorrowDonationScheduleDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTomorrowDonationSchedules()
+        {
+            try
+            {
+                var tomorrowSchedules = await _userServices.GetTomorrowDonationSchedulesAsync();
+                var schedulesList = tomorrowSchedules.ToList();
+                
+                return Ok(new { 
+                    message = "Danh sách người có lịch hiến máu vào ngày mai",
+                    totalCount = schedulesList.Count,
+                    data = schedulesList,
+                    retrievedAt = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    new { message = "Lỗi khi lấy danh sách lịch hiến máu ngày mai", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gửi thông báo nhắc nhở tự động cho những người có lịch hiến vào ngày mai
+        /// </summary>
+        /// <returns>Kết quả gửi thông báo tự động</returns>
+        /// <response code="200">Gửi thông báo thành công</response>
+        /// <response code="500">Lỗi server khi gửi thông báo</response>
+        /// <remarks>
+        /// Endpoint để trigger job gửi thông báo cho những người có lịch hiến vào ngày mai.
+        /// Thường được gọi bởi scheduled job hoặc manual trigger.
+        /// 
+        /// Ví dụ request:
+        ///     POST /api/donationreminder/send-tomorrow-reminders
+        ///     
+        /// Response bao gồm:
+        /// - TotalUpcomingDonations: Tổng số lịch hiến vào ngày mai
+        /// - SuccessfulNotifications: Số thông báo gửi thành công
+        /// - FailedNotifications: Số thông báo gửi thất bại
+        /// - ExecutionTime: Thời gian thực thi
+        /// - ErrorMessages: Chi tiết lỗi (nếu có)
+        /// </remarks>
+        [HttpPost("send-tomorrow-reminders")]
+        [ProducesResponseType(typeof(AutoReminderJobResponseDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SendTomorrowDonationReminders()
+        {
+            try
+            {
+                var result = await _userServices.SendTomorrowDonationRemindersAsync();
+
+                return Ok(new { 
+                    message = "Đã hoàn thành gửi thông báo nhắc nhở cho lịch hiến ngày mai",
+                    result = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    new { message = "Lỗi khi gửi thông báo nhắc nhở tự động", error = ex.Message });
+            }
+        }
     }
 }

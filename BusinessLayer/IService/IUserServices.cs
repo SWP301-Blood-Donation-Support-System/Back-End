@@ -54,5 +54,18 @@ namespace BusinessLayer.IService
         /// <param name="adminUserId">ID c?a admin th?c hi?n</param>
         /// <returns>K?t qu? g?i thông báo</returns>
         Task<BulkReminderResponseDTO> SendBulkDonationRemindersAsync(BulkReminderRequestDTO request, int adminUserId);
+
+        // NEW METHODS FOR TOMORROW DONATION REMINDER FEATURE
+        /// <summary>
+        /// L?y danh sách ng??i có l?ch hi?n máu vào ngày mai
+        /// </summary>
+        /// <returns>Danh sách TomorrowDonationScheduleDTO</returns>
+        Task<IEnumerable<TomorrowDonationScheduleDTO>> GetTomorrowDonationSchedulesAsync();
+
+        /// <summary>
+        /// G?i thông báo nh?c nh? t? ??ng cho nh?ng ng??i có l?ch hi?n vào ngày mai
+        /// </summary>
+        /// <returns>K?t qu? x? lý</returns>
+        Task<AutoReminderJobResponseDTO> SendTomorrowDonationRemindersAsync();
     }
 }
