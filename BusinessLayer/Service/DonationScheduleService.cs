@@ -56,9 +56,7 @@ namespace BusinessLayer.Service
             var existingSchedule = await _donationScheduleRepository.GetByIdAsync(schedule.ScheduleId);
             if (existingSchedule == null) return false;
 
-            // Cập nhật các thuộc tính
             existingSchedule.ScheduleDate = schedule.ScheduleDate;
-            // ... các thuộc tính khác
             existingSchedule.UpdatedBy = updatedBy;
             existingSchedule.UpdatedAt = DateTime.UtcNow;
 
@@ -66,7 +64,6 @@ namespace BusinessLayer.Service
             return await _donationScheduleRepository.SaveChangesAsync();
         }
 
-        // SỬA: Gộp lại còn một phương thức Delete duy nhất
         public async Task<bool> DeleteDonationScheduleAsync(int id, string deletedBy)
         {
             if (id <= 0) throw new ArgumentOutOfRangeException(nameof(id));
@@ -80,7 +77,6 @@ namespace BusinessLayer.Service
         }
 
 
-        // SỬA: Logic khôi phục đã đúng
         public async Task<bool> RestoreDonationScheduleAsync(int scheduleId, string restoredBy)
         {
             if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
@@ -110,11 +106,9 @@ namespace BusinessLayer.Service
             if (string.IsNullOrWhiteSpace(registeredBy)) throw new ArgumentException("Registered by cannot be null or empty", nameof(registeredBy));
 
 
-            // SỬA: Gọi đến phương thức đã được sửa trong repository
             var result = await _donationScheduleRepository.UpdateRegisteredSlots(scheduleId, 1);
             if (!result) return false;
 
-            // SỬA: Phải lưu thay đổi lại
             return await _donationScheduleRepository.SaveChangesAsync();
 
         }
@@ -125,9 +119,8 @@ namespace BusinessLayer.Service
             if (scheduleId <= 0) throw new ArgumentOutOfRangeException(nameof(scheduleId));
 
             var schedule = await _donationScheduleRepository.GetByIdAsync(scheduleId);
-            if (schedule == null) return true; // Coi như đã đầy
+            if (schedule == null) return true;
 
-            // Ghi chú: maxSlotsPerSchedule nên là một thuộc tính của schedule
             const int maxSlotsPerSchedule = 100;
             return schedule.RegisteredSlots >= maxSlotsPerSchedule;
         }
