@@ -11,6 +11,5 @@ namespace DataAccessLayer.DTO.Dashboard
         public int ScheduledDonations { get; set; }
         public int CompletedDonationsThisMonth { get; set; }
         public decimal TotalBloodVolumeAvailable { get; set; }
-        public decimal FulfillmentRate { get; set; }
     }
 }

@@ -14,13 +14,5 @@ namespace DataAccessLayer.DTO.Dashboard
         public decimal FulfillmentRate { get; set; } 
         public Dictionary<int, int> RequestsByUrgency { get; set; } 
         public Dictionary<int, int> RequestsByBloodType { get; set; } 
-        public List<RequestTrendDTO> RequestTrend { get; set; }
-    }
-
-    public class RequestTrendDTO
-    {
-        public DateTime Date { get; set; }
-        public int RequestCount { get; set; }
-        public decimal VolumeRequested { get; set; }
     }
 }

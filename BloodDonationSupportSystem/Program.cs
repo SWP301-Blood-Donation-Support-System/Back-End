@@ -196,6 +196,7 @@ builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IEmergencyBloodEmailService, EmergencyBloodEmailService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 // Repositories
