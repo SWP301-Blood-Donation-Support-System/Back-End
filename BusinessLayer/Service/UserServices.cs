@@ -54,13 +54,11 @@ namespace BusinessLayer.Service
             }
             catch (TimeZoneNotFoundException)
             {
-                // Fallback cho Linux/macOS
                 TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh");
                 return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
             }
             catch (Exception)
             {
-                // Nếu không tìm thấy, trả về giờ UTC + 7
                 return DateTime.UtcNow.AddHours(7);
             }
         }
@@ -125,7 +123,6 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(donor);
 
-                // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword(donor.PasswordHash);
@@ -134,14 +131,12 @@ namespace BusinessLayer.Service
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration - use the actual full name
                 SendWelcomeEmail(donor.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding user: {ex.Message}");
-                throw; // Re-throw the exception to be handled by the caller
+                throw; 
             }
         }
 
@@ -156,23 +151,20 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(staff);
 
-                // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword("staff123");
                 EntityUser.IsActive = true;
-                EntityUser.RoleId = 2; // Assuming 2 is the role ID for staff
+                EntityUser.RoleId = 2; 
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration - use the actual full name
                 SendWelcomeEmail(staff.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding staff: {ex.Message}");
-                throw; // Re-throw the exception to be handled by the caller
+                throw;
             }
         }
 
@@ -187,23 +179,20 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(admin);
 
-                // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword("staff123");
                 EntityUser.IsActive = true;
-                EntityUser.RoleId = 1; // Assuming 1 is the role ID for admin
+                EntityUser.RoleId = 1; 
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration - use the actual full name
                 SendWelcomeEmail(admin.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding admin: {ex.Message}");
-                throw; // Re-throw the exception to be handled by the caller
+                throw; 
             }
         }
         public async Task RegisterHospitalAsync(HospitalRegisterDTO hospital)
@@ -981,14 +970,12 @@ namespace BusinessLayer.Service
                 throw new ArgumentOutOfRangeException(nameof(bloodTypeId), "Blood Type ID must be greater than zero");
             }
 
-            // Tìm user dựa trên donorId (thực chất donorId chính là userId trong bảng User)
             var user = await _userRepository.GetByIdAsync(donorId);
             if (user == null)
             {
                 throw new KeyNotFoundException($"Donor with ID {donorId} not found");
             }
 
-            // Kiểm tra nếu user có RoleId = 3 (Donor role)
             if (user.RoleId != 3)
             {
                 throw new InvalidOperationException($"User with ID {donorId} is not a donor");
@@ -1000,5 +987,7 @@ namespace BusinessLayer.Service
             await _userRepository.UpdateAsync(user);
             return await _userRepository.SaveChangesAsync();
         }
+
+      
     }
 }
