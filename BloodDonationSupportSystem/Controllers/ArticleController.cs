@@ -1,4 +1,4 @@
-﻿using BusinessLayer.IService;
+using BusinessLayer.IService;
 using DataAccessLayer.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,12 +11,10 @@ namespace BloodDonationSupportSystem.Controllers
     public class ArticlesController : ControllerBase
     {
         private readonly IArticleService _articleService;
-        private readonly ICloudinaryService _cloudinaryService;
 
-        public ArticlesController(IArticleService articleService, ICloudinaryService cloudinaryService)
+        public ArticlesController(IArticleService articleService)
         {
             _articleService = articleService;
-            _cloudinaryService = cloudinaryService;
         }
 
         /// <summary>
@@ -62,163 +60,6 @@ namespace BloodDonationSupportSystem.Controllers
                 { 
                     status = "error", 
                     message = "Lỗi khi xử lý URL ảnh", 
-                    error = ex.Message 
-                });
-            }
-        }
-
-        /// <summary>
-        /// Upload image for article using Cloudinary
-        /// </summary>
-        /// <param name="imageFile">Image file to upload</param>
-        /// <returns>Cloudinary image URL</returns>
-        [HttpPost("upload-image")]
-        [Consumes("multipart/form-data")]
-        [Authorize(Roles = "Admin,Staff")]
-        public async Task<IActionResult> UploadArticleImage(IFormFile imageFile)
-        {
-            try
-            {
-                if (imageFile == null || imageFile.Length == 0)
-                {
-                    return BadRequest(new 
-                    { 
-                        status = "failed", 
-                        message = "File ảnh không hợp lệ" 
-                    });
-                }
-
-                var imageUrl = await _cloudinaryService.UploadImageAsync(imageFile, "articles");
-                
-                return Ok(new 
-                { 
-                    status = "success", 
-                    message = "Upload ảnh thành công",
-                    imageUrl = imageUrl
-                });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new 
-                { 
-                    status = "failed", 
-                    message = ex.Message 
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new 
-                { 
-                    status = "error", 
-                    message = "Lỗi khi upload ảnh", 
-                    error = ex.Message 
-                });
-            }
-        }
-
-        /// <summary>
-        /// Upload multiple images for article using Cloudinary
-        /// </summary>
-        /// <param name="imageFiles">Multiple image files to upload</param>
-        /// <returns>List of Cloudinary image URLs</returns>
-        [HttpPost("upload-images")]
-        [Consumes("multipart/form-data")]
-        [Authorize(Roles = "Admin,Staff")]
-        public async Task<IActionResult> UploadMultipleArticleImages(IFormFile[] imageFiles)
-        {
-            try
-            {
-                if (imageFiles == null || imageFiles.Length == 0)
-                {
-                    return BadRequest(new 
-                    { 
-                        status = "failed", 
-                        message = "Không có file ảnh nào được tải lên" 
-                    });
-                }
-
-                if (imageFiles.Length > 5)
-                {
-                    return BadRequest(new 
-                    { 
-                        status = "failed", 
-                        message = "Chỉ được upload tối đa 5 ảnh cùng lúc" 
-                    });
-                }
-
-                var imageUrls = await _cloudinaryService.UploadMultipleImagesAsync(imageFiles, "articles");
-                
-                return Ok(new 
-                { 
-                    status = "success", 
-                    message = $"Upload {imageUrls.Count()} ảnh thành công",
-                    imageUrls = imageUrls
-                });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new 
-                { 
-                    status = "failed", 
-                    message = ex.Message 
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new 
-                { 
-                    status = "error", 
-                    message = "Lỗi khi upload ảnh", 
-                    error = ex.Message 
-                });
-            }
-        }
-
-        /// <summary>
-        /// Delete image from Cloudinary
-        /// </summary>
-        /// <param name="imageUrl">Cloudinary image URL to delete</param>
-        /// <returns>Delete result</returns>
-        [HttpDelete("delete-image")]
-        [Authorize(Roles = "Admin,Staff")]
-        public async Task<IActionResult> DeleteArticleImage([FromBody] string imageUrl)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(imageUrl))
-                {
-                    return BadRequest(new 
-                    { 
-                        status = "failed", 
-                        message = "URL ảnh không hợp lệ" 
-                    });
-                }
-
-                var result = await _cloudinaryService.DeleteImageByUrlAsync(imageUrl);
-                
-                if (result)
-                {
-                    return Ok(new 
-                    { 
-                        status = "success", 
-                        message = "Xóa ảnh thành công" 
-                    });
-                }
-                else
-                {
-                    return BadRequest(new 
-                    { 
-                        status = "failed", 
-                        message = "Không thể xóa ảnh" 
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new 
-                { 
-                    status = "error", 
-                    message = "Lỗi khi xóa ảnh", 
                     error = ex.Message 
                 });
             }
@@ -275,7 +116,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="id"></param>
         /// <param name="articleDto"></param>
         /// <returns></returns>
-        //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin và Staff được sửa
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateArticle(int id, [FromBody] UpdateArticleDTO articleDto)
         {
@@ -309,7 +150,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// </summary>
         /// <param name="id">Article ID</param>
         /// <returns>Delete result</returns>
-        //[Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {
@@ -532,18 +373,28 @@ namespace BloodDonationSupportSystem.Controllers
         {
             try
             {
-                // Assuming status ID 1 = Published
-                var updateDto = new UpdateArticleDTO();
-                // You might need to get the current article first to preserve other fields
+                // Get current article to preserve other fields
                 var currentArticle = await _articleService.GetArticleByIdAsync(id);
                 if (currentArticle == null)
                 {
                     return NotFound(new { status = "failed", message = "Không tìm thấy bài viết" });
                 }
 
-                // Create update DTO with published status
-                // Note: You might need to implement a specific publish method in your service
-                // This is a simplified version
+                // Create update DTO with published status (assuming status ID 1 = Published)
+                var updateDto = new UpdateArticleDTO
+                {
+                    ArticleCategoryId = currentArticle.ArticleCategoryId,
+                    ArticleStatusId = 1, // Published status
+                    Title = currentArticle.Title,
+                    Content = currentArticle.Content ?? "",
+                    Picture = currentArticle.Picture
+                };
+
+                var result = await _articleService.UpdateArticleAsync(id, updateDto);
+                if (!result)
+                {
+                    return BadRequest(new { status = "failed", message = "Không thể xuất bản bài viết" });
+                }
                 
                 return Ok(new { status = "success", message = "Xuất bản bài viết thành công" });
             }
@@ -557,5 +408,13 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+    }
+
+    // DTO for storing image URL request  
+    public class StoreImageUrlRequest
+    {
+        public string ImageUrl { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? Category { get; set; }
     }
 }
