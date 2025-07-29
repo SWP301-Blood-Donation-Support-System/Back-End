@@ -98,7 +98,7 @@ namespace BusinessLayer.Service
 
         public async Task<bool> UpdateBloodUnitAsync(BloodUnit bloodUnit)
         {
-            bloodUnit.UpdatedAt = DateTime.UtcNow;
+            bloodUnit.UpdatedAt = DateTime.Now;
 
             await _bloodUnitRepository.UpdateAsync(bloodUnit);
             await _bloodUnitRepository.SaveChangesAsync();
@@ -121,7 +121,7 @@ namespace BusinessLayer.Service
                 }
                 bloodUnit.RequestId = requestId;
                 bloodUnit.BloodUnitStatusId = 2;
-                bloodUnit.UpdatedAt = DateTime.UtcNow;
+                bloodUnit.UpdatedAt = DateTime.Now;
                 var request = await _bloodRequestRepository.GetByIdAsync(requestId);
                 request.RemainingVolume -= bloodUnit.Volume;
                 if(request.RemainingVolume <= 0)
@@ -129,7 +129,7 @@ namespace BusinessLayer.Service
                     request.RemainingVolume = 0;
                     request.RequestStatusId = 3;
                 }
-                request.UpdatedAt = DateTime.UtcNow;
+                request.UpdatedAt = DateTime.Now;
                 await _bloodRequestRepository.UpdateAsync(request);
                 await _bloodUnitRepository.UpdateAsync(bloodUnit);
                 await _bloodRequestRepository.SaveChangesAsync();
@@ -153,7 +153,7 @@ namespace BusinessLayer.Service
                 }
                 bloodUnit.RequestId = null;
                 bloodUnit.BloodUnitStatusId = 1; // Reset to available status
-                bloodUnit.UpdatedAt = DateTime.UtcNow;
+                bloodUnit.UpdatedAt = DateTime.Now;
                 
                 await _bloodUnitRepository.UpdateAsync(bloodUnit);
                 await _bloodUnitRepository.SaveChangesAsync();

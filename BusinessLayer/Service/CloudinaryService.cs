@@ -77,7 +77,7 @@ namespace BusinessLayer.Service
                     // T?o folder cho ?ng d?ng
                     Folder = _defaultFolder,
                     // Generate unique filename
-                    PublicId = $"{DateTime.UtcNow:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}",
+                    PublicId = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}",
                     // Enable overwrite
                     Overwrite = false,
                     // Add tags for organization
@@ -132,7 +132,7 @@ namespace BusinessLayer.Service
                         .Quality("auto")
                         .FetchFormat("auto"),
                     Folder = !string.IsNullOrEmpty(folder) ? folder : _defaultFolder,
-                    PublicId = $"{DateTime.UtcNow:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}",
+                    PublicId = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}",
                     Overwrite = false,
                     Tags = "blood-donation,user-upload"
                 };

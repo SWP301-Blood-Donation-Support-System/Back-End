@@ -26,7 +26,7 @@ namespace BusinessLayer.Service
                 NotificationTypeId = notificationTypeId,
                 Subject = subject,
                 Message = message,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 IsDeleted = false
             };
             await _notificationRepository.AddAsync(notification);
@@ -38,7 +38,7 @@ namespace BusinessLayer.Service
                 RecipientId = recipientId,
                 NotificationId = notification.NotificationId,
                 IsRead = false,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 IsDeleted = false
             };
             await _userNotificationRepository.AddAsync(userNotification);
@@ -59,7 +59,7 @@ namespace BusinessLayer.Service
             }
 
             userNotification.IsRead = true;
-            userNotification.DeliveredAt = DateTime.UtcNow;
+            userNotification.DeliveredAt = DateTime.Now;
             await _userNotificationRepository.UpdateAsync(userNotification);
             return await _userNotificationRepository.SaveChangesAsync();
         }
