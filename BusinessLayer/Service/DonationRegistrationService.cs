@@ -109,7 +109,7 @@ namespace BusinessLayer.Service
 
                 var entity = _mapper.Map<DonationRegistration>(registration);
                 entity.RegistrationStatusId = 1;
-                entity.CreatedAt = DateTime.Now;
+                entity.CreatedAt = DateTime.UtcNow.AddHours(7);
                 entity.UpdatedAt = DateTime.Now;
                 entity.CreatedBy = "System";
 
