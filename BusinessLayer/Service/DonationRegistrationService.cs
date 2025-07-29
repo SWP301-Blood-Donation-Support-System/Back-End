@@ -350,8 +350,7 @@ namespace BusinessLayer.Service
             
             if (existingCheckedIn != null)
             {
-                // User is already checked in today
-                return existingCheckedIn;
+                throw new Exception("Người dùng đã điểm danh trong hôm nay rồi.");
             }
 
             // Try to find an approved registration for today

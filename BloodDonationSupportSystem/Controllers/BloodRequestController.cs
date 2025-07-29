@@ -22,8 +22,19 @@ namespace BloodDonationSupportSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllBloodRequestsAsync()
         {
-            var bloodRequests = await _bloodRequestService.GetAllBloodRequestsAsync();
-            return Ok(bloodRequests);
+            try
+            {
+                var bloodRequests = await _bloodRequestService.GetAllBloodRequestsAsync();
+                return Ok(bloodRequests);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
         }
         /// <summary>
         /// Get blood request by id
