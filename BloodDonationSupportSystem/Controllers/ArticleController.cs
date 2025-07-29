@@ -23,7 +23,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request">Image URL from frontend</param>
         /// <returns>Confirmation</returns>
         [HttpPost("store-image-url")]
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "1,2")]
         public async Task<IActionResult> StoreImageUrl([FromBody] StoreImageUrlRequest request)
         {
             try
@@ -403,7 +403,7 @@ namespace BloodDonationSupportSystem.Controllers
                 var updateDto = new UpdateArticleDTO
                 {
                     ArticleCategoryId = currentArticle.ArticleCategoryId,
-                    ArticleStatusId = 3, // Published status = 3
+                    ArticleStatusId = 2,
                     Title = currentArticle.Title,
                     Content = currentArticle.Content ?? "",
                     Picture = currentArticle.Picture
