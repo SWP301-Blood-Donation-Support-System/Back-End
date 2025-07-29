@@ -188,7 +188,7 @@ namespace BusinessLayer.Service
         {
             try
             {
-                var records = await _donationRecordRepository.GetAllAsync();
+                var records = await _donationRecordRepository.GetAllRecordsWithDonor();
                 var registrations = await _donationRegistrationRepository.GetAllAsync();
                 
                 var totalDonations = records.Count();
@@ -210,8 +210,9 @@ namespace BusinessLayer.Service
                 
                 // Get recent donations
                 var recentDonations = records
+                    .Where(re=>re.BloodTestResult == successfulTestResult)
                     .OrderByDescending(r => r.DonationDateTime)
-                    .Take(10)
+                    .Take(5)
                     .Select(r => new RecentDonationDTO
                     {
                         RecordId = r.DonationRecordId,
