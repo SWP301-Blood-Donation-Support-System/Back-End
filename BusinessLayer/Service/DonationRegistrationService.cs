@@ -109,12 +109,12 @@ namespace BusinessLayer.Service
 
                 var entity = _mapper.Map<DonationRegistration>(registration);
                 entity.RegistrationStatusId = 1;
-                entity.CreatedAt = DateTime.UtcNow.AddHours(7);;
-                entity.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+                entity.CreatedAt = DateTime.Now;
+                entity.UpdatedAt = DateTime.Now;
                 entity.CreatedBy = "System";
 
                 schedule.RegisteredSlots += 1;
-                schedule.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+                schedule.UpdatedAt = DateTime.Now;
                 schedule.UpdatedBy = "System";
 
                 await _donationRegistrationRepository.AddAsync(entity);
@@ -165,13 +165,13 @@ namespace BusinessLayer.Service
                         DonorPhone = donor.PhoneNumber ?? "",
                         DonorNationalId = donor.NationalId ?? "",
                         BloodType = "Sẽ được xác định tại điểm hiến máu",
-                        ScheduleDate = schedule?.ScheduleDate ?? DateTime.UtcNow.AddHours(7);,
+                        ScheduleDate = schedule?.ScheduleDate ?? DateTime.Now,
                         ScheduleLocation = "Trung tâm hiến máu", // Default location since DonationSchedule doesn't have Location property
                         TimeSlotName = "Chưa xác định",
                         StartTime = "",
                         EndTime = "",
-                        RegistrationDate = DateTime.UtcNow.AddHours(7);,
-                        RegistrationCode = $"REG-{registration.DonorId}-{DateTime.UtcNow.AddHours(7);:yyyyMMdd}"
+                        RegistrationDate = DateTime.Now,
+                        RegistrationCode = $"REG-{registration.DonorId}-{DateTime.Now:yyyyMMdd}"
                     };
 
                     // Get blood type name if available
@@ -286,7 +286,7 @@ namespace BusinessLayer.Service
             }
             
             registration.RegistrationStatusId = statusId;
-            registration.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            registration.UpdatedAt = DateTime.Now;
             
             if (statusId == 3 && registration.Donor != null && registration.DonationRecord != null)
             {
@@ -301,7 +301,7 @@ namespace BusinessLayer.Service
 
 
                     donationRecord.CertificateId = $"BDC-{donorIdPart}-{year}{month}";
-                    donationRecord.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+                    donationRecord.UpdatedAt = DateTime.Now;
                 }
 
                 donor.LastDonationDate = donationRecord.DonationDateTime;
@@ -366,7 +366,7 @@ namespace BusinessLayer.Service
 
             // Update the status to checked-in
             registration.RegistrationStatusId = checkedInStatusId;
-            registration.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            registration.UpdatedAt = DateTime.Now;
             
             await _donationRegistrationRepository.UpdateAsync(registration);
             await _donationRegistrationRepository.SaveChangesAsync();

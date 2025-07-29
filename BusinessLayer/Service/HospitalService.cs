@@ -30,7 +30,7 @@ namespace BusinessLayer.Service
                 throw new ArgumentNullException(nameof(hospital), "Hospital cannot be null");
             }
             var entity = _mapper.Map<Hospital>(hospital);
-            entity.CreatedAt = DateTime.UtcNow.AddHours(7);;
+            entity.CreatedAt = DateTime.Now;
             entity.IsDeleted = false;
             await _hospitalRepository.AddAsync(entity);
             await _hospitalRepository.SaveChangesAsync();
@@ -72,7 +72,7 @@ namespace BusinessLayer.Service
             }
             existingHospital.HospitalName=hospital.HospitalName;
             existingHospital.HospitalAddress = hospital.HospitalAddress;
-            existingHospital.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            existingHospital.UpdatedAt = DateTime.Now;
             await _hospitalRepository.UpdateAsync(existingHospital);
             await _hospitalRepository.SaveChangesAsync();
             return true;

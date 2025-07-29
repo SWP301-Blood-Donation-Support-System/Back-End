@@ -24,7 +24,7 @@ namespace DataAccessLayer.Repository
                 return false; // Hospital not found
             }
             request.IsDeleted = true; // Mark as deleted
-           request.UpdatedAt = DateTime.UtcNow.AddHours(7);; // Update the timestamp
+           request.UpdatedAt = DateTime.Now; // Update the timestamp
            await _context.SaveChangesAsync();
             return true;
 

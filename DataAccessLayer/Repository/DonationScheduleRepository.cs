@@ -21,7 +21,7 @@ namespace DataAccessLayer.Repository
 
         public async Task<IEnumerable<DonationSchedule>> GetUpcomingSchedules()
         {
-            var yesterday = DateTime.UtcNow.AddHours(7);.Date.AddDays(-1);
+            var yesterday = DateTime.Now.Date.AddDays(-1);
             // Không cần `!s.IsDeleted` nữa nhờ Global Filter
             return await _context.DonationSchedules
                                  .Where(s => s.ScheduleDate > yesterday)
@@ -56,7 +56,7 @@ namespace DataAccessLayer.Repository
 
             schedule.IsDeleted = true;
             schedule.UpdatedBy = deletedBy;
-            schedule.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            schedule.UpdatedAt = DateTime.Now;
 
             _context.DonationSchedules.Update(schedule);
             return true; // Xóa SaveChangesAsync()
@@ -75,7 +75,7 @@ namespace DataAccessLayer.Repository
 
             schedule.IsDeleted = false;
             schedule.UpdatedBy = restoredBy;
-            schedule.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            schedule.UpdatedAt = DateTime.Now;
 
             _context.DonationSchedules.Update(schedule);
             return true; // Xóa SaveChangesAsync()
@@ -94,7 +94,7 @@ namespace DataAccessLayer.Repository
             if (schedule.RegisteredSlots + change > maxCapacity) return false;
 
             schedule.RegisteredSlots += change;
-            schedule.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            schedule.UpdatedAt = DateTime.Now;
 
             return true; // Xóa SaveChangesAsync()
 

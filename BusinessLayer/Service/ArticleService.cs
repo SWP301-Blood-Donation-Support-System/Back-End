@@ -23,7 +23,7 @@ namespace BusinessLayer.Service
         public async Task<Article> AddArticleAsync(ArticleDTO articleDto)
         {
             var article = _mapper.Map<Article>(articleDto);
-            article.CreatedAt = DateTime.UtcNow.AddHours(7);;
+            article.CreatedAt = DateTime.Now;
             await _articleRepository.AddAsync(article);
             await _articleRepository.SaveChangesAsync();
             return article;
@@ -37,7 +37,7 @@ namespace BusinessLayer.Service
                 return false;
             }
             _mapper.Map(articleDto, existingArticle);
-            existingArticle.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            existingArticle.UpdatedAt = DateTime.Now;
             await _articleRepository.UpdateAsync(existingArticle);
             return await _articleRepository.SaveChangesAsync();
         }

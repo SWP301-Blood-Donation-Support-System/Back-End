@@ -86,7 +86,7 @@ namespace DataAccessLayer.Repository
                 return false; 
             }
             request.RequestStatusId = statusId;
-            request.UpdatedAt= DateTime.UtcNow.AddHours(7);;
+            request.UpdatedAt= DateTime.Now;
             await _context.SaveChangesAsync();
             return true;
         }
@@ -98,7 +98,7 @@ namespace DataAccessLayer.Repository
                 return false;
             }
             request.IsDeleted= true;
-            request.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            request.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
             return true;
         }

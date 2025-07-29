@@ -37,10 +37,10 @@ namespace BusinessLayer.Service
                 var entity = _mapper.Map<BloodRequest>(bloodRequest);
                 entity.RequestStatusId = 1;
                 entity.RemainingVolume = bloodRequest.Volume;
-                entity.RequestDateTime = DateTime.UtcNow.AddHours(7);;
+                entity.RequestDateTime = DateTime.Now;
                 if(entity.UrgencyId == 2)
                 {
-                    entity.RequiredDateTime = DateTime.UtcNow.AddHours(7);;
+                    entity.RequiredDateTime = DateTime.Now;
                 }
                 await _bloodRequestRepository.AddAsync(entity);
                 await _bloodRequestRepository.SaveChangesAsync();
@@ -160,7 +160,7 @@ namespace BusinessLayer.Service
 
                 bloodRequest.ApprovedByUserId = approvedByUserId;
                 bloodRequest.RequestStatusId = 2; // Approved status
-                bloodRequest.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+                bloodRequest.UpdatedAt = DateTime.Now;
                 await _bloodRequestRepository.UpdateAsync(bloodRequest);
                 await _bloodRequestRepository.SaveChangesAsync();
                 return true;
@@ -196,7 +196,7 @@ namespace BusinessLayer.Service
                     currentNote += $"\nĐã bị từ chối vì: \n{rejectReason}";
                 }
                 bloodRequest.Note = currentNote;
-                bloodRequest.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+                bloodRequest.UpdatedAt = DateTime.Now;
 
                 await _bloodRequestRepository.UpdateAsync(bloodRequest);
                 await _bloodRequestRepository.SaveChangesAsync();
@@ -284,7 +284,7 @@ namespace BusinessLayer.Service
                         u.ComponentId == bloodRequest.BloodComponentId &&
                         u.BloodUnitStatusId == 1 && // Available status
                         u.RequestId == null &&
-                        u.ExpiryDateTime > DateTime.UtcNow.AddHours(7);)
+                        u.ExpiryDateTime > DateTime.Now)
                         .ToList();
 
                     availableUnits.AddRange(matchingUnits);
@@ -519,7 +519,7 @@ namespace BusinessLayer.Service
                 {
                     bloodRequest.RequestStatusId = 2; // Set to Approved if there are still volumes remaining
                 }
-                bloodRequest.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+                bloodRequest.UpdatedAt = DateTime.Now;
                 await _bloodRequestRepository.UpdateAsync(bloodRequest);
                 await _bloodRequestRepository.SaveChangesAsync();
             }

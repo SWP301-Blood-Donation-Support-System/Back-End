@@ -50,7 +50,7 @@ namespace DataAccessLayer.Repository
         /// <returns>Danh sách user có th? hi?n máu</returns>
         public async Task<IEnumerable<User>> GetUpcomingEligibleDonorsAsync(int daysAhead = 3)
         {
-            var today = DateTime.UtcNow.AddHours(7);.Date;
+            var today = DateTime.Now.Date;
             var endDate = today.AddDays(daysAhead);
 
             return await _context.Users
@@ -76,7 +76,7 @@ namespace DataAccessLayer.Repository
 
             user.LastDonationDate = donationDate;
             user.NextEligibleDonationDate = donationDate.AddMonths(3);
-            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            user.UpdatedAt = DateTime.Now;
 
             _context.Users.Update(user);
             return true;
@@ -91,7 +91,7 @@ namespace DataAccessLayer.Repository
             }
 
             user.DonationAvailabilityId = donationAvailabilityId;
-            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            user.UpdatedAt = DateTime.Now;
 
             _context.Users.Update(user);
             _context.SaveChanges();
@@ -106,7 +106,7 @@ namespace DataAccessLayer.Repository
                 return false;
             }
             user.RoleId = roleId;
-            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
+            user.UpdatedAt = DateTime.Now;
             _context.Users.Update(user);
             _context.SaveChanges();
             return true;

@@ -39,16 +39,16 @@ namespace BusinessLayer.Service
             try
             {
                 TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow.AddHours(7);, vietnamTimeZone);
+                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.Now, vietnamTimeZone);
             }
             catch (TimeZoneNotFoundException)
             {
                 TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh");
-                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow.AddHours(7);, vietnamTimeZone);
+                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.Now, vietnamTimeZone);
             }
             catch (Exception)
             {
-                return DateTime.UtcNow.AddHours(7);.AddHours(7);
+                return DateTime.Now.AddHours(7);
             }
         }
 
@@ -75,7 +75,7 @@ namespace BusinessLayer.Service
                         u.RoleId == 3 && 
                         !string.IsNullOrEmpty(u.Email) &&
                         u.DonationAvailabilityId == 1 && 
-                        (u.NextEligibleDonationDate == null || u.NextEligibleDonationDate <= DateTime.UtcNow.AddHours(7);)).ToList();
+                        (u.NextEligibleDonationDate == null || u.NextEligibleDonationDate <= DateTime.Now)).ToList();
                     
                     eligibleDonors.AddRange(activeDonors);
                 }
