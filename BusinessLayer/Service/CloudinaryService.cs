@@ -14,29 +14,29 @@ namespace BusinessLayer.Service
         public CloudinaryService(IConfiguration configuration)
         {
             // Try multiple configuration approaches
-            var cloudinaryUrl = configuration["Cloudinary:CloudinaryUrl"];
+            //var cloudinaryUrl = configuration["Cloudinary:CloudinaryUrl"];
             
-            if (string.IsNullOrEmpty(cloudinaryUrl))
-            {
-                // Fallback to individual configuration values
-                var cloudName = configuration["Cloudinary:CloudName"];
-                var apiKey = configuration["Cloudinary:ApiKey"];
-                var apiSecret = configuration["Cloudinary:ApiSecret"];
+            //if (string.IsNullOrEmpty(cloudinaryUrl))
+            //{
+            //    // Fallback to individual configuration values
+            //    var cloudName = configuration["Cloudinary:CloudName"];
+            //    var apiKey = configuration["Cloudinary:ApiKey"];
+            //    var apiSecret = configuration["Cloudinary:ApiSecret"];
 
-                if (string.IsNullOrEmpty(cloudName) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
-                {
-                    throw new ArgumentException("Cloudinary configuration is missing. Please provide either CloudinaryUrl or CloudName/ApiKey/ApiSecret");
-                }
+            //    if (string.IsNullOrEmpty(cloudName) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
+            //    {
+            //        throw new ArgumentException("Cloudinary configuration is missing. Please provide either CloudinaryUrl or CloudName/ApiKey/ApiSecret");
+            //    }
 
-                var account = new Account(cloudName, apiKey, apiSecret);
-                _cloudinary = new Cloudinary(account);
-            }
-            else
-            {
-                _cloudinary = new Cloudinary(cloudinaryUrl);
-            }
+            //    var account = new Account(cloudName, apiKey, apiSecret);
+            //    _cloudinary = new Cloudinary(account);
+            //}
+            //else
+            //{
+            //    _cloudinary = new Cloudinary(cloudinaryUrl);
+            //}
 
-            _defaultFolder = configuration["Cloudinary:Folder"] ?? "blood-donation-system";
+            //_defaultFolder = configuration["Cloudinary:Folder"] ?? "blood-donation-system";
         }
 
         public async Task<string> UploadImageAsync(IFormFile imageFile)

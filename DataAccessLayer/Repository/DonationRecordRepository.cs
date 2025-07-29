@@ -66,6 +66,17 @@ namespace DataAccessLayer.Repository
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<DonationRecord>> GetAllRecordsWithDonor()
+        {
+            return await _context.DonationRecords
+                .Include(d=>d.DonationType)
+                .Include(r => r.Registration)
+                .ThenInclude(reg => reg.Donor)
+                .ThenInclude(bl=>bl.BloodType)
+                .Where(r => !r.IsDeleted) 
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<DonationRecord>> GetRecordsByValidatorAsync(int userId)
         {
             var validatedRecordIds = await _context.DonationValidations

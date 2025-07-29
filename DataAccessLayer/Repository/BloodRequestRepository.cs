@@ -17,7 +17,6 @@ namespace DataAccessLayer.Repository
         {
             _context = context;
         }
-
         public async Task<IEnumerable<BloodRequest>> GetBloodRequestsByBloodTypeIdAsync(int bloodTypeId)
         {
             return await _context.BloodRequests
