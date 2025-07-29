@@ -20,6 +20,54 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         /// <summary>
+        /// Store image URL from frontend (already processed by Cloudinary on frontend)
+        /// </summary>
+        /// <param name="request">Image URL from frontend</param>
+        /// <returns>Confirmation</returns>
+        [HttpPost("store-image-url")]
+        [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> StoreImageUrl([FromBody] StoreImageUrlRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.ImageUrl) || !Uri.IsWellFormedUriString(request.ImageUrl, UriKind.Absolute))
+                {
+                    return BadRequest(new 
+                    { 
+                        status = "failed", 
+                        message = "URL ảnh không hợp lệ" 
+                    });
+                }
+
+                // Validate if it's a Cloudinary URL (optional)
+                if (!request.ImageUrl.Contains("cloudinary.com"))
+                {
+                    return BadRequest(new 
+                    { 
+                        status = "failed", 
+                        message = "Chỉ chấp nhận URL từ Cloudinary" 
+                    });
+                }
+
+                return Ok(new 
+                { 
+                    status = "success", 
+                    message = "URL ảnh hợp lệ, có thể sử dụng để tạo bài viết",
+                    imageUrl = request.ImageUrl
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new 
+                { 
+                    status = "error", 
+                    message = "Lỗi khi xử lý URL ảnh", 
+                    error = ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
         /// Upload image for article using Cloudinary
         /// </summary>
         /// <param name="imageFile">Image file to upload</param>
