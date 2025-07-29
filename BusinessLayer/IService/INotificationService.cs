@@ -15,6 +15,6 @@ namespace BusinessLayer.IService
         Task<IEnumerable<Notification>> GetNotificationByTypeIdAsync(int notiTypeId);
         Task<IEnumerable<Notification>> GetAllNotificationsAsync();
         Task<bool> SoftDeleteNotificationAsync(int notiId);
-        Task<bool> UpdateNotificationAsync(NotificationDTO notification);
+        Task<bool> UpdateNotificationAsync(int notificationId, NotificationDTO notification); // SỬA: Thêm ID parameter
     }
 }

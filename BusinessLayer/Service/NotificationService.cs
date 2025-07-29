@@ -53,18 +53,32 @@ namespace BusinessLayer.Service
                 throw new ArgumentOutOfRangeException(nameof(notiId), "ID must be greater than zero");
             return await _notificationRepository.SoftDeleteNotificationAsync(notiId);
         }
-        public async Task<bool> UpdateNotificationAsync(NotificationDTO notification)
+        public async Task<bool> UpdateNotificationAsync(int notificationId, NotificationDTO notification)
         {
             if (notification == null)
             {
                 throw new ArgumentNullException(nameof(notification), "Notification cannot be null");
             }
 
-            var record = Mapper.Map<Notification>(notification);
-            // Update timestamp
-            record.UpdatedAt = DateTime.UtcNow;
+            if (notificationId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(notificationId), "Notification ID must be greater than zero");
+            }
 
-            await _notificationRepository.UpdateAsync(record);
+            // Lấy notification hiện tại từ database
+            var existingNotification = await _notificationRepository.GetByIdAsync(notificationId);
+            if (existingNotification == null)
+            {
+                return false; // Không tìm thấy notification
+            }
+
+            // Cập nhật các thuộc tính từ DTO
+            existingNotification.NotificationTypeId = notification.NotificationTypeId;
+            existingNotification.Subject = notification.Subject;
+            existingNotification.Message = notification.Message;
+            existingNotification.UpdatedAt = DateTime.UtcNow;
+
+            await _notificationRepository.UpdateAsync(existingNotification);
             await _notificationRepository.SaveChangesAsync();
             return true;
         }
