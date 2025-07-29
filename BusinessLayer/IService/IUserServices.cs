@@ -38,5 +38,21 @@ namespace BusinessLayer.IService
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ResetPasswordAsync(string token, string newPassword);
         Task<bool> ChangePasswordAsync(int userId,string currentPassword, string newPassword);
+        
+        // NEW METHODS FOR DONATION REMINDER FEATURE
+        /// <summary>
+        /// L?y danh sách ng??i có th? hi?n máu trong X ngày t?i
+        /// </summary>
+        /// <param name="daysAhead">S? ngày t?i</param>
+        /// <returns>Danh sách UpcomingEligibleDonorsDTO</returns>
+        Task<IEnumerable<UpcomingEligibleDonorsDTO>> GetUpcomingEligibleDonorsAsync(int daysAhead = 3);
+        
+        /// <summary>
+        /// G?i thông báo nh?c nh? hàng lo?t cho danh sách user
+        /// </summary>
+        /// <param name="request">Thông tin request</param>
+        /// <param name="adminUserId">ID c?a admin th?c hi?n</param>
+        /// <returns>K?t qu? g?i thông báo</returns>
+        Task<BulkReminderResponseDTO> SendBulkDonationRemindersAsync(BulkReminderRequestDTO request, int adminUserId);
     }
 }
