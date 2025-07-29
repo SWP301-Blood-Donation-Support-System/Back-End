@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using DataAccessLayer.DTO;
 
 namespace BloodDonationSupportSystem.Controllers
 {
@@ -165,25 +166,5 @@ namespace BloodDonationSupportSystem.Controllers
                 return false;
             }
         }
-    }
-
-    // DTOs for requests
-    public class StoreImageUrlRequest
-    {
-        public string ImageUrl { get; set; } = string.Empty;
-        public string? Description { get; set; }
-        public string? Category { get; set; }
-    }
-
-    public class StoreMultipleImageUrlsRequest
-    {
-        public List<string> ImageUrls { get; set; } = new();
-        public string? Description { get; set; }
-        public string? Category { get; set; }
-    }
-
-    public class ValidateImageUrlRequest
-    {
-        public string ImageUrl { get; set; } = string.Empty;
     }
 }
