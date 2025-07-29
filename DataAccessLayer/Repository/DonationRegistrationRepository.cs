@@ -57,7 +57,7 @@ namespace DataAccessLayer.Repository
         /// <returns>Danh sách đăng ký hiến máu</returns>
         public async Task<IEnumerable<DonationRegistration>> GetUpcomingApprovedRegistrationsAsync(int daysAhead = 1, int approvedStatusId = 1)
         {
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.AddHours(7);.Date;
             var targetDate = today.AddDays(daysAhead);
 
             return await _context.DonationRegistrations
@@ -91,7 +91,7 @@ namespace DataAccessLayer.Repository
             }
 
             registration.RegistrationStatusId = statusId;
-            registration.UpdatedAt = DateTime.Now;
+            registration.UpdatedAt = DateTime.UtcNow.AddHours(7);;
             _context.DonationRegistrations.Update(registration);
             await _context.SaveChangesAsync();
             return true;
@@ -108,7 +108,7 @@ namespace DataAccessLayer.Repository
             }
 
             registration.IsDeleted = true;
-            registration.UpdatedAt = DateTime.Now;
+            registration.UpdatedAt = DateTime.UtcNow.AddHours(7);;
             _context.DonationRegistrations.Update(registration);
             await _context.SaveChangesAsync();
             return true;
@@ -132,7 +132,7 @@ namespace DataAccessLayer.Repository
 
             // Cập nhật trạng thái bằng tham số checkedInStatusId
             registration.RegistrationStatusId = checkedInStatusId;
-            registration.UpdatedAt = DateTime.Now;
+            registration.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             await _context.SaveChangesAsync();
 

@@ -54,16 +54,16 @@ namespace BusinessLayer.Service
             {
                 // Thử tìm múi giờ cho Windows
                 TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.Now, vietnamTimeZone);
+                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow.AddHours(7);, vietnamTimeZone);
             }
             catch (TimeZoneNotFoundException)
             {
                 TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh");
-                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.Now, vietnamTimeZone);
+                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow.AddHours(7);, vietnamTimeZone);
             }
             catch (Exception)
             {
-                return DateTime.Now.AddHours(7);
+                return DateTime.UtcNow.AddHours(7);.AddHours(7);
             }
         }
         public async Task<User> GetUserByIdAsync(int userId)
@@ -240,7 +240,7 @@ namespace BusinessLayer.Service
             {
                 throw new InvalidOperationException("National ID already exists for another user");
             }
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangesAsync();
@@ -264,7 +264,7 @@ namespace BusinessLayer.Service
             _mapper.Map(donor, existingUser);
 
             // Set updated timestamp
-            existingUser.UpdatedAt = DateTime.Now;
+            existingUser.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             // Save changes
             await _userRepository.UpdateAsync(existingUser);
@@ -288,7 +288,7 @@ namespace BusinessLayer.Service
             }
 
             user.IsDeleted = true;
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             await _userRepository.UpdateAsync(user);
             return await _userRepository.SaveChangesAsync();
@@ -338,7 +338,7 @@ namespace BusinessLayer.Service
             }
 
             user.RoleId = roleId;
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             await _userRepository.UpdateAsync(user);
             return await _userRepository.SaveChangesAsync();
@@ -369,7 +369,7 @@ namespace BusinessLayer.Service
             }
 
             user.UserImage = null;
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             await _userRepository.UpdateAsync(user);
             return await _userRepository.SaveChangesAsync();
@@ -426,7 +426,7 @@ namespace BusinessLayer.Service
                         new Claim("IsActive", user.IsActive.ToString())
                     }),
                     
-                    Expires = DateTime.Now.AddMinutes(180),
+                    Expires = DateTime.UtcNow.AddHours(7);.AddMinutes(180),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
                 };
 
@@ -809,7 +809,7 @@ namespace BusinessLayer.Service
         public async Task<IEnumerable<UpcomingEligibleDonorsDTO>> GetUpcomingEligibleDonorsAsync(int daysAhead = 3)
         {
             var users = await _userRepository.GetUpcomingEligibleDonorsAsync(daysAhead);
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.AddHours(7);.Date;
 
             return users.Select(u => new UpcomingEligibleDonorsDTO
             {
@@ -838,7 +838,7 @@ namespace BusinessLayer.Service
             var response = new BulkReminderResponseDTO
             {
                 TotalTargetUsers = request.UserIds.Count,
-                ProcessedAt = DateTime.Now,
+                ProcessedAt = DateTime.UtcNow.AddHours(7);,
                 ProcessedBy = $"Admin-{adminUserId}"
             };
 
@@ -967,7 +967,7 @@ namespace BusinessLayer.Service
 
             // 2. Cập nhật   token và thời gian hết hạn cho user
             user.PasswordResetToken = token;
-            user.ResetTokenExpires = DateTime.Now.AddHours(1);
+            user.ResetTokenExpires = DateTime.UtcNow.AddHours(7);.AddHours(1);
 
             await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangesAsync();
@@ -988,7 +988,7 @@ namespace BusinessLayer.Service
             var user = await _userRepository.GetByPasswordResetToken(token);
 
             // Kiểm tra xem token có hợp lệ và còn hạn không
-            if (user == null || user.ResetTokenExpires < DateTime.Now)
+            if (user == null || user.ResetTokenExpires < DateTime.UtcNow.AddHours(7);)
             {
                 return false; // Invalid token or token expired
             }
@@ -1054,7 +1054,7 @@ namespace BusinessLayer.Service
                     Bạn nhận được email này vì đã đăng ký tài khoản tại Blood Donation Support System.
                 </p>
                 <p style='margin: 10px 0 0; font-size: 14px; color: #888888;'>
-                    &copy; {DateTime.Now.Year} Blood Donation Support System. All rights reserved.
+                    &copy; {DateTime.UtcNow.AddHours(7);.Year} Blood Donation Support System. All rights reserved.
                 </p>
             </td>
         </tr>
@@ -1083,7 +1083,7 @@ namespace BusinessLayer.Service
 
             // 3. Nếu mật khẩu hiện tại đúng, cập nhật mật khẩu mới (đã được mã hóa)
             user.PasswordHash = EncryptPassword(newPassword);
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangesAsync();
@@ -1110,7 +1110,7 @@ namespace BusinessLayer.Service
             }
 
             user.BloodTypeId = bloodTypeId;
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             await _userRepository.UpdateAsync(user);
             return await _userRepository.SaveChangesAsync();
@@ -1140,7 +1140,7 @@ namespace BusinessLayer.Service
             }
 
             user.BloodTypeId = bloodTypeId;
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             await _userRepository.UpdateAsync(user);
             return await _userRepository.SaveChangesAsync();
@@ -1188,7 +1188,7 @@ namespace BusinessLayer.Service
         /// <returns>Kết quả xử lý</returns>
         public async Task<AutoReminderJobResponseDTO> SendTomorrowDonationRemindersAsync()
         {
-            var startTime = DateTime.Now;
+            var startTime = DateTime.UtcNow.AddHours(7);;
             var response = new AutoReminderJobResponseDTO
             {
                 ProcessedAt = startTime,
@@ -1205,7 +1205,7 @@ namespace BusinessLayer.Service
 
                 if (!schedulesList.Any())
                 {
-                    response.ExecutionTime = DateTime.Now - startTime;
+                    response.ExecutionTime = DateTime.UtcNow.AddHours(7); - startTime;
                     return response;
                 }
 
@@ -1284,7 +1284,7 @@ namespace BusinessLayer.Service
                     }
                 }
 
-                response.ExecutionTime = DateTime.Now - startTime;
+                response.ExecutionTime = DateTime.UtcNow.AddHours(7); - startTime;
                 
                 // Log kết quả
                 Console.WriteLine($"=== AUTO REMINDER JOB COMPLETED ===");
@@ -1299,7 +1299,7 @@ namespace BusinessLayer.Service
             {
                 response.FailedNotifications = response.TotalUpcomingDonations;
                 response.ErrorMessages.Add($"Job execution failed: {ex.Message}");
-                response.ExecutionTime = DateTime.Now - startTime;
+                response.ExecutionTime = DateTime.UtcNow.AddHours(7); - startTime;
                 
                 Console.WriteLine($"=== AUTO REMINDER JOB FAILED ===");
                 Console.WriteLine($"Error: {ex.Message}");

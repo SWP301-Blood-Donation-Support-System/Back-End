@@ -113,7 +113,7 @@ namespace DataAccessLayer.Repository
 
             // Đánh dấu là đã xóa
             record.IsDeleted = true;
-            record.UpdatedAt = DateTime.Now;
+            record.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             _context.DonationRecords.Update(record);
             // SaveChangesAsync sẽ được gọi từ Service như code gốc của bạn
@@ -132,7 +132,7 @@ namespace DataAccessLayer.Repository
                 return false;
 
             _context.Entry(existingRecord).CurrentValues.SetValues(donationRecord);
-            existingRecord.UpdatedAt = DateTime.Now;
+            existingRecord.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             return true;
         }
@@ -149,7 +149,7 @@ namespace DataAccessLayer.Repository
 
             updatedRecord.DonationRecordId = recordId;
             _context.Entry(existingRecord).CurrentValues.SetValues(updatedRecord);
-            existingRecord.UpdatedAt = DateTime.Now;
+            existingRecord.UpdatedAt = DateTime.UtcNow.AddHours(7);;
 
             try
             {
@@ -176,8 +176,8 @@ namespace DataAccessLayer.Repository
             {
                 DonationRecordId = donationRecordId,
                 UserId = userId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7);,
+                UpdatedAt = DateTime.UtcNow.AddHours(7);,
                 IsDeleted = false
             };
             await _context.DonationValidations.AddAsync(validation);
@@ -200,7 +200,7 @@ namespace DataAccessLayer.Repository
             if (validation == null) return false;
 
             validation.IsDeleted = true;
-            validation.UpdatedAt = DateTime.Now;
+            validation.UpdatedAt = DateTime.UtcNow.AddHours(7);;
             return true;
         }
 

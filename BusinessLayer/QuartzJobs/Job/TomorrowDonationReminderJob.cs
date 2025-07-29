@@ -21,7 +21,7 @@ namespace BusinessLayer.QuartzJobs.Job
         public async Task Execute(IJobExecutionContext context)
         {
             _logger.LogInformation("=== Starting Tomorrow Donation Reminder Job ===");
-            var startTime = DateTime.Now;
+            var startTime = DateTime.UtcNow.AddHours(7);;
 
             try
             {
@@ -44,7 +44,7 @@ namespace BusinessLayer.QuartzJobs.Job
             }
             catch (Exception ex)
             {
-                var executionTime = DateTime.Now - startTime;
+                var executionTime = DateTime.UtcNow.AddHours(7); - startTime;
                 _logger.LogError(ex, $"Tomorrow Donation Reminder Job failed after {executionTime.TotalSeconds:F2} seconds");
                 _logger.LogError($"Error message: {ex.Message}");
                 _logger.LogError($"Stack trace: {ex.StackTrace}");
