@@ -13,12 +13,6 @@ namespace DataAccessLayer.DTO
         [Url(ErrorMessage = "URL ảnh không hợp lệ")]
         public string ImageUrl { get; set; } = string.Empty;
 
-        [StringLength(500, ErrorMessage = "Mô tả không được vượt quá 500 ký tự")]
-        public string? Description { get; set; }
-
-        [StringLength(100, ErrorMessage = "Danh mục không được vượt quá 100 ký tự")]
-        public string? Category { get; set; }
-
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
@@ -31,12 +25,6 @@ namespace DataAccessLayer.DTO
         [Required(ErrorMessage = "URL ảnh là bắt buộc")]
         [Url(ErrorMessage = "URL ảnh không hợp lệ")]
         public string ImageUrl { get; set; } = string.Empty;
-
-        [StringLength(500, ErrorMessage = "Mô tả không được vượt quá 500 ký tự")]
-        public string? Description { get; set; }
-
-        [StringLength(100, ErrorMessage = "Danh mục không được vượt quá 100 ký tự")]
-        public string? Category { get; set; }
     }
 
     /// <summary>
@@ -48,12 +36,6 @@ namespace DataAccessLayer.DTO
         [MinLength(1, ErrorMessage = "Phải có ít nhất 1 URL ảnh")]
         [MaxLength(10, ErrorMessage = "Chỉ được phép lưu tối đa 10 URL ảnh cùng lúc")]
         public List<string> ImageUrls { get; set; } = new();
-
-        [StringLength(500, ErrorMessage = "Mô tả không được vượt quá 500 ký tự")]
-        public string? Description { get; set; }
-
-        [StringLength(100, ErrorMessage = "Danh mục không được vượt quá 100 ký tự")]
-        public string? Category { get; set; }
     }
 
     /// <summary>
@@ -118,9 +100,6 @@ namespace DataAccessLayer.DTO
         public int? Id { get; set; }
         public string ImageUrl { get; set; } = string.Empty;
         public string? OriginalFileName { get; set; }
-        public string? Description { get; set; }
-        public string? Category { get; set; }
-        public string? Tags { get; set; }
         public long? FileSize { get; set; }
         public int? Width { get; set; }
         public int? Height { get; set; }

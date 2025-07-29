@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using DataAccessLayer.DTO;
+using System.Security.Claims;
 
 namespace BloodDonationSupportSystem.Controllers
 {
@@ -13,7 +15,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request">Request containing image URL</param>
         /// <returns>Confirmation of URL storage</returns>
         [HttpPost("store-url")]
-        [Authorize]
+        [Authorize(Roles = "Admin,Staff")]
         public IActionResult StoreImageUrl([FromBody] StoreImageUrlRequest request)
         {
             try
@@ -53,7 +55,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="request">Request containing multiple image URLs</param>
         /// <returns>Confirmation of URLs storage</returns>
         [HttpPost("store-multiple-urls")]
-        [Authorize]
+        [Authorize(Roles = "Admin,Staff")]
         public IActionResult StoreMultipleImageUrls([FromBody] StoreMultipleImageUrlsRequest request)
         {
             try
@@ -165,25 +167,5 @@ namespace BloodDonationSupportSystem.Controllers
                 return false;
             }
         }
-    }
-
-    // DTOs for requests
-    public class StoreImageUrlRequest
-    {
-        public string ImageUrl { get; set; } = string.Empty;
-        public string? Description { get; set; }
-        public string? Category { get; set; }
-    }
-
-    public class StoreMultipleImageUrlsRequest
-    {
-        public List<string> ImageUrls { get; set; } = new();
-        public string? Description { get; set; }
-        public string? Category { get; set; }
-    }
-
-    public class ValidateImageUrlRequest
-    {
-        public string ImageUrl { get; set; } = string.Empty;
     }
 }

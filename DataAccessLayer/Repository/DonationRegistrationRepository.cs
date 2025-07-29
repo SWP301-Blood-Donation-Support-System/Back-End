@@ -132,7 +132,7 @@ namespace DataAccessLayer.Repository
     return await _context.DonationRegistrations
         .Include(r => r.Donor)
         .Include(r => r.Schedule)
-        .Include(r => r.TimeSlot) // Include TimeSlot để hiển thị thông tin ca làm việc
+        .Include(r => r.TimeSlot) 
         .FirstOrDefaultAsync(r =>
             r.Donor.NationalId == nationalId &&
             r.Schedule.ScheduleDate.Value.Date == today &&
