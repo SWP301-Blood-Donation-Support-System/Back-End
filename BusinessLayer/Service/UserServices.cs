@@ -410,6 +410,7 @@ namespace BusinessLayer.Service
                         new Claim("FullName", user.FullName ?? ""),
                         new Claim("DateOfBirth", user.DateOfBirth?.ToString("yyyy-MM-dd") ?? ""),
                         new Claim("RoleID", user.RoleId.ToString()),
+                        new Claim(ClaimTypes.Role, user.RoleId.ToString()),
                         new Claim("NationalID", user.NationalId ?? ""),
                         new Claim("Address", user.Address ?? ""),
                         new Claim("GenderID", user.GenderId?.ToString() ?? ""),
@@ -420,7 +421,7 @@ namespace BusinessLayer.Service
                         new Claim("DonationAvailabilityID", user.DonationAvailabilityId.ToString()),
                         new Claim("IsActive", user.IsActive.ToString())
                     }),
-
+                    
                     Expires = DateTime.UtcNow.AddMinutes(180),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
                 };
