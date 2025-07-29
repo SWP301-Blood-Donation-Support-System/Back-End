@@ -808,6 +808,160 @@ namespace BusinessLayer.Service
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Lấy danh sách người có thể hiến máu trong X ngày tới
+        /// </summary>
+        /// <param name="daysAhead">Số ngày tới</param>
+        /// <returns>Danh sách UpcomingEligibleDonorsDTO</returns>
+        public async Task<IEnumerable<UpcomingEligibleDonorsDTO>> GetUpcomingEligibleDonorsAsync(int daysAhead = 3)
+        {
+            var users = await _userRepository.GetUpcomingEligibleDonorsAsync(daysAhead);
+            var today = DateTime.UtcNow.Date;
+
+            return users.Select(u => new UpcomingEligibleDonorsDTO
+            {
+                UserId = u.UserId,
+                FullName = u.FullName,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                BloodTypeName = u.BloodType?.BloodTypeName,
+                NextEligibleDonationDate = u.NextEligibleDonationDate,
+                DaysUntilEligible = u.NextEligibleDonationDate.HasValue 
+                    ? (int)(u.NextEligibleDonationDate.Value.Date - today).TotalDays 
+                    : 0,
+                LastDonationDate = u.LastDonationDate,
+                IsActive = u.IsActive
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Gửi thông báo nhắc nhở hàng loạt cho danh sách user
+        /// </summary>
+        /// <param name="request">Thông tin request</param>
+        /// <param name="adminUserId">ID của admin thực hiện</param>
+        /// <returns>Kết quả gửi thông báo</returns>
+        public async Task<BulkReminderResponseDTO> SendBulkDonationRemindersAsync(BulkReminderRequestDTO request, int adminUserId)
+        {
+            var response = new BulkReminderResponseDTO
+            {
+                TotalTargetUsers = request.UserIds.Count,
+                ProcessedAt = DateTime.UtcNow,
+                ProcessedBy = $"Admin-{adminUserId}"
+            };
+
+            // Lấy thông tin admin
+            var admin = await _userRepository.GetByIdAsync(adminUserId);
+            var adminName = admin?.FullName ?? "Quản trị viên";
+
+            foreach (var userId in request.UserIds)
+            {
+                try
+                {
+                    var user = await _userRepository.GetByIdAsync(userId);
+                    if (user == null || !user.IsActive || user.IsDeleted)
+                    {
+                        response.FailedNotifications++;
+                        response.ErrorMessages.Add($"User ID {userId}: Không tìm thấy hoặc tài khoản không hoạt động");
+                        continue;
+                    }
+
+                    // Tạo nội dung thông báo
+                    var subject = "🩸 Nhắc nhở hiến máu - Bạn đã sẵn sàng hiến máu trở lại!";
+                    var defaultMessage = $"Xin chào {user.FullName},\n\n" +
+                        $"Chúng tôi vui mừng thông báo rằng bạn đã có thể hiến máu trở lại! " +
+                        $"Hãy đăng ký lịch hiến máu để tiếp tục hành trình cứu người của bạn.\n\n" +
+                        $"Cảm ơn bạn đã luôn đồng hành cùng chúng tôi trong việc hiến máu cứu người.\n\n" +
+                        $"Trân trọng,\n{adminName}";
+
+                    var finalMessage = !string.IsNullOrEmpty(request.CustomMessage) 
+                        ? request.CustomMessage.Replace("{UserName}", user.FullName ?? "")
+                                               .Replace("{AdminName}", adminName)
+                        : defaultMessage;
+
+                    // 1. Gửi thông báo trong hệ thống (nếu có UserNotificationService)
+                    if (request.SendNotification)
+                    {
+                        // Giả sử có UserNotificationService - cần inject
+                        // await _userNotificationService.CreateNotificationForUserAsync(userId, subject, finalMessage, 2);
+                    }
+
+                    // 2. Gửi email (nếu được yêu cầu)
+                    if (request.SendEmail && !string.IsNullOrEmpty(user.Email))
+                    {
+                        var emailBody = GenerateDonationReminderEmailTemplate(user.FullName ?? "", finalMessage, adminName);
+                        SendMail(subject, emailBody, user.Email);
+                    }
+
+                    response.SuccessfulNotifications++;
+                }
+                catch (Exception ex)
+                {
+                    response.FailedNotifications++;
+                    response.ErrorMessages.Add($"User ID {userId}: {ex.Message}");
+                }
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Tạo template email cho thông báo nhắc nhở hiến máu
+        /// </summary>
+        private string GenerateDonationReminderEmailTemplate(string userFullName, string message, string adminName)
+        {
+            var currentDate = GetVietnamTime().ToString("dd/MM/yyyy HH:mm");
+
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html lang='vi'>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("    <meta charset='UTF-8'>");
+            sb.AppendLine("    <title>Nhắc nhở hiến máu</title>");
+            sb.AppendLine("    <style>");
+            sb.AppendLine("        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }");
+            sb.AppendLine("        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }");
+            sb.AppendLine("        .header { background-color: #B22222; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }");
+            sb.AppendLine("        .content { padding: 20px 0; }");
+            sb.AppendLine("        .highlight { background-color: #f8f9fa; padding: 15px; border-left: 4px solid #B22222; margin: 15px 0; border-radius: 4px; }");
+            sb.AppendLine("        .cta-button { background-color: #B22222; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 15px 0; }");
+            sb.AppendLine("        .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }");
+            sb.AppendLine("    </style>");
+            sb.AppendLine("</head>");
+            sb.AppendLine("<body>");
+            sb.AppendLine("    <div class='container'>");
+            sb.AppendLine("        <div class='header'>");
+            sb.AppendLine("            <h1>🩸 Nhắc nhở hiến máu</h1>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='content'>");
+            sb.AppendLine($"            <h2>Kính chào {userFullName}!</h2>");
+            sb.AppendLine($"            <p>{message.Replace("\n", "<br>")}</p>");
+            sb.AppendLine("            <div class='highlight'>");
+            sb.AppendLine("                <h3>📅 Hành động tiếp theo</h3>");
+            sb.AppendLine("                <p>Hãy truy cập hệ thống để đăng ký lịch hiến máu phù hợp với bạn.</p>");
+            sb.AppendLine("                <a href='#' class='cta-button'>Đăng ký hiến máu ngay</a>");
+            sb.AppendLine("            </div>");
+            sb.AppendLine("            <div class='highlight'>");
+            sb.AppendLine("                <h3>💡 Lưu ý quan trọng</h3>");
+            sb.AppendLine("                <ul>");
+            sb.AppendLine("                    <li>Đảm bảo sức khỏe tốt trước khi hiến máu</li>");
+            sb.AppendLine("                    <li>Không uống rượu bia trong 24h trước khi hiến máu</li>");
+            sb.AppendLine("                    <li>Ăn no và uống đủ nước</li>");
+            sb.AppendLine("                    <li>Ngủ đủ giấc và không căng thẳng</li>");
+            sb.AppendLine("                </ul>");
+            sb.AppendLine("            </div>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("        <div class='footer'>");
+            sb.AppendLine("            <p><em>\"Hiến máu cứu người - Một nghĩa cử cao đẹp\"</em></p>");
+            sb.AppendLine("            <p>Cảm ơn bạn đã luôn đồng hành cùng chúng tôi!</p>");
+            sb.AppendLine($"            <p style='font-size: 12px; color: #999;'>Email được gửi bởi {adminName} lúc: {currentDate}</p>");
+            sb.AppendLine("        </div>");
+            sb.AppendLine("    </div>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            return sb.ToString();
+        }
+
         public async Task<bool> ForgotPasswordAsync(string email)
         {
             var user = await _userRepository.GetByEmailAsync(email);

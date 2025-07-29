@@ -17,5 +17,11 @@ namespace DataAccessLayer.IRepository
         Task<bool> UpdateUserDonationAvailabilityAsync(int userId, int donationAvailabilityId );
         Task<bool> UpdateUserRoleAsync(int userId, int roleId);
         Task<User> GetByPasswordResetToken(string token);
+        /// <summary>
+        /// L?y danh sách ng??i có th? hi?n máu trong X ngày t?i
+        /// </summary>
+        /// <param name="daysAhead">S? ngày t?i (m?c ??nh 3 ngày)</param>
+        /// <returns>Danh sách user có th? hi?n máu</returns>
+        Task<IEnumerable<User>> GetUpcomingEligibleDonorsAsync(int daysAhead = 3);
     }
 }

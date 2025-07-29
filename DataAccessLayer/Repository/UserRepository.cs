@@ -30,13 +30,39 @@ namespace DataAccessLayer.Repository
 
         public async Task<IEnumerable<User>> GetByBloodTypeIdAsync(int bloodTypeId)
         {
-            return await _context.Users.Where(u => u.BloodTypeId == bloodTypeId).ToListAsync();
+            return await _context.Users
+                .Include(u => u.BloodType)
+                .Where(u => u.BloodTypeId == bloodTypeId)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<User>> GetEligibleDonorsAsync()
         {
             return await _context.Users
                 .Where(u => u.NextEligibleDonationDate <= DateTime.UtcNow)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// L?y danh sách ng??i có th? hi?n máu trong X ngày t?i
+        /// </summary>
+        /// <param name="daysAhead">S? ngày t?i</param>
+        /// <returns>Danh sách user có th? hi?n máu</returns>
+        public async Task<IEnumerable<User>> GetUpcomingEligibleDonorsAsync(int daysAhead = 3)
+        {
+            var today = DateTime.UtcNow.Date;
+            var endDate = today.AddDays(daysAhead);
+
+            return await _context.Users
+                .Include(u => u.BloodType)
+                .Where(u => 
+                    u.RoleId == 3 && // Ch? l?y donor (role 3)
+                    u.IsActive && 
+                    !u.IsDeleted &&
+                    u.NextEligibleDonationDate.HasValue &&
+                    u.NextEligibleDonationDate.Value.Date >= today &&
+                    u.NextEligibleDonationDate.Value.Date <= endDate)
+                .OrderBy(u => u.NextEligibleDonationDate)
                 .ToListAsync();
         }
 
