@@ -147,29 +147,47 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         /// <summary>
-        /// Soft delete an article (Admin and Staff only) - Sets IsDeleted = true
+        /// Archive an article (Admin and Staff only) - Set status to 3 (archived) instead of soft delete
         /// </summary>
         /// <param name="id">Article ID</param>
-        /// <returns>Delete result</returns>
+        /// <returns>Archive result</returns>
         [Authorize(Roles = "1,2")]
-        [HttpPatch("{id}/delete")]
-        public async Task<IActionResult> SoftDeleteArticle(int id)
+        [HttpPatch("{id}/archive")]
+        public async Task<IActionResult> ArchiveArticle(int id)
         {
             try
             {
-                var result = await _articleService.DeleteArticleAsync(id);
-                if (!result)
+                // Get current article to preserve other fields
+                var currentArticle = await _articleService.GetArticleByIdAsync(id);
+                if (currentArticle == null)
                 {
                     return NotFound(new { status = "failed", message = "Không tìm thấy bài viết" });
                 }
-                return Ok(new { status = "success", message = "Xóa bài viết thành công (soft delete)" });
+
+                // Create update DTO with archived status (status ID = 3)
+                var updateDto = new UpdateArticleDTO
+                {
+                    ArticleCategoryId = currentArticle.ArticleCategoryId,
+                    ArticleStatusId = 3, // Archive status = 3
+                    Title = currentArticle.Title,
+                    Content = currentArticle.Content ?? "",
+                    Picture = currentArticle.Picture
+                };
+
+                var result = await _articleService.UpdateArticleAsync(id, updateDto);
+                if (!result)
+                {
+                    return BadRequest(new { status = "failed", message = "Không thể lưu trữ bài viết" });
+                }
+                
+                return Ok(new { status = "success", message = "Lưu trữ bài viết thành công" });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new 
                 { 
                     status = "error", 
-                    message = "Lỗi hệ thống khi xóa bài viết", 
+                    message = "Lỗi hệ thống khi lưu trữ bài viết", 
                     error = ex.Message 
                 });
             }
@@ -283,7 +301,7 @@ namespace BloodDonationSupportSystem.Controllers
             try
             {
                 var currentUserId = int.Parse(User.FindFirstValue("UserID"));
-                var currentUserRole = User.FindFirstValue(ClaimTypes.Role); // Use ClaimTypes.Role instead of "RoleID"
+                var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
                 // Check permissions: Admin/Staff can see all, others can only see their own
                 if (currentUserRole != "Admin" && currentUserRole != "Staff" && currentUserId != authorId)
@@ -342,7 +360,7 @@ namespace BloodDonationSupportSystem.Controllers
                 // If requesting non-published articles (assuming status 3 = published), require authorization
                 if (statusId != 3)
                 {
-                    var currentUserRole = User.FindFirstValue(ClaimTypes.Role); // Use ClaimTypes.Role
+                    var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
                     if (currentUserRole != "Admin" && currentUserRole != "Staff")
                     {
                         return Forbid("Bạn không có quyền xem bài viết có trạng thái này");
