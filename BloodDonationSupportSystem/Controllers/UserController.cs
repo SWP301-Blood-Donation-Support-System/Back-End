@@ -120,7 +120,7 @@ namespace BloodDonationSupportSystem.Controllers
                 return new JsonResult(new
                 {
                     status = "failed",
-                    message = "An error occurred during login"
+                    message = "An error occurred during login"+ ex.Message
                 });
             }
         }
@@ -249,16 +249,23 @@ namespace BloodDonationSupportSystem.Controllers
         //[AllowAnonymous] 
         public async Task<IActionResult> VerifyGoogleToken([FromBody] TokenRequest request)
         {
-
-            var token = await _userServices.ValidateGoogleToken(request);
-            if (!string.IsNullOrEmpty(token))
+            try
             {
-                return new JsonResult(new
+                var token = await _userServices.ValidateGoogleToken(request);
+                if (!string.IsNullOrEmpty(token))
                 {
-                    result = token
-                });
+                    return new JsonResult(new
+                    {
+                        result = token
+                    });
+                }
+                return NotFound(new { status = "failed", message = "Invalid" });
             }
-            return NotFound(new { status = "failed", message = "Invalid" });
+            catch(Exception ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+            
         }
         /// <summary>
         /// Update donor information 
@@ -516,11 +523,6 @@ namespace BloodDonationSupportSystem.Controllers
                 return BadRequest(new { status = "failed", message = "Invalid user ID" });
             }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
                 var result = await _userServices.UpdateUserBloodTypeAsync(userId, dto.BloodTypeId);
@@ -587,6 +589,51 @@ namespace BloodDonationSupportSystem.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { status = "failed", message = "An error occurred while updating donor blood type", error = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Update donor availability for a user by userId
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="availabilityId"></param>
+        /// <returns></returns>
+        [HttpPatch("{userId}/availability")]
+        public async Task<IActionResult> UpdateUserDonationAvailability(int userId, [FromBody] int availabilityId )
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var result = await _userServices.UpdateUserDonationAvailabilityAsync(userId, availabilityId);
+                
+                if (!result)
+                {
+                    return BadRequest(new { status = "failed", message = "Failed to update donor availability" });
+                }
+                return Ok(new { 
+                    status = "success", 
+                    message = "Donor availability updated successfully",
+                    donorId = userId,
+                    newAvailabilityId = availabilityId
+                });
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { status = "failed", message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { status = "failed", message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { status = "failed", message = "An error occurred while updating donor availability", error = ex.Message });
             }
         }
     }

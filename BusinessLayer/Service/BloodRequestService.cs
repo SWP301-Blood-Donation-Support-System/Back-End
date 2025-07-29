@@ -38,6 +38,10 @@ namespace BusinessLayer.Service
                 entity.RequestStatusId = 1;
                 entity.RemainingVolume = bloodRequest.Volume;
                 entity.RequestDateTime = DateTime.UtcNow;
+                if(entity.UrgencyId == 2)
+                {
+                    entity.RequiredDateTime = DateTime.UtcNow;
+                }
                 await _bloodRequestRepository.AddAsync(entity);
                 await _bloodRequestRepository.SaveChangesAsync();
             }

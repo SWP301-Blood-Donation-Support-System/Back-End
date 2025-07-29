@@ -54,13 +54,11 @@ namespace BusinessLayer.Service
             }
             catch (TimeZoneNotFoundException)
             {
-                // Fallback cho Linux/macOS
                 TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh");
                 return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
             }
             catch (Exception)
             {
-                // Nếu không tìm thấy, trả về giờ UTC + 7
                 return DateTime.UtcNow.AddHours(7);
             }
         }
@@ -125,7 +123,6 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(donor);
 
-                // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword(donor.PasswordHash);
@@ -134,14 +131,12 @@ namespace BusinessLayer.Service
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration - use the actual full name
                 SendWelcomeEmail(donor.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding user: {ex.Message}");
-                throw; // Re-throw the exception to be handled by the caller
+                throw; 
             }
         }
 
@@ -156,23 +151,20 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(staff);
 
-                // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword("staff123");
                 EntityUser.IsActive = true;
-                EntityUser.RoleId = 2; // Assuming 2 is the role ID for staff
+                EntityUser.RoleId = 2; 
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration - use the actual full name
                 SendWelcomeEmail(staff.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding staff: {ex.Message}");
-                throw; // Re-throw the exception to be handled by the caller
+                throw;
             }
         }
 
@@ -187,23 +179,20 @@ namespace BusinessLayer.Service
                 }
                 User EntityUser = _mapper.Map<User>(admin);
 
-                // Remove image processing - set UserImage to null
                 EntityUser.UserImage = null;
 
                 EntityUser.PasswordHash = EncryptPassword("staff123");
                 EntityUser.IsActive = true;
-                EntityUser.RoleId = 1; // Assuming 1 is the role ID for admin
+                EntityUser.RoleId = 1; 
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
 
-                // Send welcome email after successful registration - use the actual full name
                 SendWelcomeEmail(admin.Email, EntityUser.FullName ?? "");
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
                 Console.WriteLine($"Error adding admin: {ex.Message}");
-                throw; // Re-throw the exception to be handled by the caller
+                throw; 
             }
         }
         public async Task RegisterHospitalAsync(HospitalRegisterDTO hospital)
@@ -215,16 +204,16 @@ namespace BusinessLayer.Service
                 {
                     throw new InvalidOperationException("Email already exists");
                 }
-                User EntityUser=_mapper.Map<User>(hospital);
+                User EntityUser = _mapper.Map<User>(hospital);
                 EntityUser.PasswordHash = EncryptPassword("hospital123");
                 EntityUser.IsActive = true;
                 EntityUser.RoleId = 4;
                 await _userRepository.AddAsync(EntityUser);
                 await _userRepository.SaveChangesAsync();
                 var hospitalName = _hospitalService.GetHospitalByIdAsync(hospital.HospitalId).Result.HospitalName;
-                SendWelcomeEmail(hospital.Email,hospitalName);
+                SendWelcomeEmail(hospital.Email, hospitalName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Error adding hospital: {ex.Message}");
                 throw;
@@ -511,10 +500,10 @@ namespace BusinessLayer.Service
             {
                 var payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, new GoogleJsonWebSignature.ValidationSettings
                 {
-                    Audience = new[] { "439095486459-gvdm000c5lstr8v0j1cl3ng9bg4gs4l2.apps.googleusercontent.com" }
+                    Audience = new[] { "1038271412034-f887nt2v6kln6nb09e20pvjgfo1o7jn0.apps.googleusercontent.com" }
                 });
                 string email = payload.Email;
-                var user = (await _userRepository.GetAllAsync()).FirstOrDefault(p => p.Email == email);
+                var user= await _userRepository.GetByEmailAsync(email);
 
                 if (user == null)
                 {
@@ -524,24 +513,23 @@ namespace BusinessLayer.Service
                         PasswordHash = EncryptPassword(Guid.NewGuid().ToString()),
                     };
                     await RegisterDonorAsync(googleDTO);
-                    user = (await _userRepository.GetAllAsync()).FirstOrDefault(p => p.Email == email);
-                    LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
                     await _userRepository.SaveChangesAsync();
-
-                    // Send welcome email for new Google user - use actual name from Google payload
-                    SendWelcomeEmail(payload.Email, payload.Name ?? "");
-
+                    user = await _userRepository.GetByEmailAsync(email); 
+                    LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
+                    userLogin.PasswordHash = DecryptPassword(user.PasswordHash);
                     return await GenerateToken(userLogin);
                 }
                 else
                 {
                     LoginDTO userLogin = _mapper.Map<LoginDTO>(user);
-                    userLogin.PasswordHash = DecryptPassword(userLogin.PasswordHash);
+                    userLogin.PasswordHash = DecryptPassword(user.PasswordHash);
                     return await GenerateToken(userLogin);
                 }
             }
-            catch (InvalidJwtException)
+            catch (InvalidJwtException ex)
             {
+                Console.WriteLine($"Error generating token: {ex.Message}");
+                throw;
             }
             return null;
         }
@@ -565,7 +553,7 @@ namespace BusinessLayer.Service
                 Console.WriteLine($"Email service is null: {_emailService == null}");
                 Console.WriteLine($"Target email: {userEmail}");
                 Console.WriteLine($"Full name: {fullName}");
-                
+
                 var subject = "Chào mừng bạn đến với Hệ thống Hỗ trợ Hiến máu!";
                 var htmlBody = GenerateWelcomeEmailTemplate(fullName, userEmail);
 
@@ -575,9 +563,9 @@ namespace BusinessLayer.Service
                     content: htmlBody);
 
                 Console.WriteLine($"Created email message successfully");
-                
+
                 _emailService.SendEmail(message);
-                
+
                 Console.WriteLine($"=== EMAIL SENT SUCCESSFULLY to {userEmail} ===");
             }
             catch (Exception ex)
@@ -591,7 +579,7 @@ namespace BusinessLayer.Service
                     Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                 }
                 Console.WriteLine($"=== END ERROR LOG ===");
-                
+
                 // Don't throw - email failure shouldn't break registration
             }
         }
@@ -654,7 +642,7 @@ namespace BusinessLayer.Service
                 Console.WriteLine($"Target email: {userEmail}");
                 Console.WriteLine($"Full name: {fullName}");
                 Console.WriteLine($"Registration code: {registrationInfo.RegistrationCode}");
-                
+
                 var subject = "Cảm ơn bạn đã đăng ký hiến máu tình nguyện!";
                 var htmlBody = GenerateDonationRegistrationThankYouEmailTemplate(fullName, userEmail, registrationInfo);
 
@@ -664,9 +652,9 @@ namespace BusinessLayer.Service
                     content: htmlBody);
 
                 Console.WriteLine($"Created donation registration email message successfully");
-                
+
                 _emailService.SendEmail(message);
-                
+
                 Console.WriteLine($"=== DONATION REGISTRATION EMAIL SENT SUCCESSFULLY to {userEmail} ===");
             }
             catch (Exception ex)
@@ -828,7 +816,7 @@ namespace BusinessLayer.Service
 
             // 3. Gửi email chứa link reset
             // **QUAN TRỌNG**: Link này phải trỏ đến trang reset password trên Frontend của bạn
-            var resetLink = $"http://localhost:3000/reset-password?token={token}";
+            var resetLink = $"https://giotmaunghiatinh.vercel.app/reset-password?token={token}";
 
             var subject = "Yêu cầu đặt lại mật khẩu";
             var body = GeneratePasswordResetEmailTemplate(user.FullName, resetLink);
@@ -982,14 +970,12 @@ namespace BusinessLayer.Service
                 throw new ArgumentOutOfRangeException(nameof(bloodTypeId), "Blood Type ID must be greater than zero");
             }
 
-            // Tìm user dựa trên donorId (thực chất donorId chính là userId trong bảng User)
             var user = await _userRepository.GetByIdAsync(donorId);
             if (user == null)
             {
                 throw new KeyNotFoundException($"Donor with ID {donorId} not found");
             }
 
-            // Kiểm tra nếu user có RoleId = 3 (Donor role)
             if (user.RoleId != 3)
             {
                 throw new InvalidOperationException($"User with ID {donorId} is not a donor");
@@ -1001,5 +987,7 @@ namespace BusinessLayer.Service
             await _userRepository.UpdateAsync(user);
             return await _userRepository.SaveChangesAsync();
         }
+
+      
     }
 }

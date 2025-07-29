@@ -198,43 +198,23 @@ namespace BloodDonationSupportSystem.Controllers
         //[Authorize(Roles = "Admin,Staff")] // Chỉ Admin/Staff được check-in
         public async Task<IActionResult> CheckIn([FromBody] CheckInDTO request)
         {
-            // 2. Không cần check null/empty thủ công cho NationalId nữa
-            // vì [ApiController] và [Required] trong model đã tự động xử lý.
-            // Nếu request thiếu nationalId, client sẽ tự nhận lỗi 400 Bad Request.
-
             try
             {
-                // Sử dụng Enum để code dễ đọc hơn
-                const int approvedStatusId = 1; // Hoặc (int)RegistrationStatus.Approved
-                const int checkedInStatusId = 2; // Hoặc (int)RegistrationStatus.CheckedIn
+                const int approvedStatusId = 1; 
+                const int checkedInStatusId = 2; 
 
-                // 3. Gọi phương thức service mới, có thể truyền vào cả ScheduleId để xử lý chính xác hơn
-                // Service sẽ tìm đăng ký có NationalId và ScheduleId tương ứng, đang ở trạng thái Approved, diễn ra trong ngày hôm nay.
                 var checkedInRegistration = await _donationRegistrationService.CheckInByNationalIdResponseAsync(
                     request.NationalId,
                     approvedStatusId,
                     checkedInStatusId
                 );
 
-                // 4. Toàn bộ cấu trúc response (success, warning, failed) được giữ nguyên
                 if (checkedInRegistration == null)
                 {
                     return NotFound(new
                     {
                         status = "failed",
                         message = $"Không tìm thấy đăng ký hợp lệ (trạng thái 'Approved') cho ngày hôm nay với CCCD/CMND: {request.NationalId} tại lịch hiến máu này."
-                    });
-                }
-
-                // Đoạn logic này vẫn có thể hữu ích nếu service của bạn trả về thông tin
-                // ngay cả khi người dùng đã check-in rồi, để controller quyết định thông báo.
-                if (checkedInRegistration.RegistrationStatusId == checkedInStatusId)
-                {
-                    return Ok(new
-                    {
-                        status = "warning",
-                        message = "Người dùng đã điểm danh trong hôm nay rồi.",
-                        registration = checkedInRegistration
                     });
                 }
 
@@ -255,7 +235,6 @@ namespace BloodDonationSupportSystem.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception details (quan trọng cho việc debug)
                 Console.WriteLine($"Error during check-in: {ex.ToString()}");
                 return StatusCode(500, new
                 {

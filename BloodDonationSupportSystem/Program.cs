@@ -194,6 +194,7 @@ builder.Services.AddScoped<IHospitalService, HospitalService>();
 builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IEmergencyBloodEmailService, EmergencyBloodEmailService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();

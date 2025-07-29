@@ -20,9 +20,8 @@ namespace BusinessLayer.Service
         private readonly IMapper _mapper;
 
 
-        public DonationRecordService(IDonationRecordRepository donationRecordRepository,IBloodUnitRepository bloodUnitRepository, IMapper mapper)
-        {
-      
+        public DonationRecordService(IDonationRecordRepository donationRecordRepository, IBloodUnitRepository bloodUnitRepository, IMapper mapper)
+        { 
             _donationRecordRepository = donationRecordRepository ?? throw new ArgumentNullException(nameof(donationRecordRepository));
             _bloodUnitRepository = bloodUnitRepository ?? throw new ArgumentNullException(nameof(bloodUnitRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -50,10 +49,9 @@ namespace BusinessLayer.Service
                 throw new ArgumentNullException(nameof(donationRecord), "Record cannot be null");
             }
 
-            // Set creation timestamp
 
             var donationRecordEntity = _mapper.Map<DonationRecord>(donationRecord);
-            var addedRecord = await _donationRecordRepository.AddAsync(donationRecordEntity);
+            await _donationRecordRepository.AddAsync(donationRecordEntity);
             await _donationRecordRepository.SaveChangesAsync();
         }
 
@@ -93,7 +91,7 @@ namespace BusinessLayer.Service
 
             // Map DTO to entity, preserving properties not included in the DTO
             _mapper.Map(updateDto, existingRecord);
-            
+
             // Update timestamp
             existingRecord.UpdatedAt = DateTime.UtcNow;
 
@@ -155,7 +153,6 @@ namespace BusinessLayer.Service
             return await _donationRecordRepository.SaveChangesAsync();
         }
 
-        // Trong DonationRecordService, triển khai:
         public async Task<bool> ValidateDonationRecordAsync(int recordId, int userId)
         {
             if (recordId <= 0)
@@ -195,9 +192,9 @@ namespace BusinessLayer.Service
             {
                 throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero");
             }
-            
+
             return await _donationRecordRepository.GetRecordsByUserIdAsync(userId)
-                .ContinueWith(task=>task.Result.Select(rc=>_mapper.Map<DonationRecordDTO>(rc)));
+                .ContinueWith(task => task.Result.Select(rc => _mapper.Map<DonationRecordDTO>(rc)));
         }
 
         public async Task<bool> UpdateRecordsResultAsync(int recordId, int resultId)
@@ -205,8 +202,8 @@ namespace BusinessLayer.Service
             var record = await _donationRecordRepository.GetRecordAndRegistrationAndUserAsync(recordId);
             record.BloodTestResult = resultId;
             record.UpdatedAt = DateTime.UtcNow;
-            
-            if (resultId == 2) // If result is "approved" 
+
+            if (resultId == 2 || resultId == 3) // If result is 2:"approved" or 3:"rejected" (We still save rejected blood)
             {
                 if (record.Registration.Donor.BloodTypeId == 1001)
                 {
@@ -215,7 +212,7 @@ namespace BusinessLayer.Service
                 // Get the donor information to determine blood type
                 // Create a new blood unit
                 var existingBloodUnits = await _bloodUnitRepository.GetUnitsByRecordIdAsync(recordId);
-                if(existingBloodUnits.Any())
+                if (existingBloodUnits.Any())
                 {
                     throw new InvalidOperationException("Đã có túi máu được tạo từ hồ sơ này, không thể tạo thêm");
                 }
@@ -225,34 +222,40 @@ namespace BusinessLayer.Service
                     BloodTypeId = record.Registration.Donor.BloodTypeId ?? 1001, // Default or use test result
                     ComponentId = record.DonationTypeId ?? 1, // Use donation type as component ID
                     Volume = record.VolumeDonated, // Use the volume donated
-                    CollectedDateTime=record.DonationDateTime,
-                    BloodUnitStatusId = 1 // Default status for new blood units
+                    CollectedDateTime = record.DonationDateTime,
                 };
-                if (record.DonationTypeId.HasValue)
+                if (resultId == 2)
                 {
-                    switch (record.DonationTypeId.Value)
+                    bloodUnit.BloodUnitStatusId = 1;
+                    if (record.DonationTypeId.HasValue)
                     {
-                        case 1: // Whole Blood
-                        case 4: // Red Blood Cells
-                            bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(42);
-                            break;
-                        case 2: // Plasma
-                            bloodUnit.ExpiryDateTime = record.DonationDateTime.AddYears(1);
-                            break;
-                        case 3: // Platelets
-                            bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(5);
-                            break;
-                        default:
-                            // Use a default expiration if component type is unknown
-                            bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(42);
-                            break;
+                        switch (record.DonationTypeId.Value)
+                        {
+                            case 1: // Whole Blood
+                            case 4: // Red Blood Cells
+                                bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(42);
+                                break;
+                            case 2: // Plasma
+                                bloodUnit.ExpiryDateTime = record.DonationDateTime.AddYears(1);
+                                break;
+                            case 3: // Platelets
+                                bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(5);
+                                break;
+                            default:
+                                // Use a default expiration if component type is unknown
+                                bloodUnit.ExpiryDateTime = record.DonationDateTime.AddDays(42);
+                                break;
+                        }
                     }
                 }
-
-                // Add the blood unit to the donation record
+                else if (resultId == 3)
+                {
+                    bloodUnit.BloodUnitStatusId = 4;
+                    bloodUnit.ExpiryDateTime = record.DonationDateTime;
+                }
                 record.BloodUnits.Add(bloodUnit);
             }
-            
+
             await _donationRecordRepository.UpdateAsync(record);
             return await _donationRecordRepository.SaveChangesAsync();
         }
