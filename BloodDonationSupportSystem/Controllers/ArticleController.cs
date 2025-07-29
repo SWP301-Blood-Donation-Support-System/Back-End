@@ -147,13 +147,13 @@ namespace BloodDonationSupportSystem.Controllers
         }
 
         /// <summary>
-        /// Delete an article (Admin and Staff only)
+        /// Soft delete an article (Admin and Staff only)
         /// </summary>
         /// <param name="id">Article ID</param>
         /// <returns>Delete result</returns>
         [Authorize(Roles = "1,2")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteArticle(int id)
+        [HttpPatch("{id}/delete")]
+        public async Task<IActionResult> SoftDeleteArticle(int id)
         {
             try
             {
