@@ -76,7 +76,7 @@ namespace BusinessLayer.Service
             existingNotification.NotificationTypeId = notification.NotificationTypeId;
             existingNotification.Subject = notification.Subject;
             existingNotification.Message = notification.Message;
-            existingNotification.UpdatedAt = DateTime.Now;
+            existingNotification.UpdatedAt = DateTime.UtcNow;
 
             await _notificationRepository.UpdateAsync(existingNotification);
             await _notificationRepository.SaveChangesAsync();

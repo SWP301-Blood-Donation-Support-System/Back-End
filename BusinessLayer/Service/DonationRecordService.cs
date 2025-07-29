@@ -63,7 +63,7 @@ namespace BusinessLayer.Service
             }
 
             // Update timestamp
-            record.UpdatedAt = DateTime.Now;
+            record.UpdatedAt = DateTime.UtcNow;
 
             await _donationRecordRepository.UpdateAsync(record);
             await _donationRecordRepository.SaveChangesAsync();
@@ -93,7 +93,7 @@ namespace BusinessLayer.Service
             _mapper.Map(updateDto, existingRecord);
 
             // Update timestamp
-            existingRecord.UpdatedAt = DateTime.Now;
+            existingRecord.UpdatedAt = DateTime.UtcNow;
 
             await _donationRecordRepository.UpdateAsync(existingRecord);
             await _donationRecordRepository.SaveChangesAsync();
@@ -201,7 +201,7 @@ namespace BusinessLayer.Service
         {
             var record = await _donationRecordRepository.GetRecordAndRegistrationAndUserAsync(recordId);
             record.BloodTestResult = resultId;
-            record.UpdatedAt = DateTime.Now;
+            record.UpdatedAt = DateTime.UtcNow;
 
             if (resultId == 2 || resultId == 3) // If result is 2:"approved" or 3:"rejected" (We still save rejected blood)
             {

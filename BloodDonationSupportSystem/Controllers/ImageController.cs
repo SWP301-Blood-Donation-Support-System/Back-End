@@ -39,7 +39,7 @@ namespace BloodDonationSupportSystem.Controllers
                     data = new
                     {
                         imageUrl = request.ImageUrl,
-                        storedAt = DateTime.Now
+                        storedAt = DateTime.UtcNow
                     }
                 });
             }
@@ -98,7 +98,7 @@ namespace BloodDonationSupportSystem.Controllers
                         invalidUrls = invalidUrls.Count,
                         imageUrls = validUrls,
                         failedUrls = invalidUrls,
-                        storedAt = DateTime.Now
+                        storedAt = DateTime.UtcNow
                     }
                 });
             }
@@ -141,7 +141,7 @@ namespace BloodDonationSupportSystem.Controllers
                         imageUrl = request.ImageUrl,
                         isValid = true,
                         isAccessible = isAccessible,
-                        checkedAt = DateTime.Now
+                        checkedAt = DateTime.UtcNow
                     }
                 });
             }

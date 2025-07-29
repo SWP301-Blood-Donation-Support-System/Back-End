@@ -60,7 +60,7 @@ namespace BusinessLayer.Service
                 var approvedTestResult = 2; // Assuming 2 is "approved" result
                 var donationRecords = await _donationRecordRepository.GetAllAsync();
                 var completedDonationsThisMonth = donationRecords
-                    .Where(r => r.DonationDateTime >= DateTime.Now.AddMonths(-1) && r.BloodTestResult == approvedTestResult)
+                    .Where(r => r.DonationDateTime >= DateTime.UtcNow.AddMonths(-1) && r.BloodTestResult == approvedTestResult)
                     .Count();
                 
                 // Fulfillment calculation
@@ -94,7 +94,7 @@ namespace BusinessLayer.Service
                 var donorRoleId = 3; // Role ID for donors
                 var donors = await _userRepository.GetByRoleIdAsync(donorRoleId);
                 var eligibleDonors = await _userRepository.GetEligibleDonorsAsync();
-                var newDonorsThisMonth = donors.Where(d => d.CreatedAt >= DateTime.Now.AddMonths(-1)).Count();
+                var newDonorsThisMonth = donors.Where(d => d.CreatedAt >= DateTime.UtcNow.AddMonths(-1)).Count();
                 
                 // Group donors by blood type
                 var donorsByBloodType = donors
@@ -141,7 +141,7 @@ namespace BusinessLayer.Service
                 var expiredUnits = bloodUnits.Where(u => u.BloodUnitStatusId == expiredStatus).Count();
                 var expiringWithinWeek = bloodUnits
                     .Count(u => u.BloodUnitStatusId == availableStatus && 
-                             u.ExpiryDateTime <= DateTime.Now.AddDays(7));
+                             u.ExpiryDateTime <= DateTime.UtcNow.AddDays(7));
                 
                 // Group by blood type
                 var unitsByBloodType = bloodUnits
@@ -394,7 +394,7 @@ namespace BusinessLayer.Service
                 
                 // Calculate active users in last 30 days
                 var activeUsersLast30Days = users.Count(u => 
-                    u.UpdatedAt.HasValue && u.UpdatedAt >= DateTime.Now.AddDays(-30));
+                    u.UpdatedAt.HasValue && u.UpdatedAt >= DateTime.UtcNow.AddDays(-30));
                 
                 // Calculate registration to completion rate
                 var donorRoleId = 3; 

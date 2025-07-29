@@ -41,7 +41,7 @@ namespace BusinessLayer.Service
             if (string.IsNullOrWhiteSpace(createdBy)) throw new ArgumentException("Created by cannot be null or empty", nameof(createdBy));
 
             schedule.CreatedBy = createdBy;
-            schedule.CreatedAt = DateTime.Now;
+            schedule.CreatedAt = DateTime.UtcNow;
 
             var result = await _donationScheduleRepository.AddAsync(schedule);
             await _donationScheduleRepository.SaveChangesAsync();
@@ -58,7 +58,7 @@ namespace BusinessLayer.Service
 
             existingSchedule.ScheduleDate = schedule.ScheduleDate;
             existingSchedule.UpdatedBy = updatedBy;
-            existingSchedule.UpdatedAt = DateTime.Now;
+            existingSchedule.UpdatedAt = DateTime.UtcNow;
 
             await _donationScheduleRepository.UpdateAsync(existingSchedule);
             return await _donationScheduleRepository.SaveChangesAsync();
@@ -141,7 +141,7 @@ namespace BusinessLayer.Service
             const string systemUser = "System-AutoJob"; // Người tạo
 
             var latestSchedule = await _donationScheduleRepository.GetLatestScheduleAsync();
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.Date;
 
             // Xác định ngày cuối cùng có lịch. Nếu không có lịch nào, bắt đầu từ hôm nay.
             var lastScheduledDate = latestSchedule?.ScheduleDate?.Date ?? today;
@@ -163,7 +163,7 @@ namespace BusinessLayer.Service
                         {
                             ScheduleDate = day,
                             RegisteredSlots = 0,
-                            CreatedAt = DateTime.Now,
+                            CreatedAt = DateTime.UtcNow,
                             CreatedBy = systemUser,
                             IsDeleted = false
                         });

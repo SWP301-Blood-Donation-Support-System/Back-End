@@ -109,12 +109,12 @@ namespace BusinessLayer.Service
 
                 var entity = _mapper.Map<DonationRegistration>(registration);
                 entity.RegistrationStatusId = 1;
-                entity.CreatedAt = DateTime.Now;
-                entity.UpdatedAt = DateTime.Now;
+                entity.CreatedAt = DateTime.UtcNow;
+                entity.UpdatedAt = DateTime.UtcNow;
                 entity.CreatedBy = "System";
 
                 schedule.RegisteredSlots += 1;
-                schedule.UpdatedAt = DateTime.Now;
+                schedule.UpdatedAt = DateTime.UtcNow;
                 schedule.UpdatedBy = "System";
 
                 await _donationRegistrationRepository.AddAsync(entity);
@@ -286,7 +286,7 @@ namespace BusinessLayer.Service
             }
             
             registration.RegistrationStatusId = statusId;
-            registration.UpdatedAt = DateTime.Now;
+            registration.UpdatedAt = DateTime.UtcNow;
             
             if (statusId == 3 && registration.Donor != null && registration.DonationRecord != null)
             {
@@ -301,7 +301,7 @@ namespace BusinessLayer.Service
 
 
                     donationRecord.CertificateId = $"BDC-{donorIdPart}-{year}{month}";
-                    donationRecord.UpdatedAt = DateTime.Now;
+                    donationRecord.UpdatedAt = DateTime.UtcNow;
                 }
 
                 donor.LastDonationDate = donationRecord.DonationDateTime;
@@ -311,7 +311,6 @@ namespace BusinessLayer.Service
                 // Type 2: Huyết Tương
                 // Type 3: Tiểu cầu
                 // Type 4: Hồng cầu
-                // Calculate next eligible donation date based on donation type
                 if (donationTypeId == 1 || donationTypeId == 4)
                 {
                     donor.NextEligibleDonationDate = donor.LastDonationDate.Value.AddDays(84); 
@@ -366,7 +365,7 @@ namespace BusinessLayer.Service
 
             // Update the status to checked-in
             registration.RegistrationStatusId = checkedInStatusId;
-            registration.UpdatedAt = DateTime.Now;
+            registration.UpdatedAt = DateTime.UtcNow;
             
             await _donationRegistrationRepository.UpdateAsync(registration);
             await _donationRegistrationRepository.SaveChangesAsync();

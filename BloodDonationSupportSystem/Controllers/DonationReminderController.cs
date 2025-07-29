@@ -66,7 +66,7 @@ namespace BloodDonationSupportSystem.Controllers
                     daysAhead = daysAhead,
                     totalCount = upcomingDonors.Count(),
                     data = upcomingDonors,
-                    retrievedAt = DateTime.Now
+                    retrievedAt = DateTime.UtcNow
                 });
             }
             catch (ArgumentOutOfRangeException ex)
@@ -278,7 +278,7 @@ namespace BloodDonationSupportSystem.Controllers
                     message = "Danh sách người có lịch hiến máu vào ngày mai",
                     totalCount = schedulesList.Count,
                     data = schedulesList,
-                    retrievedAt = DateTime.Now
+                    retrievedAt = DateTime.UtcNow
                 });
             }
             catch (Exception ex)

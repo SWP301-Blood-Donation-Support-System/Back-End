@@ -90,7 +90,7 @@ namespace DataAccessLayer.DTO
         public string Message { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
         public string? PublicId { get; set; }
-        public DateTime UploadedAt { get; set; } = DateTime.Now;
+        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -102,6 +102,6 @@ namespace DataAccessLayer.DTO
         public string Message { get; set; } = string.Empty;
         public List<string> ImageUrls { get; set; } = new();
         public int TotalUploaded { get; set; }
-        public DateTime UploadedAt { get; set; } = DateTime.Now;
+        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
     }
 }

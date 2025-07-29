@@ -54,7 +54,7 @@ namespace DataAccessLayer.Repository
             }
 
             userNotification.IsDeleted = true;
-            userNotification.UpdatedAt = DateTime.Now;
+            userNotification.UpdatedAt = DateTime.UtcNow;
 
             _context.UserNotifications.Update(userNotification);
             return await _context.SaveChangesAsync() > 0;
