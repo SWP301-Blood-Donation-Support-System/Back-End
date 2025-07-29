@@ -49,6 +49,34 @@ namespace DataAccessLayer.Repository
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Lấy danh sách đăng ký hiến máu trong X ngày tới với status đã approved
+        /// </summary>
+        /// <param name="daysAhead">Số ngày tới</param>
+        /// <param name="approvedStatusId">ID của status approved</param>
+        /// <returns>Danh sách đăng ký hiến máu</returns>
+        public async Task<IEnumerable<DonationRegistration>> GetUpcomingApprovedRegistrationsAsync(int daysAhead = 1, int approvedStatusId = 1)
+        {
+            var today = DateTime.UtcNow.Date;
+            var targetDate = today.AddDays(daysAhead);
+
+            return await _context.DonationRegistrations
+                .Include(r => r.Donor)
+                    .ThenInclude(d => d.BloodType)
+                .Include(r => r.Schedule)
+                .Include(r => r.TimeSlot)
+                .Include(r => r.RegistrationStatus)
+                .Where(r => 
+                    r.Schedule.ScheduleDate.HasValue &&
+                    r.Schedule.ScheduleDate.Value.Date == targetDate &&
+                    r.RegistrationStatusId == approvedStatusId &&
+                    !r.IsDeleted &&
+                    r.Donor.IsActive &&
+                    !r.Donor.IsDeleted)
+                .OrderBy(r => r.TimeSlot.StartTime)
+                .ToListAsync();
+        }
+
         public async Task<bool> UpdateRegistrationStatusAsync(int registrationId, int statusId)
         {
             // FindAsync sẽ tìm cả những record đã bị soft-delete, nên cần kiểm tra thêm

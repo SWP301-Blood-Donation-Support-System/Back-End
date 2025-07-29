@@ -69,6 +69,18 @@ builder.Services.AddQuartz(q =>
         .WithCronSchedule("0 0 1 * * ?") // Cú pháp Cron: giây phút giờ ngày tháng WDAY
         .WithDescription("Trigger to run auto schedule creation job daily at 1 AM")
     );
+
+    // --- Job tự động gửi thông báo nhắc nhở cho lịch hiến ngày mai ---
+    var tomorrowReminderJobKey = new JobKey("TomorrowDonationReminderJob");
+    q.AddJob<TomorrowDonationReminderJob>(opts => opts.WithIdentity(tomorrowReminderJobKey));
+
+    // Chạy job này vào 8 giờ tối mỗi ngày (để nhắc nhở cho ngày mai)
+    q.AddTrigger(opts => opts
+        .ForJob(tomorrowReminderJobKey)
+        .WithIdentity("TomorrowDonationReminderJob-trigger")
+        .WithCronSchedule("0 0 20 * * ?") // Cú pháp Cron: 8:00 PM mỗi ngày
+        .WithDescription("Trigger to send donation reminders for tomorrow's schedules at 8 PM daily")
+    );
 });
 
 builder.Services.AddTransient<NotifQuartzScheduler>();
@@ -195,6 +207,10 @@ builder.Services.AddScoped<IBloodCompatibilityService, BloodCompatibilityService
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IEmergencyBloodEmailService, EmergencyBloodEmailService>();
 builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
+
+// Quartz Jobs
+builder.Services.AddScoped<AutoScheduleCreationJob>();
+builder.Services.AddScoped<TomorrowDonationReminderJob>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
