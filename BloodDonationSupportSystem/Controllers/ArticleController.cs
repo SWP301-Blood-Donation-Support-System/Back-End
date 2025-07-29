@@ -70,7 +70,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// </summary>
         /// <param name="articleDto">Article creation data</param>
         /// <returns>Created article</returns>
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "1,2")]
         [HttpPost]
         public async Task<IActionResult> CreateArticle([FromBody] ArticleCreateDTO articleDto)
         {
@@ -83,6 +83,7 @@ namespace BloodDonationSupportSystem.Controllers
             {
                 // Get current user ID from JWT token
                 var currentUserId = int.Parse(User.FindFirstValue("UserID"));
+                var currentRoleId = int.Parse(User.FindFirstValue("RoleID"));
                 var currentUserName = User.FindFirstValue("FullName") ?? "Unknown";
 
                 // Map to full ArticleDTO
@@ -116,7 +117,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// <param name="id"></param>
         /// <param name="articleDto"></param>
         /// <returns></returns>
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "1,2")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateArticle(int id, [FromBody] UpdateArticleDTO articleDto)
         {
@@ -150,7 +151,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// </summary>
         /// <param name="id">Article ID</param>
         /// <returns>Delete result</returns>
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "1,2")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {

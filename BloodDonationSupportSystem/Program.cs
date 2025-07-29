@@ -114,6 +114,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+            RoleClaimType = "RoleID", // hoặc "roles", tùy vào key trong JWT
         };
     });
 
