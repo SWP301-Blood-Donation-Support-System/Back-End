@@ -225,6 +225,14 @@ namespace BloodDonationSupportSystem.Controllers
                     registration = checkedInRegistration
                 });
             }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new
+                {
+                    status = "failed",
+                    message = ex.Message
+                });
+            }
             catch (ArgumentException ex) // Lỗi do đầu vào không hợp lệ từ service
             {
                 return BadRequest(new
