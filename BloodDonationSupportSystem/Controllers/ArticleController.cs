@@ -399,7 +399,7 @@ namespace BloodDonationSupportSystem.Controllers
                     return NotFound(new { status = "failed", message = "Không tìm thấy bài viết" });
                 }
 
-                // Create update DTO with published status (status ID = 3)
+                // Create update DTO with published status (status ID = 2)
                 var updateDto = new UpdateArticleDTO
                 {
                     ArticleCategoryId = currentArticle.ArticleCategoryId,

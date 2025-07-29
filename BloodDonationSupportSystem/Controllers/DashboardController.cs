@@ -34,6 +34,10 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Returns statistics related to donors
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("donor-statistics")]
         public async Task<IActionResult> GetDashboardStatistics()
         {
@@ -51,6 +55,10 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Returns statistics related to blood inventory
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("blood-inventory-statistics")]
         public async Task<IActionResult> GetBloodInventoryStatisticsAsync()
         {
@@ -68,6 +76,10 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// returns statistics related to donation activity
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("donation-activity-statistics")]
         public async Task<IActionResult> GetDonationActivityStatisticsAsync()
         {
@@ -85,6 +97,10 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// returns statistics related to blood requests
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("blood-request-statistics")]
         public async Task<IActionResult> GetBloodRequestsStatisticsAsync()
         {
@@ -102,6 +118,10 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// returns statistics related to hospital activity
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("hospital-activity-statistics")]
         public async Task<IActionResult> GetHospitalActivityStatisticsAsync()
         {
@@ -119,6 +139,10 @@ namespace BloodDonationSupportSystem.Controllers
                 });
             }
         }
+        /// <summary>
+        /// returns the health status of the system
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("system-health")]
         public async Task<IActionResult> GetSystemHealthAsync()
         {
