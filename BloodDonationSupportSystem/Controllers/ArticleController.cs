@@ -70,7 +70,7 @@ namespace BloodDonationSupportSystem.Controllers
         /// </summary>
         /// <param name="articleDto">Article creation data</param>
         /// <returns>Created article</returns>
-        //[Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPost]
         public async Task<IActionResult> CreateArticle([FromBody] ArticleCreateDTO articleDto)
         {
@@ -282,12 +282,12 @@ namespace BloodDonationSupportSystem.Controllers
             try
             {
                 var currentUserId = int.Parse(User.FindFirstValue("UserID"));
-                var currentUserRole = User.FindFirstValue("RoleID");
+                var currentUserRole = User.FindFirstValue(ClaimTypes.Role); // Use ClaimTypes.Role instead of "RoleID"
 
                 // Check permissions: Admin/Staff can see all, others can only see their own
-                if (currentUserRole != "1" && currentUserRole != "2" && currentUserId != authorId)
+                if (currentUserRole != "Admin" && currentUserRole != "Staff" && currentUserId != authorId)
                 {
-                    return Forbid(new { status = "failed", message = "Bạn không có quyền xem bài viết của tác giả này" }.ToString());
+                    return Forbid("Bạn không có quyền xem bài viết của tác giả này");
                 }
 
                 var articles = await _articleService.GetArticlesByAuthorIdAsync(authorId);
@@ -341,10 +341,10 @@ namespace BloodDonationSupportSystem.Controllers
                 // If requesting non-published articles (assuming status 1 = published), require authorization
                 if (statusId != 1)
                 {
-                    var currentUserRole = User.FindFirstValue("RoleID");
-                    if (currentUserRole != "1" && currentUserRole != "2")
+                    var currentUserRole = User.FindFirstValue(ClaimTypes.Role); // Use ClaimTypes.Role
+                    if (currentUserRole != "Admin" && currentUserRole != "Staff")
                     {
-                        return Forbid(new { status = "failed", message = "Bạn không có quyền xem bài viết có trạng thái này" }.ToString());
+                        return Forbid("Bạn không có quyền xem bài viết có trạng thái này");
                     }
                 }
 
