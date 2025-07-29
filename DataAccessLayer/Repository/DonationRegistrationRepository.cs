@@ -115,14 +115,14 @@ namespace DataAccessLayer.Repository
         }
         public async Task<DonationRegistration?> CheckInByNationalIdAsync(string nationalId, int approvedStatusId, int checkedInStatusId)
         {
-            var today = DateTime.Today;
+            var today = DateTime.UtcNow.AddHours(7);
 
             var registration = await _context.DonationRegistrations
                 .Include(r => r.Donor)
                 .Include(r => r.Schedule)
                 .FirstOrDefaultAsync(r =>
                     r.Donor.NationalId == nationalId &&
-                    r.Schedule.ScheduleDate.Value.Date == today &&
+                    r.Schedule.ScheduleDate.Value.Date == today.Date &&
                     r.RegistrationStatusId == approvedStatusId); // Dùng tham số approvedStatusId
 
             if (registration == null)
