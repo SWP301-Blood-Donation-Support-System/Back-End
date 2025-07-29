@@ -816,7 +816,7 @@ namespace BusinessLayer.Service
 
             // 3. Gửi email chứa link reset
             // **QUAN TRỌNG**: Link này phải trỏ đến trang reset password trên Frontend của bạn
-            var resetLink = $"http://localhost:3000/reset-password?token={token}";
+            var resetLink = $"https://giotmaunghiatinh.vercel.app/reset-password?token={token}";
 
             var subject = "Yêu cầu đặt lại mật khẩu";
             var body = GeneratePasswordResetEmailTemplate(user.FullName, resetLink);

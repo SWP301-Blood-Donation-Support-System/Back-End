@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace DataAccessLayer.DTO
 {
@@ -66,5 +67,41 @@ namespace DataAccessLayer.DTO
 
         [Url(ErrorMessage = "Picture must be a valid URL")]
         public string? Picture { get; set; }
+    }
+
+    /// <summary>
+    /// DTO for article image upload request
+    /// </summary>
+    public class ArticleImageUploadRequest
+    {
+        [Required(ErrorMessage = "Image file is required")]
+        public IFormFile ImageFile { get; set; }
+
+        [StringLength(100, ErrorMessage = "Description cannot exceed 100 characters")]
+        public string? Description { get; set; }
+    }
+
+    /// <summary>
+    /// DTO for article image upload response
+    /// </summary>
+    public class ArticleImageUploadResponse
+    {
+        public string Status { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public string? PublicId { get; set; }
+        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// DTO for multiple image upload response
+    /// </summary>
+    public class MultipleImageUploadResponse
+    {
+        public string Status { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public List<string> ImageUrls { get; set; } = new();
+        public int TotalUploaded { get; set; }
+        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
     }
 }

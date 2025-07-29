@@ -1,8 +1,6 @@
 ﻿using BusinessLayer.IService;
 using DataAccessLayer.DTO;
 using Microsoft.AspNetCore.Authorization;
-
-//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -13,10 +11,169 @@ namespace BloodDonationSupportSystem.Controllers
     public class ArticlesController : ControllerBase
     {
         private readonly IArticleService _articleService;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public ArticlesController(IArticleService articleService)
+        public ArticlesController(IArticleService articleService, ICloudinaryService cloudinaryService)
         {
             _articleService = articleService;
+            _cloudinaryService = cloudinaryService;
+        }
+
+        /// <summary>
+        /// Upload image for article using Cloudinary
+        /// </summary>
+        /// <param name="imageFile">Image file to upload</param>
+        /// <returns>Cloudinary image URL</returns>
+        [HttpPost("upload-image")]
+        [Consumes("multipart/form-data")]
+        [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> UploadArticleImage(IFormFile imageFile)
+        {
+            try
+            {
+                if (imageFile == null || imageFile.Length == 0)
+                {
+                    return BadRequest(new 
+                    { 
+                        status = "failed", 
+                        message = "File ảnh không hợp lệ" 
+                    });
+                }
+
+                var imageUrl = await _cloudinaryService.UploadImageAsync(imageFile, "articles");
+                
+                return Ok(new 
+                { 
+                    status = "success", 
+                    message = "Upload ảnh thành công",
+                    imageUrl = imageUrl
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new 
+                { 
+                    status = "failed", 
+                    message = ex.Message 
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new 
+                { 
+                    status = "error", 
+                    message = "Lỗi khi upload ảnh", 
+                    error = ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Upload multiple images for article using Cloudinary
+        /// </summary>
+        /// <param name="imageFiles">Multiple image files to upload</param>
+        /// <returns>List of Cloudinary image URLs</returns>
+        [HttpPost("upload-images")]
+        [Consumes("multipart/form-data")]
+        [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> UploadMultipleArticleImages(IFormFile[] imageFiles)
+        {
+            try
+            {
+                if (imageFiles == null || imageFiles.Length == 0)
+                {
+                    return BadRequest(new 
+                    { 
+                        status = "failed", 
+                        message = "Không có file ảnh nào được tải lên" 
+                    });
+                }
+
+                if (imageFiles.Length > 5)
+                {
+                    return BadRequest(new 
+                    { 
+                        status = "failed", 
+                        message = "Chỉ được upload tối đa 5 ảnh cùng lúc" 
+                    });
+                }
+
+                var imageUrls = await _cloudinaryService.UploadMultipleImagesAsync(imageFiles, "articles");
+                
+                return Ok(new 
+                { 
+                    status = "success", 
+                    message = $"Upload {imageUrls.Count()} ảnh thành công",
+                    imageUrls = imageUrls
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new 
+                { 
+                    status = "failed", 
+                    message = ex.Message 
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new 
+                { 
+                    status = "error", 
+                    message = "Lỗi khi upload ảnh", 
+                    error = ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Delete image from Cloudinary
+        /// </summary>
+        /// <param name="imageUrl">Cloudinary image URL to delete</param>
+        /// <returns>Delete result</returns>
+        [HttpDelete("delete-image")]
+        [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> DeleteArticleImage([FromBody] string imageUrl)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    return BadRequest(new 
+                    { 
+                        status = "failed", 
+                        message = "URL ảnh không hợp lệ" 
+                    });
+                }
+
+                var result = await _cloudinaryService.DeleteImageByUrlAsync(imageUrl);
+                
+                if (result)
+                {
+                    return Ok(new 
+                    { 
+                        status = "success", 
+                        message = "Xóa ảnh thành công" 
+                    });
+                }
+                else
+                {
+                    return BadRequest(new 
+                    { 
+                        status = "failed", 
+                        message = "Không thể xóa ảnh" 
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new 
+                { 
+                    status = "error", 
+                    message = "Lỗi khi xóa ảnh", 
+                    error = ex.Message 
+                });
+            }
         }
 
         /// <summary>
