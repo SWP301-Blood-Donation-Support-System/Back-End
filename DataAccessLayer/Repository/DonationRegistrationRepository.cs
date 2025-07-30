@@ -129,7 +129,7 @@ namespace DataAccessLayer.Repository
             {
                 return null;
             }
-
+            //Fix
             // Cập nhật trạng thái bằng tham số checkedInStatusId
             registration.RegistrationStatusId = checkedInStatusId;
             registration.UpdatedAt = DateTime.UtcNow;
